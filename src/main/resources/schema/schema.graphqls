@@ -1,3 +1,116 @@
 type Query {
     ping: String
+
+    # Character
+    characters: [Character!]!
+    character(id: ID!): Character
+
+    # Monster
+    monsters: [Monster!]!
+    monster(id: ID!): Monster
+
+    # Quest
+    quests: [Quest!]!
+}
+
+type Mutation {
+    # Character
+    createCharacter(input: CreateCharacterInput!): Character!
+
+    # Item
+    equipItem(characterId: ID!, itemId: ID!): Inventory!
+    unequipItem(characterId: ID!, itemId: ID!): Inventory!
+
+    # Quest
+    acceptQuest(characterId: ID!, questId: ID!): Quest!
+    completeQuest(characterId: ID!, questId: ID!): Quest!
+
+    # Battle
+    attack(characterId: ID!, monsterId: ID!): BattleResult!
+    flee(characterId: ID!, monsterId: ID!): BattleResult!
+}
+
+type Subscription {
+    battleEvents(battleId: ID!): BattleEvent!
+}
+
+input CreateCharacterInput {
+    name: String!
+    level: Int
+}
+
+type BattleResult {
+    damage: Int!
+    remainHp: Int!
+    isCritical: Boolean!
+    message: String!
+    monsterDefeated: Boolean!
+}
+
+type BattleEvent {
+    battleId: ID!
+    turn: Int!
+    damage: Int!
+    remainHp: Int!
+    isCritical: Boolean!
+    message: String!
+    finished: Boolean!
+}
+
+type Character {
+    id: ID!
+    name: String!
+    level: Int!
+    hp: Int!
+    maxHp: Int!
+    stats: Stats!
+    inventory: Inventory
+    quests: [Quest!]!
+}
+
+type Stats {
+    attack: Int!
+    defense: Int!
+    speed: Int!
+}
+
+type Monster {
+    id: ID!
+    name: String!
+    hp: Int!
+    maxHp: Int!
+    attackPower: Int!
+}
+
+type Item {
+    id: ID!
+    name: String!
+    type: ItemType!
+    attackBonus: Int!
+    defenseBonus: Int!
+}
+
+enum ItemType {
+    WEAPON
+    ARMOR
+    ACCESSORY
+}
+
+type Inventory {
+    id: ID!
+    characterId: ID!
+    items: [Item!]!
+}
+
+type Quest {
+    id: ID!
+    title: String!
+    description: String
+    status: QuestStatus!
+}
+
+enum QuestStatus {
+    AVAILABLE
+    IN_PROGRESS
+    COMPLETED
 }
