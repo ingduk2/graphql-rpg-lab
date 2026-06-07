@@ -42,13 +42,13 @@
 > "API는 Schema가 전부다"
 
 - **1-1.** 도메인 타입 정의 (`schema.graphqls`)
-    - `Character` (id, name, level, hp, maxHp, stats)
+    - `Player` (id, name, level, hp, maxHp, stats)
     - `Monster` (id, name, hp, attackPower)
     - `Item` (id, name, type, attackBonus, defenseBonus)
-    - `Inventory` (characterId, items)
+    - `Inventory` (playerId, items)
     - `Quest` (id, title, description, status, rewards)
 - **1-2.** Query / Mutation / Subscription 틀 설계
-- **1-3.** 타입 간 관계 설계 (Character ↔ Inventory ↔ Item)
+- **1-3.** 타입 간 관계 설계 (Player ↔ Inventory ↔ Item)
 - **1-4.** GraphiQL에서 Introspection으로 Schema 확인
 
 **학습 포인트**
@@ -62,12 +62,12 @@
 > "조회부터 완벽하게"
 
 - **2-1.** JPA Entity 및 Repository 생성
-- **2-2.** `CharacterDataFetcher` 구현
-    - `characters` — 전체 목록 조회
-    - `character(id)` — 단건 조회
+- **2-2.** `PlayerDataFetcher` 구현
+    - `players` — 전체 목록 조회
+    - `player(id)` — 단건 조회
 - **2-3.** `MonsterDataFetcher` 구현
 - **2-4.** 더미 데이터 `data.sql` 작성
-- **2-5.** HTML 페이지에서 fetch로 캐릭터 목록 표시
+- **2-5.** HTML 페이지에서 fetch로 플레이어 목록 표시
 
 **학습 포인트**
 - `@DgsQuery`, `@InputArgument` 사용법
@@ -79,10 +79,10 @@
 ### Step 3. N+1 문제 재현 & 확인
 > "문제를 모르면 해결도 없다"
 
-- **3-1.** `Character`가 `Inventory`와 `Item`을 함께 조회하는 Query 구현
+- **3-1.** `Player`가 `Inventory`와 `Item`을 함께 조회하는 Query 구현
 - **3-2.** N+1 쿼리가 발생하는 상황을 의도적으로 만들기
 - **3-3.** Hibernate SQL 로그로 쿼리 수 눈으로 확인
-- **3-4.** 10개 캐릭터 조회 시 → 1 + 10 + 10 = 21개 쿼리 발생 확인
+- **3-4.** 10개 플레이어 조회 시 → 1 + 10 + 10 = 21개 쿼리 발생 확인
 
 **학습 포인트**
 - GraphQL에서 N+1이 왜 REST보다 더 쉽게 터지는지
@@ -109,10 +109,10 @@
 ### Step 5. Mutation 구현
 > "쓰기 작업 — GraphQL답게"
 
-- **5-1.** 캐릭터 생성 `createCharacter(input: CreateCharacterInput!)`
+- **5-1.** 플레이어 생성 `createPlayer(input: CreatePlayerInput!)`
 - **5-2.** 아이템 장착/해제 `equipItem`, `unequipItem`
 - **5-3.** 퀘스트 수락/완료 `acceptQuest`, `completeQuest`
-- **5-4.** HTML에서 캐릭터 생성 폼 구현
+- **5-4.** HTML에서 플레이어 생성 폼 구현
 
 **학습 포인트**
 - `@DgsMutation` 사용법
@@ -126,11 +126,11 @@
 
 - **6-1.** 전투 도메인 설계
     - `BattleResult` (damage, remainHp, isCritical, message)
-- **6-2.** `attack(characterId, monsterId)` Mutation 구현
+- **6-2.** `attack(playerId, monsterId)` Mutation 구현
     - 데미지 계산 로직 (스탯 + 아이템 보너스 반영)
     - 크리티컬 히트 (15% 확률, 1.5배 데미지)
     - 몬스터 처치 시 경험치/아이템 드롭 처리
-- **6-3.** `flee(characterId, monsterId)` Mutation 구현
+- **6-3.** `flee(playerId, monsterId)` Mutation 구현
 - **6-4.** HTML 전투 화면 — 공격 버튼 + 결과 표시
 
 **학습 포인트**
@@ -160,7 +160,7 @@
 ### Step 8. 에러 핸들링 & 인증 기초
 > "프로덕션 코드답게"
 
-- **8-1.** Custom Exception 설계 (`CharacterNotFoundException`, `InsufficientHpException`)
+- **8-1.** Custom Exception 설계 (`PlayerNotFoundException`, `InsufficientHpException`)
 - **8-2.** `@DgsExceptionHandler`로 에러 응답 통일
 - **8-3.** GraphQL Error Extensions로 에러 코드 추가
 - **8-4.** Context 활용 — 요청별 플레이어 정보 전달
@@ -192,10 +192,10 @@
 graphql-rpg/
 ├── src/main/
 │   ├── java/com/rpg/lab/
-│   │   ├── character/
-│   │   │   ├── CharacterEntity.java
-│   │   │   ├── CharacterRepository.java
-│   │   │   └── CharacterDataFetcher.java
+│   │   ├── player/
+│   │   │   ├── PlayerEntity.java
+│   │   │   ├── PlayerRepository.java
+│   │   │   └── PlayerDataFetcher.java
 │   │   ├── monster/
 │   │   ├── battle/
 │   │   │   ├── BattleService.java
@@ -211,7 +211,7 @@ graphql-rpg/
 │       ├── application.yml
 │       └── data.sql
 └── frontend/
-    ├── index.html                         ← 캐릭터 목록
+    ├── index.html                         ← 플레이어 목록
     └── battle.html                        ← 전투 화면
 ```
 
