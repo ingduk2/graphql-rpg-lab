@@ -1,6 +1,9 @@
 spring:
   application:
     name: graphql-rpg
+  sql:
+    init:
+      mode: always
 
   datasource:
     url: jdbc:h2:mem:rpgdb
@@ -9,6 +12,7 @@ spring:
     password:
 
   jpa:
+    defer-datasource-initialization: true
     open-in-view: false
     hibernate:
       ddl-auto: create-drop
