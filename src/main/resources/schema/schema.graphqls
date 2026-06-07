@@ -1,9 +1,9 @@
 type Query {
     ping: String
 
-    # Character
-    characters: [Character!]!
-    character(id: ID!): Character
+    # Player
+    players: [Player!]!
+    player(id: ID!): Player
 
     # Monster
     monsters: [Monster!]!
@@ -14,29 +14,28 @@ type Query {
 }
 
 type Mutation {
-    # Character
-    createCharacter(input: CreateCharacterInput!): Character!
+    # Player
+    createPlayer(input: CreatePlayerInput!): Player!
 
     # Item
-    equipItem(characterId: ID!, itemId: ID!): Inventory!
-    unequipItem(characterId: ID!, itemId: ID!): Inventory!
+    equipItem(playerId: ID!, itemId: ID!): Inventory!
+    unequipItem(playerId: ID!, itemId: ID!): Inventory!
 
     # Quest
-    acceptQuest(characterId: ID!, questId: ID!): Quest!
-    completeQuest(characterId: ID!, questId: ID!): Quest!
+    acceptQuest(playerId: ID!, questId: ID!): Quest!
+    completeQuest(playerId: ID!, questId: ID!): Quest!
 
     # Battle
-    attack(characterId: ID!, monsterId: ID!): BattleResult!
-    flee(characterId: ID!, monsterId: ID!): BattleResult!
+    attack(playerId: ID!, monsterId: ID!): BattleResult!
+    flee(playerId: ID!, monsterId: ID!): BattleResult!
 }
 
 type Subscription {
     battleEvents(battleId: ID!): BattleEvent!
 }
 
-input CreateCharacterInput {
+input CreatePlayerInput {
     name: String!
-    level: Int
 }
 
 type BattleResult {
@@ -57,7 +56,7 @@ type BattleEvent {
     finished: Boolean!
 }
 
-type Character {
+type Player {
     id: ID!
     name: String!
     level: Int!
@@ -98,7 +97,7 @@ enum ItemType {
 
 type Inventory {
     id: ID!
-    characterId: ID!
+    playerId: ID!
     items: [Item!]!
 }
 
