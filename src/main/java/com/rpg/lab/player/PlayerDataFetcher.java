@@ -15,17 +15,11 @@ public class PlayerDataFetcher {
 
     @DgsQuery
     public List<PlayerResponse> players() {
-        List<Player> players = playerService.getPlayers();
-
-        return players.stream()
-                .map(PlayerResponse::from)
-                .toList();
+        return playerService.getPlayers();
     }
 
     @DgsQuery
     public PlayerResponse player(@InputArgument Long id) {
-        Player player = playerService.getPlayer(id);
-
-        return PlayerResponse.from(player);
+        return playerService.getPlayer(id);
     }
 }
