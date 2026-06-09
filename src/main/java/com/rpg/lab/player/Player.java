@@ -1,6 +1,5 @@
 package com.rpg.lab.player;
 
-import com.rpg.lab.inventory.Inventory;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -39,9 +38,6 @@ public class Player {
 
     @Column(nullable = false)
     private int speed;
-
-    @OneToOne(mappedBy = "player")
-    private Inventory inventory;
 
     public static Player create(String name) {
         Player player = new Player();

@@ -97,7 +97,6 @@ enum ItemType {
 
 type Inventory {
     id: ID!
-    playerId: ID!
     items: [Item!]!
 }
 

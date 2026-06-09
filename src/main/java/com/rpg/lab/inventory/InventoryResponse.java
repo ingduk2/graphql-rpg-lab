@@ -6,7 +6,6 @@ import java.util.List;
 
 public record InventoryResponse(
         Long id,
-        Long playerId,
         List<ItemResponse> items
 ) {
     public static InventoryResponse from(Inventory inventory) {
@@ -16,7 +15,6 @@ public record InventoryResponse(
 
         return new InventoryResponse(
                 inventory.getId(),
-                inventory.getPlayer().getId(),
                 items
         );
     }

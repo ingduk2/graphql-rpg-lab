@@ -1,7 +1,5 @@
 package com.rpg.lab.player;
 
-import com.rpg.lab.inventory.InventoryResponse;
-
 public record PlayerResponse(
         Long id,
         String name,
@@ -10,8 +8,7 @@ public record PlayerResponse(
         int maxHp,
         int attack,
         int defence,
-        int speed,
-        InventoryResponse inventory
+        int speed
 ) {
     public static PlayerResponse from(Player player) {
         return new PlayerResponse(
@@ -22,10 +19,7 @@ public record PlayerResponse(
                 player.getMaxHp(),
                 player.getAttack(),
                 player.getDefence(),
-                player.getSpeed(),
-                player.getInventory() != null
-                        ? InventoryResponse.from(player.getInventory())
-                        : null
+                player.getSpeed()
         );
     }
 }

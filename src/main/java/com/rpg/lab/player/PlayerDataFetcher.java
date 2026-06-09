@@ -1,11 +1,12 @@
 package com.rpg.lab.player;
 
-import com.netflix.graphql.dgs.DgsComponent;
-import com.netflix.graphql.dgs.DgsQuery;
-import com.netflix.graphql.dgs.InputArgument;
+import com.netflix.graphql.dgs.*;
+import com.rpg.lab.inventory.InventoryResponse;
 import lombok.RequiredArgsConstructor;
+import org.dataloader.DataLoader;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @DgsComponent
 @RequiredArgsConstructor
@@ -16,6 +17,13 @@ public class PlayerDataFetcher {
     @DgsQuery
     public List<PlayerResponse> players() {
         return playerService.getPlayers();
+    }
+
+    @DgsData(parentType = "Player", field = "inventory")
+    public CompletableFuture<InventoryResponse> inventory(DgsDataFetchingEnvironment dfe) {
+        DataLoader<Long, InventoryResponse> dataLoader = dfe.getDataLoader("inventories");
+        PlayerResponse player = dfe.getSource();
+        return dataLoader.load(player.id());
     }
 
     @DgsQuery
