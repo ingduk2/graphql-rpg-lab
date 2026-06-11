@@ -109,10 +109,11 @@
 ### Step 5. Mutation 구현
 > "쓰기 작업 — GraphQL답게"
 
-- **5-1.** 플레이어 생성 `createPlayer(input: CreatePlayerInput!)`
-- **5-2.** 아이템 장착/해제 `equipItem`, `unequipItem`
-- **5-3.** 퀘스트 수락/완료 `acceptQuest`, `completeQuest`
-- **5-4.** HTML에서 플레이어 생성 폼 구현
+- **5-1.** Quest 도메인 및 Query 구현
+- **5-2.** 플레이어 생성 `createPlayer(input: CreatePlayerInput!)`
+- **5-3.** 아이템 장착/해제 `equipItem`, `unequipItem`
+- **5-4.** 퀘스트 수락/완료 `acceptQuest`, `completeQuest`
+- **5-5.** HTML에서 플레이어 생성 폼 구현
 
 **학습 포인트**
 - `@DgsMutation` 사용법
