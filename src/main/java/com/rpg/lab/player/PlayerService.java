@@ -24,4 +24,10 @@ public class PlayerService {
                 .map(PlayerResponse::from)
                 .orElseThrow(() -> new RuntimeException("Player not found: " + id));
     }
+
+    @Transactional
+    public PlayerResponse createPlayer(String name) {
+        Player savedPlayer = playerRepository.save(Player.create(name));
+        return PlayerResponse.from(savedPlayer);
+    }
 }

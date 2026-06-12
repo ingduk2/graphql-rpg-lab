@@ -30,4 +30,9 @@ public class PlayerDataFetcher {
     public PlayerResponse player(@InputArgument Long id) {
         return playerService.getPlayer(id);
     }
+
+    @DgsMutation
+    public PlayerResponse createPlayer(@InputArgument CreatePlayerInput input) {
+        return playerService.createPlayer(input.name());
+    }
 }
