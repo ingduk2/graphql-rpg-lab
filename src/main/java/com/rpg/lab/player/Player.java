@@ -34,7 +34,7 @@ public class Player {
     private int attack;
 
     @Column(nullable = false)
-    private int defence;
+    private int defense;
 
     @Column(nullable = false)
     private int speed;
@@ -46,7 +46,7 @@ public class Player {
         player.hp = PlayerDefaults.HP;
         player.maxHp = PlayerDefaults.MAX_HP;
         player.attack = PlayerDefaults.ATTACK;
-        player.defence = PlayerDefaults.DEFENCE;
+        player.defense = PlayerDefaults.DEFENSE;
         player.speed = PlayerDefaults.SPEED;
         return player;
     }

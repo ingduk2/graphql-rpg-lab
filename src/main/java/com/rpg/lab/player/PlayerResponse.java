@@ -6,9 +6,7 @@ public record PlayerResponse(
         int level,
         int hp,
         int maxHp,
-        int attack,
-        int defence,
-        int speed
+        StatsResponse stats
 ) {
     public static PlayerResponse from(Player player) {
         return new PlayerResponse(
@@ -17,9 +15,7 @@ public record PlayerResponse(
                 player.getLevel(),
                 player.getHp(),
                 player.getMaxHp(),
-                player.getAttack(),
-                player.getDefence(),
-                player.getSpeed()
+                StatsResponse.from(player)
         );
     }
 }
