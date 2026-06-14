@@ -1,5 +1,6 @@
 package com.rpg.lab.inventory;
 
+import com.rpg.lab.item.Item;
 import com.rpg.lab.player.Player;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -23,12 +24,17 @@ public class Inventory {
     @JoinColumn(name = "player_id")
     private Player player;
 
-    @OneToMany(mappedBy = "inventory", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "inventory", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<InventoryItem> inventoryItems = new ArrayList<>();
 
     public static Inventory create(Player player) {
         Inventory inventory = new Inventory();
         inventory.player = player;
         return inventory;
+    }
+
+    public void addItem(Item item) {
+        InventoryItem inventoryItem = InventoryItem.create(this, item);
+        this.inventoryItems.add(inventoryItem);
     }
 }

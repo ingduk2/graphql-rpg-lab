@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
@@ -15,4 +16,6 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
         WHERE i.player.id IN :playerIds
     """)
     List<Inventory> findAllWithItemsByPlayerIdIn(@Param("playerIds") List<Long> playerIds);
+
+    Optional<Inventory> findByPlayerId(Long playerId);
 }
