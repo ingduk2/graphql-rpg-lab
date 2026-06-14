@@ -37,4 +37,8 @@ public class Inventory {
         InventoryItem inventoryItem = InventoryItem.create(this, item);
         this.inventoryItems.add(inventoryItem);
     }
+
+    public void removeItem(Long itemId) {
+        this.inventoryItems.removeIf(li -> li.getItem().getId().equals(itemId));
+    }
 }

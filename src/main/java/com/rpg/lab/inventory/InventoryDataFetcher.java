@@ -18,4 +18,12 @@ public class InventoryDataFetcher {
     ) {
         return inventoryService.equipItem(playerId, itemId);
     }
+
+    @DgsMutation
+    public InventoryResponse unequipItem(
+            @InputArgument Long playerId,
+            @InputArgument Long itemId
+    ) {
+        return inventoryService.unequipItem(playerId, itemId);
+    }
 }
