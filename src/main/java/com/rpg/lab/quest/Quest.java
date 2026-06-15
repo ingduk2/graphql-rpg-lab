@@ -22,15 +22,10 @@ public class Quest {
 
     private String description;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private QuestStatus status;
-
     public static Quest create(String title, String description) {
         Quest quest = new Quest();
         quest.title = Objects.requireNonNull(title);
         quest.description = description;
-        quest.status = QuestStatus.AVAILABLE;
         return quest;
     }
 }

@@ -22,8 +22,8 @@ type Mutation {
     unequipItem(playerId: ID!, itemId: ID!): Inventory!
 
     # Quest
-    acceptQuest(playerId: ID!, questId: ID!): Quest!
-    completeQuest(playerId: ID!, questId: ID!): Quest!
+    acceptQuest(playerId: ID!, questId: ID!): PlayerQuest!
+    completeQuest(playerId: ID!, questId: ID!): PlayerQuest!
 
     # Battle
     attack(playerId: ID!, monsterId: ID!): BattleResult!
@@ -104,7 +104,14 @@ type Quest {
     id: ID!
     title: String!
     description: String
+}
+
+type PlayerQuest {
+    id: ID!
+    questId: ID!
     status: QuestStatus!
+    title: String!
+    description: String
 }
 
 enum QuestStatus {

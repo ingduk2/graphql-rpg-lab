@@ -27,8 +27,8 @@ VALUES
     (2, 3),
     (3, 4), (3, 5);
 
-INSERT INTO quests (title, description, status)
+INSERT INTO quests (title, description)
 VALUES
-    ('슬라임 사냥', '슬라임 5마리를 처치하라', 'AVAILABLE'),
-    ('고블린 토벌', '고블린 3마리를 처치하라', 'AVAILABLE'),
-    ('던전 탐험', '던전 깊은 곳을 탐험하라', 'AVAILABLE');
+    ('슬라임 사냥', '슬라임 5마리를 처치하라'),
+    ('고블린 토벌', '고블린 3마리를 처치하라'),
+    ('던전 탐험', '던전 깊은 곳을 탐험하라');
