@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>GraphQL RPG</title>
+</head>
+<body>
+<h1>⚔️ GraphQL RPG</h1>
+
+<h2>플레이어 생성</h2>
+<input type="text" id="playerName" placeholder="플레이어 이름">
+<button onclick="createPlayer()">생성</button>
+<div id="createResult"></div>
+
+<h2>플레이어 목록</h2>
+<button onclick="loadPlayers()">불러오기</button>
+<div id="playerList"></div>
+
+<script>
+    const API = 'http://localhost:8080/graphql';
+
+    async function graphql(query) {
+        const res = await fetch(API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query })
+        });
+        return res.json();
+    }
+
+    async function createPlayer() {
+        const name = document.getElementById('playerName').value;
+        const data = await graphql(`
+                mutation {
+                    createPlayer(input: { name: "${name}" }) {
+                        id
+                        name
+                        level
+                        hp
+                    }
+                }
+            `);
+        document.getElementById('createResult').innerText =
+            JSON.stringify(data.data.createPlayer, null, 2);
+    }
+
+    async function loadPlayers() {
+        const data = await graphql(`
+                {
+                    players {
+                        id
+                        name
+                        level
+                        hp
+                    }
+                }
+            `);
+        const players = data.data.players;
+        document.getElementById('playerList').innerHTML =
+            players.map(p => `<div>${p.id}. ${p.name} (Lv.${p.level} HP:${p.hp})</div>`).join('');
+    }
+</script>
+</body>
+</html>
