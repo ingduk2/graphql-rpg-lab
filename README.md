@@ -127,11 +127,13 @@
 > "게임의 핵심"
 
 - **6-1.** 전투 도메인 설계
-    - `BattleResult` (damage, remainHp, isCritical, message)
+  - `BattleResult` (damage, monsterRemainHp, playerRemainHp, isCritical, message, monsterDefeated)
 - **6-2.** `attack(playerId, monsterId)` Mutation 구현
-    - 데미지 계산 로직 (스탯 + 아이템 보너스 반영)
-    - 크리티컬 히트 (15% 확률, 1.5배 데미지)
-    - 몬스터 처치 시 경험치/아이템 드롭 처리
+  - 플레이어 → 몬스터 데미지 계산 (스탯 + 아이템 보너스 반영)
+  - 크리티컬 히트 (15% 확률, 1.5배 데미지)
+  - 몬스터 반격 (몬스터 attackPower 기반)
+  - 플레이어 HP DB 업데이트
+  - 몬스터 처치 시 처리
 - **6-3.** `flee(playerId, monsterId)` Mutation 구현
 - **6-4.** HTML 전투 화면 — 공격 버튼 + 결과 표시
 
