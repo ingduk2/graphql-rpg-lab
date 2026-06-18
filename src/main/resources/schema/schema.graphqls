@@ -39,18 +39,21 @@ input CreatePlayerInput {
 }
 
 type BattleResult {
-    damage: Int!
-    remainHp: Int!
+    playerDamage: Int!
+    monsterDamage: Int!
+    monsterRemainHp: Int!
+    playerRemainHp: Int!
     isCritical: Boolean!
-    message: String!
     monsterDefeated: Boolean!
+    playerDefeated: Boolean!
+    message: String!
 }
 
 type BattleEvent {
     battleId: ID!
     turn: Int!
     damage: Int!
-    remainHp: Int!
+    monsterRemainHp: Int!
     isCritical: Boolean!
     message: String!
     finished: Boolean!
