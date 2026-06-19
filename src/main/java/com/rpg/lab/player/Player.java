@@ -50,4 +50,8 @@ public class Player {
         player.speed = PlayerDefaults.SPEED;
         return player;
     }
+
+    public void syncHp(int hp) {
+        this.hp = hp;
+    }
 }
