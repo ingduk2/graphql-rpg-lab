@@ -136,6 +136,12 @@
   - 몬스터 처치 시 처리
 - **6-3.** `flee(playerId, monsterId)` Mutation 구현
 - **6-4.** HTML 전투 화면 — 공격 버튼 + 결과 표시
+- **6-5.** 경험치/레벨업 시스템
+  - Player exp, expToNextLevel 필드 추가
+  - 몬스터 처치 시 exp 지급, 레벨업 로직
+- **6-6.** 몬스터 처치 시 아이템 드롭
+  - 드롭 테이블 설계
+  - equipItem 자동 연동
 
 **학습 포인트**
 - 복잡한 비즈니스 로직을 Mutation에서 처리하는 패턴
