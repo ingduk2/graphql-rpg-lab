@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>BATTLE // graphql-rpg-lab</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+        :root {
+            --bg: #0a0f0a;
+            --panel: #0f1a0f;
+            --line: #1f3d1f;
+            --green: #5cf26a;
+            --green-dim: #2f8f3d;
+            --amber: #ffb000;
+            --red: #ff4d4d;
+            --text: #c8f5c8;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            background-image:
+                    repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 3px);
+            color: var(--text);
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .crt {
+            width: 100%;
+            max-width: 760px;
+            border: 2px solid var(--green-dim);
+            border-radius: 4px;
+            box-shadow: 0 0 0 1px #000, 0 0 24px rgba(92,242,106,0.15), inset 0 0 40px rgba(0,0,0,0.6);
+            background: var(--panel);
+            padding: 20px 24px 24px;
+        }
+
+        .title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 13px;
+            color: var(--green);
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+            text-shadow: 0 0 6px rgba(92,242,106,0.6);
+        }
+
+        .subtitle {
+            color: var(--green-dim);
+            font-size: 14px;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 12px;
+            align-items: stretch;
+            margin-bottom: 16px;
+        }
+
+        .vs {
+            align-self: center;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 12px;
+            color: var(--amber);
+            text-align: center;
+        }
+
+        .unit {
+            border: 1px solid var(--line);
+            border-radius: 3px;
+            padding: 12px 14px;
+            background: rgba(0,0,0,0.25);
+        }
+
+        .unit.player { border-color: #2f6f8f; }
+        .unit.monster { border-color: #8f2f2f; }
+
+        .unit-label {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 9px;
+            color: var(--green-dim);
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        select {
+            width: 100%;
+            background: #060906;
+            color: var(--text);
+            border: 1px solid var(--line);
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            padding: 6px 8px;
+            margin-bottom: 10px;
+        }
+
+        .hp-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 15px;
+            color: var(--green-dim);
+            margin-bottom: 4px;
+        }
+
+        .hp-bar {
+            height: 14px;
+            background: #060906;
+            border: 1px solid var(--line);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--green-dim), var(--green));
+            width: 100%;
+            transition: width 0.4s steps(12);
+        }
+
+        .hp-fill.low { background: linear-gradient(90deg, #7a1f1f, var(--red)); }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 18px 0 16px;
+        }
+
+        button {
+            flex: 1;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 11px;
+            padding: 14px 8px;
+            background: #060906;
+            color: var(--green);
+            border: 2px solid var(--green-dim);
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.1s;
+        }
+
+        button:hover:not(:disabled) {
+            background: var(--green-dim);
+            color: #060906;
+        }
+
+        button:active:not(:disabled) { transform: translateY(1px); }
+
+        button.flee { color: var(--amber); border-color: #8a6000; }
+        button.flee:hover:not(:disabled) { background: #8a6000; color: #060906; }
+
+        button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+        .log {
+            border: 1px solid var(--line);
+            background: #060906;
+            padding: 10px 12px;
+            height: 150px;
+            overflow-y: auto;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .log::-webkit-scrollbar { width: 8px; }
+        .log::-webkit-scrollbar-thumb { background: var(--green-dim); }
+        .log::-webkit-scrollbar-track { background: #060906; }
+
+        .log p { margin: 0 0 4px; }
+        .log p.sys { color: var(--green-dim); }
+        .log p.crit { color: var(--amber); }
+        .log p.dead { color: var(--red); }
+        .log .cursor {
+            display: inline-block;
+            width: 8px;
+            background: var(--green);
+            animation: blink 1s steps(1) infinite;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .footer-note {
+            margin-top: 14px;
+            font-size: 13px;
+            color: var(--green-dim);
+            text-align: center;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="crt">
+    <div class="title">⚔ BATTLE.EXE</div>
+    <div class="subtitle">graphql-rpg-lab // turn-based combat test console</div>
+
+    <div class="row">
+        <div class="unit player">
+            <div class="unit-label">PLAYER</div>
+            <select id="playerSelect"></select>
+            <div class="hp-label"><span>HP</span><span id="playerHpText">--/--</span></div>
+            <div class="hp-bar"><div class="hp-fill" id="playerHpFill"></div></div>
+        </div>
+
+        <div class="vs">VS</div>
+
+        <div class="unit monster">
+            <div class="unit-label">MONSTER</div>
+            <select id="monsterSelect"></select>
+            <div class="hp-label"><span>HP</span><span id="monsterHpText">--/--</span></div>
+            <div class="hp-bar"><div class="hp-fill" id="monsterHpFill"></div></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="attackBtn" onclick="doAttack()">⚔ ATTACK</button>
+        <button id="fleeBtn" class="flee" onclick="doFlee()">🏃 FLEE</button>
+    </div>
+
+    <div class="log" id="log">
+        <p class="sys">&gt; system ready. select your fighters and press attack.<span class="cursor">&nbsp;</span></p>
+    </div>
+
+    <div class="footer-note">localhost:8080/graphql — Step 6 Battle Mutation</div>
+</div>
+
+<script>
+    const API = 'http://localhost:8080/graphql';
+
+    let players = [];
+    let monsters = [];
+    let currentMonsterMaxHp = 100;
+    let currentPlayerMaxHp = 100;
+
+    async function graphql(query) {
+        const res = await fetch(API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query })
+        });
+        const json = await res.json();
+        if (json.errors) {
+            log(json.errors[0].message, 'dead');
+            throw new Error(json.errors[0].message);
+        }
+        return json.data;
+    }
+
+    function log(message, cls) {
+        const el = document.getElementById('log');
+        document.querySelectorAll('.cursor').forEach(c => c.remove());
+        const p = document.createElement('p');
+        if (cls) p.className = cls;
+        p.innerHTML = '&gt; ' + message;
+        el.appendChild(p);
+        const cursorP = document.createElement('p');
+        cursorP.className = 'sys';
+        cursorP.innerHTML = '&gt; <span class="cursor">&nbsp;</span>';
+        el.appendChild(cursorP);
+        el.scrollTop = el.scrollHeight;
+    }
+
+    function setHpBar(fillId, textId, current, max) {
+        const fill = document.getElementById(fillId);
+        const text = document.getElementById(textId);
+        const pct = Math.max(0, Math.min(100, (current / max) * 100));
+        fill.style.width = pct + '%';
+        fill.classList.toggle('low', pct <= 30);
+        text.textContent = `${Math.max(0, current)}/${max}`;
+    }
+
+    async function loadFighters() {
+        const data = await graphql(`{
+    players { id name level hp maxHp }
+    monsters { id name hp maxHp }
+  }`);
+        players = data.players;
+        monsters = data.monsters;
+
+        document.getElementById('playerSelect').innerHTML =
+            players.map(p => `<option value="${p.id}">${p.name} (Lv. ${p.level})</option>`).join('');
+        document.getElementById('monsterSelect').innerHTML =
+            monsters.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+
+        document.getElementById('playerSelect').onchange = syncSelection;
+        document.getElementById('monsterSelect').onchange = syncSelection;
+        syncSelection();
+    }
+
+    async function syncSelection() {
+        const pid = document.getElementById('playerSelect').value;
+        const mid = document.getElementById('monsterSelect').value;
+        if (!pid || !mid) return;
+
+        const data = await graphql(`{
+    player(id: ${pid}) { id name level hp maxHp }
+    monster(id: ${mid}) { id name hp maxHp }
+  }`);
+
+        currentPlayerMaxHp = data.player.maxHp;
+        currentMonsterMaxHp = data.monster.maxHp;
+        setHpBar('playerHpFill', 'playerHpText', data.player.hp, data.player.maxHp);
+        setHpBar('monsterHpFill', 'monsterHpText', data.monster.hp, data.monster.maxHp);
+
+        const isDead = data.player.hp <= 0 || data.monster.hp <= 0;
+        setButtonsDisabled(isDead);
+    }
+
+    function setButtonsDisabled(disabled) {
+        document.getElementById('attackBtn').disabled = disabled;
+        document.getElementById('fleeBtn').disabled = disabled;
+    }
+
+    async function doAttack() {
+        const playerId = document.getElementById('playerSelect').value;
+        const monsterId = document.getElementById('monsterSelect').value;
+        if (!playerId || !monsterId) return;
+
+        setButtonsDisabled(true);
+        try {
+            const data = await graphql(`
+      mutation {
+        attack(playerId: ${playerId}, monsterId: ${monsterId}) {
+          playerDamage
+          monsterDamage
+          monsterRemainHp
+          playerRemainHp
+          isCritical
+          monsterDefeated
+          playerDefeated
+          message
+        }
+      }
+    `);
+            const r = data.attack;
+
+            setHpBar('monsterHpFill', 'monsterHpText', r.monsterRemainHp, currentMonsterMaxHp);
+            setHpBar('playerHpFill', 'playerHpText', r.playerRemainHp, currentPlayerMaxHp);
+
+            log(r.message, r.isCritical ? 'crit' : null);
+
+            if (r.monsterDefeated) {
+                log('monster defeated. battle won.', 'dead');
+                setButtonsDisabled(true);
+                return;
+            }
+            if (r.playerDefeated) {
+                log('player has fallen. battle lost.', 'dead');
+                setButtonsDisabled(true);
+                return;
+            }
+        } catch (e) {
+            // error already logged
+        }
+        setButtonsDisabled(false);
+    }
+
+    async function doFlee() {
+        const playerId = document.getElementById('playerSelect').value;
+        const monsterId = document.getElementById('monsterSelect').value;
+        if (!playerId || !monsterId) return;
+
+        setButtonsDisabled(true);
+        try {
+            const data = await graphql(`
+      mutation {
+        flee(playerId: ${playerId}, monsterId: ${monsterId}) {
+          message
+        }
+      }
+    `);
+            log(data.flee.message, 'sys');
+        } catch (e) {}
+        setButtonsDisabled(false);
+    }
+
+    loadFighters();
+</script>
+
+</body>
+</html>

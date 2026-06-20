@@ -24,7 +24,10 @@ public class BattleService {
         Battle battle = new Battle(player, monster).attack();
 
         player.syncHp(battle.getPlayerRemainHp());
+        monster.syncHp(battle.getMonsterRemainHp());
+
         playerRepository.save(player);
+        monsterRepository.save(monster);
 
         return BattleResult.from(battle);
     }

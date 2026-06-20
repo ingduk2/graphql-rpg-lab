@@ -41,4 +41,8 @@ public class Monster {
         monster.attackPower = attackPower;
         return monster;
     }
+
+    public void syncHp(int hp) {
+        this.hp = hp;
+    }
 }
