@@ -12,4 +12,11 @@ public class PlayerDefaults {
     public static final int ATTACK = 10;
     public static final int DEFENSE = 5;
     public static final int SPEED = 5;
+    public static final int EXP = 0;
+
+    public static final int LEVEL_UP_HP_BONUS = 10;
+    public static final int LEVEL_UP_ATTACK_BONUS = 2;
+    public static final int LEVEL_UP_DEFENSE_BONUS = 1;
+    public static final int LEVEL_UP_SPEED_BONUS = 1;
+    public static final int EXP_PER_LEVEL = 100;
 }

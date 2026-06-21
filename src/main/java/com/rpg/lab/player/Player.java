@@ -39,6 +39,9 @@ public class Player {
     @Column(nullable = false)
     private int speed;
 
+    @Column(nullable = false)
+    private int exp;
+
     public static Player create(String name) {
         Player player = new Player();
         player.name = Objects.requireNonNull(name);
@@ -48,10 +51,35 @@ public class Player {
         player.attack = PlayerDefaults.ATTACK;
         player.defense = PlayerDefaults.DEFENSE;
         player.speed = PlayerDefaults.SPEED;
+        player.exp = PlayerDefaults.EXP;
         return player;
     }
 
     public void syncHp(int hp) {
         this.hp = hp;
+    }
+
+    public int gainExp(int amount) {
+        this.exp += amount;
+        int levelUps = 0;
+        while (this.exp >= expToNextLevel()) {
+            this.exp -= expToNextLevel();
+            levelUp();
+            levelUps++;
+        }
+        return levelUps;
+    }
+
+    private int expToNextLevel() {
+        return this.level * PlayerDefaults.EXP_PER_LEVEL;
+    }
+
+    private void levelUp() {
+        this.level += 1;
+        this.maxHp += PlayerDefaults.LEVEL_UP_HP_BONUS;
+        this.hp = this.maxHp;
+        this.attack += PlayerDefaults.LEVEL_UP_ATTACK_BONUS;
+        this.defense += PlayerDefaults.LEVEL_UP_DEFENSE_BONUS;
+        this.speed += PlayerDefaults.LEVEL_UP_SPEED_BONUS;
     }
 }
