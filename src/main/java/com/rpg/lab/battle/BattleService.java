@@ -26,6 +26,10 @@ public class BattleService {
         player.syncHp(battle.getPlayerRemainHp());
         monster.syncHp(battle.getMonsterRemainHp());
 
+        if (battle.isMonsterDefeated()) {
+            player.gainExp(battle.getExpGained());
+        }
+
         playerRepository.save(player);
         monsterRepository.save(monster);
 

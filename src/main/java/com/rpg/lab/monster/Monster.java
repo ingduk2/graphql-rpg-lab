@@ -29,16 +29,21 @@ public class Monster {
     @Column(nullable = false)
     private int attackPower;
 
+    @Column(nullable = false)
+    private int expReward;
+
     public static Monster create(
             String name,
             int hp,
-            int attackPower
+            int attackPower,
+            int expReward
     ) {
         Monster monster = new Monster();
         monster.name = Objects.requireNonNull(name);
         monster.hp = hp;
         monster.maxHp = hp;
         monster.attackPower = attackPower;
+        monster.expReward = expReward;
         return monster;
     }
 

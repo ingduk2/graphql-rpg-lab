@@ -17,6 +17,7 @@ public class Battle {
     private boolean monsterDefeated;
     private boolean playerDefeated;
     private boolean isCritical;
+    private int expGained;
     private String message;
 
     public Battle(Player player, Monster monster) {
@@ -38,10 +39,12 @@ public class Battle {
             monsterDamage = 0;
             playerRemainHp = player.getHp();
             playerDefeated = false;
+            expGained = monster.getExpReward();
         } else {
             monsterDamage = monster.getAttackPower();
             playerRemainHp = Math.max(0, player.getHp() - monsterDamage);
             playerDefeated = playerRemainHp == 0;
+            expGained = 0;
         }
 
         message = buildMessage();

@@ -46,6 +46,7 @@ type BattleResult {
     isCritical: Boolean!
     monsterDefeated: Boolean!
     playerDefeated: Boolean!
+    expGained: Int!
     message: String!
 }
 
@@ -65,6 +66,7 @@ type Player {
     level: Int!
     hp: Int!
     maxHp: Int!
+    exp: Int!
     stats: Stats!
     inventory: Inventory
     quests: [Quest!]!

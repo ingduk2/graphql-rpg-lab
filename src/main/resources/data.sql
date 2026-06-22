@@ -4,11 +4,11 @@ VALUES
     ('마법사 이영희', 1, 80, 80, 15, 3, 7, 0),
     ('궁수 박민준', 1, 90, 90, 12, 4, 9, 0);
 
-INSERT INTO monsters (name, hp, max_hp, attack_power)
+INSERT INTO monsters (name, hp, max_hp, attack_power, exp_reward)
 VALUES
-    ('슬라임', 30, 30, 5),
-    ('고블린', 50, 50, 10),
-    ('오크', 100, 100, 20);
+    ('슬라임', 30, 30, 5, 20),
+    ('고블린', 50, 50, 10, 40),
+    ('오크', 100, 100, 20, 80);
 
 INSERT INTO items (name, type, attack_bonus, defense_bonus)
 VALUES

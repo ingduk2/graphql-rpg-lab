@@ -8,6 +8,7 @@ public record BattleResult(
         boolean isCritical,
         boolean monsterDefeated,
         boolean playerDefeated,
+        int expGained,
         String message
 ) {
 
@@ -20,6 +21,7 @@ public record BattleResult(
                 battle.isCritical(),
                 battle.isMonsterDefeated(),
                 battle.isPlayerDefeated(),
+                battle.getExpGained(),
                 battle.getMessage()
         );
     }
