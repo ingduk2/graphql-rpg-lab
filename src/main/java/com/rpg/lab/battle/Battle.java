@@ -10,6 +10,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class Battle {
     private final Player player;
     private final Monster monster;
+    private final int currentMonsterHp;
     private int playerDamage;
     private int monsterDamage;
     private int monsterRemainHp;
@@ -20,9 +21,10 @@ public class Battle {
     private int expGained;
     private String message;
 
-    public Battle(Player player, Monster monster) {
+    public Battle(Player player, Monster monster, int currentMonsterHp) {
         this.player = player;
         this.monster = monster;
+        this.currentMonsterHp = currentMonsterHp;
     }
 
     public Battle attack() {
@@ -32,7 +34,7 @@ public class Battle {
             playerDamage = (int) (playerDamage * 1.5);
         }
 
-        monsterRemainHp = Math.max(0, monster.getHp() - playerDamage);
+        monsterRemainHp = Math.max(0, currentMonsterHp - playerDamage);
         monsterDefeated = monsterRemainHp == 0;
 
         if (monsterDefeated) {

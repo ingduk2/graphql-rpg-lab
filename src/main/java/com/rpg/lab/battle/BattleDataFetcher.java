@@ -14,9 +14,10 @@ public class BattleDataFetcher {
     @DgsMutation
     public BattleResult attack(
             @InputArgument Long playerId,
-            @InputArgument Long monsterId
+            @InputArgument Long monsterId,
+            @InputArgument Integer currentMonsterHp
     ) {
-        return battleService.attack(playerId, monsterId);
+        return battleService.attack(playerId, monsterId, currentMonsterHp);
     }
 
     @DgsMutation

@@ -17,32 +17,31 @@ public class BattleService {
     private final MonsterRepository monsterRepository;
 
     @Transactional
-    public BattleResult attack(Long playerId, Long monsterId) {
+    public BattleResult attack(Long playerId, Long monsterId, int currentMonsterHp) {
         Player player = getPlayer(playerId);
         Monster monster = getMonster(monsterId);
 
-        Battle battle = new Battle(player, monster).attack();
+        Battle battle = new Battle(player, monster, currentMonsterHp).attack();
 
         player.syncHp(battle.getPlayerRemainHp());
-        monster.syncHp(battle.getMonsterRemainHp());
 
+        int levelUps = 0;
         if (battle.isMonsterDefeated()) {
-            player.gainExp(battle.getExpGained());
+            levelUps = player.gainExp(battle.getExpGained());
         }
 
         playerRepository.save(player);
-        monsterRepository.save(monster);
 
-        return BattleResult.from(battle);
+        return BattleResult.from(battle, levelUps);
     }
 
     public BattleResult flee(Long playerId, Long monsterId) {
         Player player = getPlayer(playerId);
         Monster monster = getMonster(monsterId);
 
-        Battle battle = new Battle(player, monster).flee();
+        Battle battle = new Battle(player, monster, monster.getHp()).flee();
 
-        return BattleResult.from(battle);
+        return BattleResult.from(battle, 0);
     }
 
     private Player getPlayer(Long playerId) {

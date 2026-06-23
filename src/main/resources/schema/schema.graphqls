@@ -26,7 +26,7 @@ type Mutation {
     completeQuest(playerId: ID!, questId: ID!): PlayerQuest!
 
     # Battle
-    attack(playerId: ID!, monsterId: ID!): BattleResult!
+    attack(playerId: ID!, monsterId: ID!, currentMonsterHp: Int!): BattleResult!
     flee(playerId: ID!, monsterId: ID!): BattleResult!
 }
 
@@ -47,6 +47,7 @@ type BattleResult {
     monsterDefeated: Boolean!
     playerDefeated: Boolean!
     expGained: Int!
+    levelUps: Int!
     message: String!
 }
 

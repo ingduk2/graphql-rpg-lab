@@ -9,10 +9,11 @@ public record BattleResult(
         boolean monsterDefeated,
         boolean playerDefeated,
         int expGained,
+        int levelUps,
         String message
 ) {
 
-    public static BattleResult from(Battle battle) {
+    public static BattleResult from(Battle battle, int levelUps) {
         return new BattleResult(
                 battle.getPlayerDamage(),
                 battle.getMonsterDamage(),
@@ -22,6 +23,7 @@ public record BattleResult(
                 battle.isMonsterDefeated(),
                 battle.isPlayerDefeated(),
                 battle.getExpGained(),
+                levelUps,
                 battle.getMessage()
         );
     }
