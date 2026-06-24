@@ -23,8 +23,7 @@
             margin: 0;
             min-height: 100vh;
             background: var(--bg);
-            background-image:
-                    repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 3px);
+            background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 3px);
             color: var(--text);
             font-family: 'VT323', monospace;
             font-size: 20px;
@@ -102,10 +101,21 @@
             font-family: 'VT323', monospace;
             font-size: 18px;
             padding: 6px 8px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
-        .hp-label {
+        .stats-row {
+            display: flex;
+            gap: 10px;
+            font-size: 15px;
+            color: var(--green-dim);
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .stats-row span { color: var(--green); }
+
+        .bar-label {
             display: flex;
             justify-content: space-between;
             font-size: 15px;
@@ -113,22 +123,23 @@
             margin-bottom: 4px;
         }
 
-        .hp-bar {
+        .bar {
             height: 14px;
             background: #060906;
             border: 1px solid var(--line);
             overflow: hidden;
-            position: relative;
+            margin-bottom: 6px;
         }
 
-        .hp-fill {
+        .bar-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--green-dim), var(--green));
             width: 100%;
             transition: width 0.4s steps(12);
         }
 
-        .hp-fill.low { background: linear-gradient(90deg, #7a1f1f, var(--red)); }
+        .bar-fill.hp { background: linear-gradient(90deg, var(--green-dim), var(--green)); }
+        .bar-fill.hp.low { background: linear-gradient(90deg, #7a1f1f, var(--red)); }
+        .bar-fill.exp { background: linear-gradient(90deg, #1a4a8a, #4a90d9); }
 
         .controls {
             display: flex;
@@ -149,23 +160,17 @@
             transition: all 0.1s;
         }
 
-        button:hover:not(:disabled) {
-            background: var(--green-dim);
-            color: #060906;
-        }
-
+        button:hover:not(:disabled) { background: var(--green-dim); color: #060906; }
         button:active:not(:disabled) { transform: translateY(1px); }
-
         button.flee { color: var(--amber); border-color: #8a6000; }
         button.flee:hover:not(:disabled) { background: #8a6000; color: #060906; }
-
         button:disabled { opacity: 0.35; cursor: not-allowed; }
 
         .log {
             border: 1px solid var(--line);
             background: #060906;
             padding: 10px 12px;
-            height: 150px;
+            height: 180px;
             overflow-y: auto;
             font-size: 16px;
             line-height: 1.5;
@@ -179,6 +184,7 @@
         .log p.sys { color: var(--green-dim); }
         .log p.crit { color: var(--amber); }
         .log p.dead { color: var(--red); }
+        .log p.levelup { color: #4af; }
         .log .cursor {
             display: inline-block;
             width: 8px;
@@ -207,8 +213,16 @@
         <div class="unit player">
             <div class="unit-label">PLAYER</div>
             <select id="playerSelect"></select>
-            <div class="hp-label"><span>HP</span><span id="playerHpText">--/--</span></div>
-            <div class="hp-bar"><div class="hp-fill" id="playerHpFill"></div></div>
+            <div class="stats-row" id="playerStats">
+                LV.<span id="statLv">-</span>
+                &nbsp;ATK.<span id="statAtk">-</span>
+                &nbsp;DEF.<span id="statDef">-</span>
+                &nbsp;SPD.<span id="statSpd">-</span>
+            </div>
+            <div class="bar-label"><span>HP</span><span id="playerHpText">--/--</span></div>
+            <div class="bar"><div class="bar-fill hp" id="playerHpFill"></div></div>
+            <div class="bar-label"><span>EXP</span><span id="playerExpText">-/-</span></div>
+            <div class="bar"><div class="bar-fill exp" id="playerExpFill"></div></div>
         </div>
 
         <div class="vs">VS</div>
@@ -216,8 +230,11 @@
         <div class="unit monster">
             <div class="unit-label">MONSTER</div>
             <select id="monsterSelect"></select>
-            <div class="hp-label"><span>HP</span><span id="monsterHpText">--/--</span></div>
-            <div class="hp-bar"><div class="hp-fill" id="monsterHpFill"></div></div>
+            <div class="stats-row" id="monsterStats">
+                ATK.<span id="statMonsterAtk">-</span>
+            </div>
+            <div class="bar-label"><span>HP</span><span id="monsterHpText">--/--</span></div>
+            <div class="bar"><div class="bar-fill hp" id="monsterHpFill"></div></div>
         </div>
     </div>
 
@@ -236,10 +253,12 @@
 <script>
     const API = 'http://localhost:8080/graphql';
 
-    let players = [];
-    let monsters = [];
     let currentMonsterMaxHp = 100;
     let currentPlayerMaxHp = 100;
+    let currentMonsterHp = 0;
+    let currentPlayerLevel = 1;
+    let currentPlayerExp = 0;
+    let monsterDefeated = false;
 
     async function graphql(query) {
         const res = await fetch(API, {
@@ -278,18 +297,42 @@
         text.textContent = `${Math.max(0, current)}/${max}`;
     }
 
+    function setExpBar(exp, level) {
+        const nextLevelExp = level * 100;
+        const pct = Math.min(100, (exp / nextLevelExp) * 100);
+        document.getElementById('playerExpFill').style.width = pct + '%';
+        document.getElementById('playerExpText').textContent = `${exp}/${nextLevelExp}`;
+        currentPlayerExp = exp;
+    }
+
+    function updatePlayerDisplay(player) {
+        currentPlayerLevel = player.level;
+        currentPlayerMaxHp = player.maxHp;
+        document.getElementById('statLv').textContent = player.level;
+        document.getElementById('statAtk').textContent = player.stats.attack;
+        document.getElementById('statDef').textContent = player.stats.defense;
+        document.getElementById('statSpd').textContent = player.stats.speed;
+        setHpBar('playerHpFill', 'playerHpText', player.hp, player.maxHp);
+        setExpBar(player.exp, player.level);
+    }
+
+    function updateMonsterDisplay(monster) {
+        document.getElementById('statMonsterAtk').textContent = monster.attackPower;
+        currentMonsterMaxHp = monster.maxHp;
+        currentMonsterHp = monster.maxHp;
+        setHpBar('monsterHpFill', 'monsterHpText', monster.maxHp, monster.maxHp);
+    }
+
     async function loadFighters() {
         const data = await graphql(`{
-    players { id name level hp maxHp }
-    monsters { id name hp maxHp }
-  }`);
-        players = data.players;
-        monsters = data.monsters;
+            players { id name }
+            monsters { id name }
+        }`);
 
         document.getElementById('playerSelect').innerHTML =
-            players.map(p => `<option value="${p.id}">${p.name} (Lv. ${p.level})</option>`).join('');
+            data.players.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
         document.getElementById('monsterSelect').innerHTML =
-            monsters.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+            data.monsters.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
 
         document.getElementById('playerSelect').onchange = syncSelection;
         document.getElementById('monsterSelect').onchange = syncSelection;
@@ -302,17 +345,14 @@
         if (!pid || !mid) return;
 
         const data = await graphql(`{
-    player(id: ${pid}) { id name level hp maxHp }
-    monster(id: ${mid}) { id name hp maxHp }
-  }`);
+            player(id: ${pid}) { id name level hp maxHp exp stats { attack defense speed } }
+            monster(id: ${mid}) { id name hp maxHp attackPower }
+        }`);
 
-        currentPlayerMaxHp = data.player.maxHp;
-        currentMonsterMaxHp = data.monster.maxHp;
-        setHpBar('playerHpFill', 'playerHpText', data.player.hp, data.player.maxHp);
-        setHpBar('monsterHpFill', 'monsterHpText', data.monster.hp, data.monster.maxHp);
-
-        const isDead = data.player.hp <= 0 || data.monster.hp <= 0;
-        setButtonsDisabled(isDead);
+        monsterDefeated = false;
+        updatePlayerDisplay(data.player);
+        updateMonsterDisplay(data.monster);
+        setButtonsDisabled(data.player.hp <= 0);
     }
 
     function setButtonsDisabled(disabled) {
@@ -321,6 +361,7 @@
     }
 
     async function doAttack() {
+        if (monsterDefeated) return;
         const playerId = document.getElementById('playerSelect').value;
         const monsterId = document.getElementById('monsterSelect').value;
         if (!playerId || !monsterId) return;
@@ -328,39 +369,57 @@
         setButtonsDisabled(true);
         try {
             const data = await graphql(`
-      mutation {
-        attack(playerId: ${playerId}, monsterId: ${monsterId}) {
-          playerDamage
-          monsterDamage
-          monsterRemainHp
-          playerRemainHp
-          isCritical
-          monsterDefeated
-          playerDefeated
-          message
-        }
-      }
-    `);
+                mutation {
+                    attack(playerId: ${playerId}, monsterId: ${monsterId}, currentMonsterHp: ${currentMonsterHp}) {
+                        playerDamage
+                        monsterDamage
+                        monsterRemainHp
+                        playerRemainHp
+                        isCritical
+                        monsterDefeated
+                        playerDefeated
+                        expGained
+                        levelUps
+                        message
+                    }
+                }
+            `);
             const r = data.attack;
 
+            currentMonsterHp = r.monsterRemainHp;
             setHpBar('monsterHpFill', 'monsterHpText', r.monsterRemainHp, currentMonsterMaxHp);
             setHpBar('playerHpFill', 'playerHpText', r.playerRemainHp, currentPlayerMaxHp);
 
             log(r.message, r.isCritical ? 'crit' : null);
 
+            if (r.expGained > 0) {
+                log(`경험치 +${r.expGained} 획득!`, 'sys');
+            }
+
+            if (r.levelUps > 0) {
+                const newLevel = currentPlayerLevel + r.levelUps;
+                log(`★ LEVEL UP! Lv.${currentPlayerLevel} → Lv.${newLevel} ★`, 'levelup');
+                const playerData = await graphql(`{
+                    player(id: ${playerId}) { id name level hp maxHp exp stats { attack defense speed } }
+                }`);
+                updatePlayerDisplay(playerData.player);
+            } else if (r.expGained > 0) {
+                setExpBar(currentPlayerExp + r.expGained, currentPlayerLevel);
+            }
+
             if (r.monsterDefeated) {
-                log('monster defeated. battle won.', 'dead');
+                monsterDefeated = true;
+                log('monster defeated. select a new monster to continue.', 'dead');
                 setButtonsDisabled(true);
                 return;
             }
+
             if (r.playerDefeated) {
                 log('player has fallen. battle lost.', 'dead');
                 setButtonsDisabled(true);
                 return;
             }
-        } catch (e) {
-            // error already logged
-        }
+        } catch (e) {}
         setButtonsDisabled(false);
     }
 
@@ -372,13 +431,16 @@
         setButtonsDisabled(true);
         try {
             const data = await graphql(`
-      mutation {
-        flee(playerId: ${playerId}, monsterId: ${monsterId}) {
-          message
-        }
-      }
-    `);
+                mutation {
+                    flee(playerId: ${playerId}, monsterId: ${monsterId}) {
+                        message
+                    }
+                }
+            `);
             log(data.flee.message, 'sys');
+            monsterDefeated = false;
+            currentMonsterHp = currentMonsterMaxHp;
+            setHpBar('monsterHpFill', 'monsterHpText', currentMonsterMaxHp, currentMonsterMaxHp);
         } catch (e) {}
         setButtonsDisabled(false);
     }
