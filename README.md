@@ -145,8 +145,10 @@
   - currentMonsterHp 클라이언트 누적 관리
   - 레벨업/경험치 획득 로그 표시
 - **6-8.** 몬스터 처치 시 아이템 드롭
-  - 드롭 테이블 설계
-  - equipItem 자동 연동
+  - MonsterDrop 엔티티 설계
+  - 드롭 확률 계산 로직 구현
+  - BattleResult droppedItem 추가
+  - HTML 드롭 아이템 로그 표시
 
 **학습 포인트**
 - 복잡한 비즈니스 로직을 Mutation에서 처리하는 패턴
