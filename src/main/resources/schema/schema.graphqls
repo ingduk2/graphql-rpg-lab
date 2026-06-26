@@ -38,6 +38,12 @@ input CreatePlayerInput {
     name: String!
 }
 
+type DroppedItem {
+    id: ID!
+    name: String!
+    type: String!
+}
+
 type BattleResult {
     playerDamage: Int!
     monsterDamage: Int!
@@ -48,6 +54,7 @@ type BattleResult {
     playerDefeated: Boolean!
     expGained: Int!
     levelUps: Int!
+    droppedItem: DroppedItem
     message: String!
 }
 

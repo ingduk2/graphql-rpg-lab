@@ -41,4 +41,15 @@ public class Inventory {
     public void removeItem(Long itemId) {
         this.inventoryItems.removeIf(li -> li.getItem().getId().equals(itemId));
     }
+
+    public void addItemIfNotOwned(Item item) {
+        if (!hasItem(item.getId())) {
+            addItem(item);
+        }
+    }
+
+    private boolean hasItem(Long itemId) {
+        return inventoryItems.stream()
+                .anyMatch(it -> it.getItem().getId().equals(itemId));
+    }
 }

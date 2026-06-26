@@ -1,5 +1,7 @@
 package com.rpg.lab.battle;
 
+import com.rpg.lab.item.Item;
+
 public record BattleResult(
         int playerDamage,
         int monsterDamage,
@@ -10,10 +12,15 @@ public record BattleResult(
         boolean playerDefeated,
         int expGained,
         int levelUps,
+        DroppedItem droppedItem,
         String message
 ) {
 
-    public static BattleResult from(Battle battle, int levelUps) {
+    public static BattleResult from(
+            Battle battle,
+            int levelUps,
+            Item droppedItem
+    ) {
         return new BattleResult(
                 battle.getPlayerDamage(),
                 battle.getMonsterDamage(),
@@ -24,6 +31,7 @@ public record BattleResult(
                 battle.isPlayerDefeated(),
                 battle.getExpGained(),
                 levelUps,
+                droppedItem != null ? DroppedItem.from(droppedItem) : null,
                 battle.getMessage()
         );
     }

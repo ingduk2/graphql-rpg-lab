@@ -1,5 +1,6 @@
 package com.rpg.lab.battle;
 
+import com.rpg.lab.item.Item;
 import com.rpg.lab.monster.Monster;
 import com.rpg.lab.monster.MonsterRepository;
 import com.rpg.lab.player.Player;
@@ -15,6 +16,7 @@ public class BattleService {
 
     private final PlayerRepository playerRepository;
     private final MonsterRepository monsterRepository;
+    private final ItemDropProcessor itemDropProcessor;
 
     @Transactional
     public BattleResult attack(Long playerId, Long monsterId, int currentMonsterHp) {
@@ -26,13 +28,16 @@ public class BattleService {
         player.syncHp(battle.getPlayerRemainHp());
 
         int levelUps = 0;
+        Item droppedItem = null;
+
         if (battle.isMonsterDefeated()) {
             levelUps = player.gainExp(battle.getExpGained());
+            droppedItem = itemDropProcessor.process(monsterId, playerId).orElse(null);
         }
 
         playerRepository.save(player);
 
-        return BattleResult.from(battle, levelUps);
+        return BattleResult.from(battle, levelUps, droppedItem);
     }
 
     public BattleResult flee(Long playerId, Long monsterId) {
@@ -41,7 +46,7 @@ public class BattleService {
 
         Battle battle = new Battle(player, monster, monster.getHp()).flee();
 
-        return BattleResult.from(battle, 0);
+        return BattleResult.from(battle, 0, null);
     }
 
     private Player getPlayer(Long playerId) {

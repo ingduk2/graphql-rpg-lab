@@ -21,12 +21,6 @@ VALUES
 INSERT INTO inventories (player_id)
 VALUES (1), (2), (3);
 
-INSERT INTO inventory_items (inventory_id, item_id)
-VALUES
-    (1, 1), (1, 2),
-    (2, 3),
-    (3, 4), (3, 5);
-
 INSERT INTO quests (title, description)
 VALUES
     ('슬라임 사냥', '슬라임 5마리를 처치하라'),
