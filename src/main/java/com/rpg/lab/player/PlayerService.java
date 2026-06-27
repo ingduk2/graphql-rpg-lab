@@ -1,5 +1,7 @@
 package com.rpg.lab.player;
 
+import com.rpg.lab.inventory.Inventory;
+import com.rpg.lab.inventory.InventoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +14,7 @@ import java.util.List;
 public class PlayerService {
 
     private final PlayerRepository playerRepository;
+    private final InventoryRepository inventoryRepository;
 
     public List<PlayerResponse> getPlayers() {
         return playerRepository.findAll().stream()
@@ -28,6 +31,7 @@ public class PlayerService {
     @Transactional
     public PlayerResponse createPlayer(String name) {
         Player savedPlayer = playerRepository.save(Player.create(name));
+        inventoryRepository.save(Inventory.create(savedPlayer));
         return PlayerResponse.from(savedPlayer);
     }
 }

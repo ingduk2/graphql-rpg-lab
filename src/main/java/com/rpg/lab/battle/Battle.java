@@ -1,5 +1,6 @@
 package com.rpg.lab.battle;
 
+import com.rpg.lab.inventory.Inventory;
 import com.rpg.lab.monster.Monster;
 import com.rpg.lab.player.Player;
 import lombok.Getter;
@@ -10,6 +11,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class Battle {
     private final Player player;
     private final Monster monster;
+    private final Inventory inventory;
     private final int currentMonsterHp;
     private int playerDamage;
     private int monsterDamage;
@@ -21,15 +23,25 @@ public class Battle {
     private int expGained;
     private String message;
 
-    public Battle(Player player, Monster monster, int currentMonsterHp) {
+    public Battle(
+            Player player,
+            Monster monster,
+            Inventory inventory,
+            int currentMonsterHp
+    ) {
         this.player = player;
         this.monster = monster;
         this.currentMonsterHp = currentMonsterHp;
+        this.inventory = inventory;
     }
 
     public Battle attack() {
         isCritical = ThreadLocalRandom.current().nextInt(100) < 15;
-        playerDamage = player.getAttack();
+
+        int attackBonus = inventory != null ? inventory.getAttackBonus() : 0;
+        int defenseBonus = inventory != null ? inventory.getDefenseBonus() : 0;
+
+        playerDamage = player.getAttack() + attackBonus;
         if (isCritical) {
             playerDamage = (int) (playerDamage * 1.5);
         }
@@ -43,7 +55,7 @@ public class Battle {
             playerDefeated = false;
             expGained = monster.getExpReward();
         } else {
-            monsterDamage = monster.getAttackPower();
+            monsterDamage = Math.max(0, monster.getAttackPower() - defenseBonus);
             playerRemainHp = Math.max(0, player.getHp() - monsterDamage);
             playerDefeated = playerRemainHp == 0;
             expGained = 0;

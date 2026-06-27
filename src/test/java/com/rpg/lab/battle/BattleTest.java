@@ -1,5 +1,8 @@
 package com.rpg.lab.battle;
 
+import com.rpg.lab.inventory.Inventory;
+import com.rpg.lab.item.Item;
+import com.rpg.lab.item.ItemType;
 import com.rpg.lab.monster.Monster;
 import com.rpg.lab.player.Player;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,12 +15,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BattleTest {
 
     private Player player;
+    private Inventory inventory;
     private Monster slime;
     private Monster orc;
 
     @BeforeEach
     void setUp() {
         player = Player.create("user1");
+        inventory = Inventory.create(player);
         slime = Monster.create("슬라임", 30, 5, 20);
         orc = Monster.create("오크", 100, 20, 80);
     }
@@ -81,6 +86,44 @@ class BattleTest {
     }
 
     @Nested
+    class AttackWithItems {
+
+        @Test
+        @DisplayName("공격 아이템 보너스가 데미지에 반영된다")
+        void test1() {
+            Item item = Item.create("테스트 검", ItemType.WEAPON, 10, 0);
+            inventory.addItem(item);
+
+            Battle battle = attack(orc);
+
+            assertThat(battle.getPlayerDamage()).isGreaterThanOrEqualTo(player.getAttack() + 10);
+        }
+
+        @Test
+        @DisplayName("방어 아이템 보너스가 몬스터 반격 데미지에 반영된다")
+        void test2() {
+            Item item = Item.create("테스트 갑옷", ItemType.ARMOR, 0, 5);
+            inventory.addItem(item);
+
+            Battle battle = attack(orc);
+
+            assertThat(battle.getMonsterDamage()).isEqualTo(orc.getAttackPower() - 5);
+        }
+
+        @Test
+        @DisplayName("액세서리 보너스가 공격과 방어 둘 다 반영한다")
+        void test3() {
+            Item item = Item.create("테스트 반지", ItemType.ACCESSORY, 2, 2);
+            inventory.addItem(item);
+
+            Battle battle = attack(orc);
+
+            assertThat(battle.getPlayerDamage()).isGreaterThanOrEqualTo(player.getAttack() + 2);
+            assertThat(battle.getMonsterDamage()).isEqualTo(orc.getAttackPower() - 2);
+        }
+    }
+
+    @Nested
     class Flee {
 
         @Test
@@ -95,14 +138,14 @@ class BattleTest {
     }
 
     private Battle attack(Monster monster) {
-        return new Battle(player, monster, monster.getHp()).attack();
+        return new Battle(player, monster, inventory, monster.getHp()).attack();
     }
 
     private Battle attackWithHp(Monster monster, int monsterHp) {
-        return new Battle(player, monster, monsterHp).attack();
+        return new Battle(player, monster, inventory, monsterHp).attack();
     }
 
     private Battle flee(Monster monster) {
-        return new Battle(player, monster, monster.getHp()).flee();
+        return new Battle(player, monster, inventory, monster.getHp()).flee();
     }
 }

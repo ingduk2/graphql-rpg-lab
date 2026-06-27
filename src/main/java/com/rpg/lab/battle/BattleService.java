@@ -1,5 +1,7 @@
 package com.rpg.lab.battle;
 
+import com.rpg.lab.inventory.Inventory;
+import com.rpg.lab.inventory.InventoryRepository;
 import com.rpg.lab.item.Item;
 import com.rpg.lab.monster.Monster;
 import com.rpg.lab.monster.MonsterRepository;
@@ -16,14 +18,16 @@ public class BattleService {
 
     private final PlayerRepository playerRepository;
     private final MonsterRepository monsterRepository;
+    private final InventoryRepository inventoryRepository;
     private final ItemDropProcessor itemDropProcessor;
 
     @Transactional
     public BattleResult attack(Long playerId, Long monsterId, int currentMonsterHp) {
         Player player = getPlayer(playerId);
         Monster monster = getMonster(monsterId);
+        Inventory inventory = getInventory(playerId);
 
-        Battle battle = new Battle(player, monster, currentMonsterHp).attack();
+        Battle battle = new Battle(player, monster, inventory, currentMonsterHp).attack();
 
         player.syncHp(battle.getPlayerRemainHp());
 
@@ -43,8 +47,9 @@ public class BattleService {
     public BattleResult flee(Long playerId, Long monsterId) {
         Player player = getPlayer(playerId);
         Monster monster = getMonster(monsterId);
+        Inventory inventory = getInventory(playerId);
 
-        Battle battle = new Battle(player, monster, monster.getHp()).flee();
+        Battle battle = new Battle(player, monster, inventory, monster.getHp()).flee();
 
         return BattleResult.from(battle, 0, null);
     }
@@ -57,5 +62,10 @@ public class BattleService {
     private Monster getMonster(Long monsterId) {
         return monsterRepository.findById(monsterId)
                 .orElseThrow(() -> new RuntimeException("Monster not found: " + monsterId));
+    }
+
+    private Inventory getInventory(Long playerId) {
+        return inventoryRepository.findByPlayerId(playerId)
+                .orElseThrow(() -> new RuntimeException("Inventory not found: " + playerId));
     }
 }

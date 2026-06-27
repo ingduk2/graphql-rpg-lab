@@ -52,4 +52,16 @@ public class Inventory {
         return inventoryItems.stream()
                 .anyMatch(it -> it.getItem().getId().equals(itemId));
     }
+
+    public int getAttackBonus() {
+        return inventoryItems.stream()
+                .mapToInt(it -> it.getItem().getAttackBonus())
+                .sum();
+    }
+
+    public int getDefenseBonus() {
+        return inventoryItems.stream()
+                .mapToInt(it -> it.getItem().getDefenseBonus())
+                .sum();
+    }
 }
