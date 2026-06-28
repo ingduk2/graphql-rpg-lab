@@ -14,6 +14,7 @@
             --green-dim: #2f8f3d;
             --amber: #ffb000;
             --red: #ff4d4d;
+            --blue: #4a90d9;
             --text: #c8f5c8;
         }
 
@@ -139,7 +140,7 @@
 
         .bar-fill.hp { background: linear-gradient(90deg, var(--green-dim), var(--green)); }
         .bar-fill.hp.low { background: linear-gradient(90deg, #7a1f1f, var(--red)); }
-        .bar-fill.exp { background: linear-gradient(90deg, #1a4a8a, #4a90d9); }
+        .bar-fill.exp { background: linear-gradient(90deg, #1a4a8a, var(--blue)); }
 
         .controls {
             display: flex;
@@ -170,10 +171,11 @@
             border: 1px solid var(--line);
             background: #060906;
             padding: 10px 12px;
-            height: 180px;
+            height: 160px;
             overflow-y: auto;
             font-size: 16px;
             line-height: 1.5;
+            margin-bottom: 12px;
         }
 
         .log::-webkit-scrollbar { width: 8px; }
@@ -185,6 +187,7 @@
         .log p.crit { color: var(--amber); }
         .log p.dead { color: var(--red); }
         .log p.levelup { color: #4af; }
+        .log p.drop { color: var(--amber); }
         .log .cursor {
             display: inline-block;
             width: 8px;
@@ -193,6 +196,46 @@
         }
 
         @keyframes blink { 50% { opacity: 0; } }
+
+        .inventory-panel {
+            border: 1px solid var(--line);
+            background: #060906;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+        }
+
+        .inventory-label {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 9px;
+            color: var(--green-dim);
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .inventory-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 28px;
+        }
+
+        .inventory-item {
+            background: #0f1a0f;
+            border: 1px solid var(--green-dim);
+            padding: 3px 8px;
+            font-size: 15px;
+            color: var(--text);
+        }
+
+        .inventory-item .bonus {
+            color: var(--green);
+            font-size: 13px;
+        }
+
+        .inventory-empty {
+            color: var(--green-dim);
+            font-size: 15px;
+        }
 
         .footer-note {
             margin-top: 14px;
@@ -213,7 +256,7 @@
         <div class="unit player">
             <div class="unit-label">PLAYER</div>
             <select id="playerSelect"></select>
-            <div class="stats-row" id="playerStats">
+            <div class="stats-row">
                 LV.<span id="statLv">-</span>
                 &nbsp;ATK.<span id="statAtk">-</span>
                 &nbsp;DEF.<span id="statDef">-</span>
@@ -223,6 +266,10 @@
             <div class="bar"><div class="bar-fill hp" id="playerHpFill"></div></div>
             <div class="bar-label"><span>EXP</span><span id="playerExpText">-/-</span></div>
             <div class="bar"><div class="bar-fill exp" id="playerExpFill"></div></div>
+            <div class="inventory-label" style="margin-top:10px;">INVENTORY</div>
+            <div class="inventory-items" id="inventoryItems">
+                <span class="inventory-empty">empty</span>
+            </div>
         </div>
 
         <div class="vs">VS</div>
@@ -230,7 +277,7 @@
         <div class="unit monster">
             <div class="unit-label">MONSTER</div>
             <select id="monsterSelect"></select>
-            <div class="stats-row" id="monsterStats">
+            <div class="stats-row">
                 ATK.<span id="statMonsterAtk">-</span>
             </div>
             <div class="bar-label"><span>HP</span><span id="monsterHpText">--/--</span></div>
@@ -276,14 +323,14 @@
 
     function log(message, cls) {
         const el = document.getElementById('log');
-        document.querySelectorAll('.cursor').forEach(c => c.remove());
+        document.querySelectorAll('.cursor').forEach(c => c.parentElement.remove());
         const p = document.createElement('p');
         if (cls) p.className = cls;
         p.innerHTML = '&gt; ' + message;
         el.appendChild(p);
         const cursorP = document.createElement('p');
         cursorP.className = 'sys';
-        cursorP.innerHTML = '&gt; <span class="cursor">&nbsp;</span>';
+        cursorP.innerHTML = '<span class="cursor">&nbsp;</span>';
         el.appendChild(cursorP);
         el.scrollTop = el.scrollHeight;
     }
@@ -308,9 +355,12 @@
     function updatePlayerDisplay(player) {
         currentPlayerLevel = player.level;
         currentPlayerMaxHp = player.maxHp;
+        const items = player.inventory?.items || [];
+        const atkBonus = items.reduce((sum, i) => sum + i.attackBonus, 0);
+        const defBonus = items.reduce((sum, i) => sum + i.defenseBonus, 0);
         document.getElementById('statLv').textContent = player.level;
-        document.getElementById('statAtk').textContent = player.stats.attack;
-        document.getElementById('statDef').textContent = player.stats.defense;
+        document.getElementById('statAtk').textContent = atkBonus > 0 ? `${player.stats.attack}+${atkBonus}` : player.stats.attack;
+        document.getElementById('statDef').textContent = defBonus > 0 ? `${player.stats.defense}+${defBonus}` : player.stats.defense;
         document.getElementById('statSpd').textContent = player.stats.speed;
         setHpBar('playerHpFill', 'playerHpText', player.hp, player.maxHp);
         setExpBar(player.exp, player.level);
@@ -321,6 +371,21 @@
         currentMonsterMaxHp = monster.maxHp;
         currentMonsterHp = monster.maxHp;
         setHpBar('monsterHpFill', 'monsterHpText', monster.maxHp, monster.maxHp);
+    }
+
+    function updateInventoryDisplay(items) {
+        const el = document.getElementById('inventoryItems');
+        if (!items || items.length === 0) {
+            el.innerHTML = '<span class="inventory-empty">empty</span>';
+            return;
+        }
+        el.innerHTML = items.map(item => {
+            const bonuses = [];
+            if (item.attackBonus > 0) bonuses.push(`ATK+${item.attackBonus}`);
+            if (item.defenseBonus > 0) bonuses.push(`DEF+${item.defenseBonus}`);
+            const bonusText = bonuses.length > 0 ? ` <span class="bonus">${bonuses.join(' ')}</span>` : '';
+            return `<div class="inventory-item">${item.name}${bonusText}</div>`;
+        }).join('');
     }
 
     async function loadFighters() {
@@ -345,13 +410,18 @@
         if (!pid || !mid) return;
 
         const data = await graphql(`{
-            player(id: ${pid}) { id name level hp maxHp exp stats { attack defense speed } }
+            player(id: ${pid}) {
+                id name level hp maxHp exp
+                stats { attack defense speed }
+                inventory { items { id name attackBonus defenseBonus } }
+            }
             monster(id: ${mid}) { id name hp maxHp attackPower }
         }`);
 
         monsterDefeated = false;
         updatePlayerDisplay(data.player);
         updateMonsterDisplay(data.monster);
+        updateInventoryDisplay(data.player.inventory?.items);
         setButtonsDisabled(data.player.hp <= 0);
     }
 
@@ -380,6 +450,7 @@
                         playerDefeated
                         expGained
                         levelUps
+                        droppedItem { name type attackBonus defenseBonus }
                         message
                     }
                 }
@@ -396,13 +467,29 @@
                 log(`경험치 +${r.expGained} 획득!`, 'sys');
             }
 
+            if (r.droppedItem) {
+                const bonuses = [];
+                if (r.droppedItem.attackBonus > 0) bonuses.push(`ATK+${r.droppedItem.attackBonus}`);
+                if (r.droppedItem.defenseBonus > 0) bonuses.push(`DEF+${r.droppedItem.defenseBonus}`);
+                const bonusText = bonuses.length > 0 ? ` (${bonuses.join(' ')})` : '';
+                log(`★ 아이템 드롭! [${r.droppedItem.type}] ${r.droppedItem.name}${bonusText}`, 'drop');
+            }
+
             if (r.levelUps > 0) {
                 const newLevel = currentPlayerLevel + r.levelUps;
                 log(`★ LEVEL UP! Lv.${currentPlayerLevel} → Lv.${newLevel} ★`, 'levelup');
+            }
+
+            if (r.levelUps > 0 || r.droppedItem) {
                 const playerData = await graphql(`{
-                    player(id: ${playerId}) { id name level hp maxHp exp stats { attack defense speed } }
+                    player(id: ${playerId}) {
+                        id name level hp maxHp exp
+                        stats { attack defense speed }
+                        inventory { items { id name attackBonus defenseBonus } }
+                    }
                 }`);
                 updatePlayerDisplay(playerData.player);
+                updateInventoryDisplay(playerData.player.inventory?.items);
             } else if (r.expGained > 0) {
                 setExpBar(currentPlayerExp + r.expGained, currentPlayerLevel);
             }

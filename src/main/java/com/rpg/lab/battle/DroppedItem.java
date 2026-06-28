@@ -5,13 +5,17 @@ import com.rpg.lab.item.Item;
 public record DroppedItem(
         Long id,
         String name,
-        String type
+        String type,
+        int attackBonus,
+        int defenseBonus
 ) {
     public static DroppedItem from(Item item) {
         return new DroppedItem(
                 item.getId(),
                 item.getName(),
-                item.getType().name()
+                item.getType().name(),
+                item.getAttackBonus(),
+                item.getDefenseBonus()
         );
     }
 }

@@ -42,6 +42,8 @@ type DroppedItem {
     id: ID!
     name: String!
     type: String!
+    attackBonus: Int!
+    defenseBonus: Int!
 }
 
 type BattleResult {
