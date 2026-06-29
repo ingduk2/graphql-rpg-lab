@@ -8,9 +8,12 @@ import com.rpg.lab.monster.MonsterRepository;
 import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -25,7 +28,7 @@ public class BattleService {
     public BattleResult attack(Long playerId, Long monsterId, int currentMonsterHp) {
         Player player = getPlayer(playerId);
         Monster monster = getMonster(monsterId);
-        Inventory inventory = getInventory(playerId);
+        Inventory inventory = getInventoryWithItems(playerId);
 
         Battle battle = new Battle(player, monster, inventory, currentMonsterHp).attack();
 
@@ -47,11 +50,51 @@ public class BattleService {
     public BattleResult flee(Long playerId, Long monsterId) {
         Player player = getPlayer(playerId);
         Monster monster = getMonster(monsterId);
-        Inventory inventory = getInventory(playerId);
+        Inventory inventory = getInventoryWithItems(playerId);
 
         Battle battle = new Battle(player, monster, inventory, monster.getHp()).flee();
 
         return BattleResult.from(battle, 0, null);
+    }
+
+    @Transactional
+    public Flux<BattleEvent> streamBattle(Long playerId, Long monsterId) {
+        Player player = getPlayer(playerId);
+        Monster monster = getMonster(monsterId);
+        Inventory inventory = getInventoryWithItems(playerId);
+        String battleId = playerId + ":" + monsterId;
+
+        return Flux.create(sink -> {
+            try {
+                int[] monsterHp = {monster.getHp()};
+                int[] turn = {1};
+
+                while (monsterHp[0] > 0 && player.getHp() > 0) {
+                    Battle battle = new Battle(player, monster, inventory, monsterHp[0]).attack();
+                    monsterHp[0] = battle.getMonsterRemainHp();
+                    player.syncHp(battle.getPlayerRemainHp());
+
+                    boolean finished = battle.isMonsterDefeated() || battle.isPlayerDefeated();
+
+                    sink.next(new BattleEvent(
+                            battleId, turn[0]++,
+                            battle.getPlayerDamage(), battle.getMonsterDamage(),
+                            battle.getMonsterRemainHp(), battle.getPlayerRemainHp(),
+                            battle.isCritical(), battle.isMonsterDefeated(),
+                            battle.isPlayerDefeated(), battle.getMessage(),
+                            finished
+                    ));
+
+                    if (finished) break;
+
+                    Thread.sleep(1000);
+                }
+                sink.complete();
+            } catch (Exception e) {
+                log.error("Battle stream error: {}", e.getMessage(), e);
+                sink.error(e);
+            }
+        });
     }
 
     private Player getPlayer(Long playerId) {
@@ -64,8 +107,8 @@ public class BattleService {
                 .orElseThrow(() -> new RuntimeException("Monster not found: " + monsterId));
     }
 
-    private Inventory getInventory(Long playerId) {
-        return inventoryRepository.findByPlayerId(playerId)
+    private Inventory getInventoryWithItems(Long playerId) {
+        return inventoryRepository.findWithItemsByPlayerId(playerId)
                 .orElseThrow(() -> new RuntimeException("Inventory not found: " + playerId));
     }
 }

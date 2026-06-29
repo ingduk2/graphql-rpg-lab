@@ -24,6 +24,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
 	implementation("com.netflix.graphql.dgs:graphql-dgs-spring-graphql-starter")
+	implementation("org.springframework.boot:spring-boot-starter-websocket")
+
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("com.h2database:h2")
 	annotationProcessor("org.projectlombok:lombok")

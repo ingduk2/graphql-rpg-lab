@@ -31,7 +31,7 @@ type Mutation {
 }
 
 type Subscription {
-    battleEvents(battleId: ID!): BattleEvent!
+    battleEvents(playerId: ID!, monsterId: ID!): BattleEvent!
 }
 
 input CreatePlayerInput {
@@ -63,9 +63,13 @@ type BattleResult {
 type BattleEvent {
     battleId: ID!
     turn: Int!
-    damage: Int!
+    playerDamage: Int!
+    monsterDamage: Int!
     monsterRemainHp: Int!
+    playerRemainHp: Int!
     isCritical: Boolean!
+    monsterDefeated: Boolean!
+    playerDefeated: Boolean!
     message: String!
     finished: Boolean!
 }

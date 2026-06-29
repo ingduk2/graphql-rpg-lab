@@ -21,6 +21,10 @@ spring:
       hibernate:
         format_sql: true
 
+  graphql:
+    websocket:
+      path: /graphql
+
   h2:
     console:
       enabled: true
