@@ -76,6 +76,11 @@ public class BattleService {
 
                     boolean finished = battle.isMonsterDefeated() || battle.isPlayerDefeated();
 
+                    if (battle.isMonsterDefeated()) {
+                        player.gainExp(battle.getExpGained());
+                        itemDropProcessor.process(monsterId, playerId);
+                    }
+
                     sink.next(new BattleEvent(
                             battleId, turn[0]++,
                             battle.getPlayerDamage(), battle.getMonsterDamage(),
@@ -89,6 +94,7 @@ public class BattleService {
 
                     Thread.sleep(1000);
                 }
+                playerRepository.save(player);
                 sink.complete();
             } catch (Exception e) {
                 log.error("Battle stream error: {}", e.getMessage(), e);
