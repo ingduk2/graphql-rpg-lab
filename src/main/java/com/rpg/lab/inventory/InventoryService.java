@@ -1,5 +1,6 @@
 package com.rpg.lab.inventory;
 
+import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.item.Item;
 import com.rpg.lab.item.ItemRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class InventoryService {
     public InventoryResponse equipItem(Long playerId, Long itemId) {
         Inventory inventory = findInventoryByPlayerId(playerId);
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
+                .orElseThrow(() -> new EntityNotFoundException("Item not found: " + itemId));
 
         inventory.addItem(item);
         inventoryRepository.save(inventory);
@@ -36,6 +37,6 @@ public class InventoryService {
 
     private @NonNull Inventory findInventoryByPlayerId(Long playerId) {
         return inventoryRepository.findByPlayerId(playerId)
-                .orElseThrow(() -> new RuntimeException("Inventory not found, playerId: " + playerId));
+                .orElseThrow(() -> new EntityNotFoundException("Inventory not found, playerId: " + playerId));
     }
 }

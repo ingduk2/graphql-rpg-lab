@@ -1,5 +1,6 @@
 package com.rpg.lab.monster;
 
+import com.rpg.lab.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,6 @@ public class MonsterService {
 
     public Monster getMonster(Long id) {
         return monsterRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Monster not found: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Monster not found: " + id));
     }
 }

@@ -1,5 +1,6 @@
 package com.rpg.lab.battle;
 
+import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.inventory.Inventory;
 import com.rpg.lab.inventory.InventoryRepository;
 import com.rpg.lab.item.Item;
@@ -40,7 +41,7 @@ public class ItemDropProcessor {
 
     private void equipIfNotOwned(Item item, Long playerId) {
         Inventory inventory = inventoryRepository.findByPlayerId(playerId)
-                .orElseThrow(() -> new RuntimeException("Inventory not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Inventory not found"));
 
         inventory.addItemIfNotOwned(item);
         inventoryRepository.save(inventory);

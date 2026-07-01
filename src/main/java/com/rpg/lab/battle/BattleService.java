@@ -1,5 +1,6 @@
 package com.rpg.lab.battle;
 
+import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.inventory.Inventory;
 import com.rpg.lab.inventory.InventoryRepository;
 import com.rpg.lab.item.Item;
@@ -105,16 +106,16 @@ public class BattleService {
 
     private Player getPlayer(Long playerId) {
         return playerRepository.findById(playerId)
-                .orElseThrow(() -> new RuntimeException("Player not found: " + playerId));
+                .orElseThrow(() -> new EntityNotFoundException("Player not found: " + playerId));
     }
 
     private Monster getMonster(Long monsterId) {
         return monsterRepository.findById(monsterId)
-                .orElseThrow(() -> new RuntimeException("Monster not found: " + monsterId));
+                .orElseThrow(() -> new EntityNotFoundException("Monster not found: " + monsterId));
     }
 
     private Inventory getInventoryWithItems(Long playerId) {
         return inventoryRepository.findWithItemsByPlayerId(playerId)
-                .orElseThrow(() -> new RuntimeException("Inventory not found: " + playerId));
+                .orElseThrow(() -> new EntityNotFoundException("Inventory not found: " + playerId));
     }
 }

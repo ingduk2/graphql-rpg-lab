@@ -1,5 +1,6 @@
 package com.rpg.lab.player;
 
+import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.inventory.Inventory;
 import com.rpg.lab.inventory.InventoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class PlayerService {
     public PlayerResponse getPlayer(Long id) {
         return playerRepository.findById(id)
                 .map(PlayerResponse::from)
-                .orElseThrow(() -> new RuntimeException("Player not found: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Player not found: " + id));
     }
 
     @Transactional

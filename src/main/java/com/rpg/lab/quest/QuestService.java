@@ -1,5 +1,6 @@
 package com.rpg.lab.quest;
 
+import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +23,13 @@ public class QuestService {
 
     public Quest getQuest(Long id) {
         return questRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Quest not found: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Quest not found: " + id));
     }
 
     @Transactional
     public PlayerQuestResponse acceptQuest(Long playerId, Long questId) {
         Player player = playerRepository.findById(playerId)
-                .orElseThrow(() -> new RuntimeException("Player not found: " + playerId));
+                .orElseThrow(() -> new EntityNotFoundException("Player not found: " + playerId));
         Quest quest = findQuestById(questId);
 
         PlayerQuest playerQuest = PlayerQuest.create(player, quest);
@@ -40,7 +41,7 @@ public class QuestService {
     @Transactional
     public PlayerQuestResponse completeQuest(Long playerId, Long questId) {
         PlayerQuest playerQuest = playerQuestRepository.findByPlayerIdAndQuestId(playerId, questId)
-                .orElseThrow(() -> new RuntimeException("PlayerQuest not found"));
+                .orElseThrow(() -> new EntityNotFoundException("PlayerQuest not found"));
 
         playerQuest.complete();
         playerQuestRepository.save(playerQuest);
@@ -50,6 +51,6 @@ public class QuestService {
 
     private Quest findQuestById(Long questId) {
         return questRepository.findById(questId)
-                .orElseThrow(() -> new RuntimeException("Quest not found: " + questId));
+                .orElseThrow(() -> new EntityNotFoundException("Quest not found: " + questId));
     }
 }
