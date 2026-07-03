@@ -20,6 +20,7 @@ public class GlobalExceptionHandler extends DefaultDataFetcherExceptionHandler {
             DataFetcherExceptionHandlerResult result = DataFetcherExceptionHandlerResult.newResult()
                     .error(GraphqlErrorBuilder.newError()
                             .message(e.getMessage())
+                            .extensions(ErrorCode.NOT_FOUND.toExtensions())
                             .path(handlerParameters.getPath())
                             .build()
                     )
