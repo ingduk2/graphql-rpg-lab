@@ -185,7 +185,15 @@
 - **8-1.** Custom Exception 설계 (`PlayerNotFoundException`, `InsufficientHpException`)
 - **8-2.** `@DgsExceptionHandler`로 에러 응답 통일
 - **8-3.** GraphQL Error Extensions로 에러 코드 추가
-- **8-4.** Context 활용 — 요청별 플레이어 정보 전달
+- **8-4.** DGS Context 구현
+  - DgsContextBuilder 구현
+  - 헤더에서 X-Player-Id 읽어서 Context에 담기
+  - DataFetcher에서 Context로 playerId 사용
+- **8-5.** 플레이어 생성 화면 (index.html 개선)
+  - 최초 접속 시 플레이어 생성
+  - playerId 로컬스토리지 저장
+  - 이후 요청마다 X-Player-Id 헤더 자동 추가
+  - data.sql 플레이어 더미 데이터 제거
 
 **학습 포인트**
 - REST의 HTTP 상태 코드 vs GraphQL의 에러 처리 방식
