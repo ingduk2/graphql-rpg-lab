@@ -26,8 +26,8 @@ type Mutation {
     completeQuest(playerId: ID!, questId: ID!): PlayerQuest!
 
     # Battle
-    attack(playerId: ID!, monsterId: ID!, currentMonsterHp: Int!): BattleResult!
-    flee(playerId: ID!, monsterId: ID!): BattleResult!
+    attack(monsterId: ID!, currentMonsterHp: Int!): BattleResult!
+    flee(monsterId: ID!): BattleResult!
 }
 
 type Subscription {
