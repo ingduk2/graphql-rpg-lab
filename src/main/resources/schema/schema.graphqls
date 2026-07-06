@@ -18,12 +18,12 @@ type Mutation {
     createPlayer(input: CreatePlayerInput!): Player!
 
     # Item
-    equipItem(playerId: ID!, itemId: ID!): Inventory!
-    unequipItem(playerId: ID!, itemId: ID!): Inventory!
+    equipItem(itemId: ID!): Inventory!
+    unequipItem(itemId: ID!): Inventory!
 
     # Quest
-    acceptQuest(playerId: ID!, questId: ID!): PlayerQuest!
-    completeQuest(playerId: ID!, questId: ID!): PlayerQuest!
+    acceptQuest(questId: ID!): PlayerQuest!
+    completeQuest(questId: ID!): PlayerQuest!
 
     # Battle
     attack(monsterId: ID!, currentMonsterHp: Int!): BattleResult!
@@ -31,7 +31,7 @@ type Mutation {
 }
 
 type Subscription {
-    battleEvents(playerId: ID!, monsterId: ID!): BattleEvent!
+    battleEvents(monsterId: ID!): BattleEvent!
 }
 
 input CreatePlayerInput {

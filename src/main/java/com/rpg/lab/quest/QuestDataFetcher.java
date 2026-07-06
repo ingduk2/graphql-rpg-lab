@@ -1,9 +1,8 @@
 package com.rpg.lab.quest;
 
-import com.netflix.graphql.dgs.DgsComponent;
-import com.netflix.graphql.dgs.DgsMutation;
-import com.netflix.graphql.dgs.DgsQuery;
-import com.netflix.graphql.dgs.InputArgument;
+import com.netflix.graphql.dgs.*;
+import com.netflix.graphql.dgs.context.DgsContext;
+import com.rpg.lab.config.PlayerContext;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -23,17 +22,19 @@ public class QuestDataFetcher {
 
     @DgsMutation
     public PlayerQuestResponse acceptQuest(
-            @InputArgument Long playerId,
-            @InputArgument Long questId
+            @InputArgument Long questId,
+            DgsDataFetchingEnvironment dfe
     ) {
-        return questService.acceptQuest(playerId, questId);
+        PlayerContext context = DgsContext.getCustomContext(dfe);
+        return questService.acceptQuest(context.playerId(), questId);
     }
 
     @DgsMutation
     public PlayerQuestResponse completeQuest(
-            @InputArgument Long playerId,
-            @InputArgument Long questId
+            @InputArgument Long questId,
+            DgsDataFetchingEnvironment dfe
     ) {
-        return questService.completeQuest(playerId, questId);
+        PlayerContext context = DgsContext.getCustomContext(dfe);
+        return questService.completeQuest(context.playerId(), questId);
     }
 }

@@ -1,8 +1,11 @@
 package com.rpg.lab.inventory;
 
 import com.netflix.graphql.dgs.DgsComponent;
+import com.netflix.graphql.dgs.DgsDataFetchingEnvironment;
 import com.netflix.graphql.dgs.DgsMutation;
 import com.netflix.graphql.dgs.InputArgument;
+import com.netflix.graphql.dgs.context.DgsContext;
+import com.rpg.lab.config.PlayerContext;
 import lombok.RequiredArgsConstructor;
 
 @DgsComponent
@@ -13,17 +16,19 @@ public class InventoryDataFetcher {
 
     @DgsMutation
     public InventoryResponse equipItem(
-            @InputArgument Long playerId,
-            @InputArgument Long itemId
+            @InputArgument Long itemId,
+            DgsDataFetchingEnvironment dfe
     ) {
-        return inventoryService.equipItem(playerId, itemId);
+        PlayerContext context = DgsContext.getCustomContext(dfe);
+        return inventoryService.equipItem(context.playerId(), itemId);
     }
 
     @DgsMutation
     public InventoryResponse unequipItem(
-            @InputArgument Long playerId,
-            @InputArgument Long itemId
+            @InputArgument Long itemId,
+            DgsDataFetchingEnvironment dfe
     ) {
-        return inventoryService.unequipItem(playerId, itemId);
+        PlayerContext context = DgsContext.getCustomContext(dfe);
+        return inventoryService.unequipItem(context.playerId(), itemId);
     }
 }
