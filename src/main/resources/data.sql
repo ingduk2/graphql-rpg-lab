@@ -1,9 +1,3 @@
-INSERT INTO players (name, level, hp, max_hp, attack, defense, speed, exp)
-VALUES
-    ('전사 김철수', 1, 100, 100, 10, 5, 5, 0),
-    ('마법사 이영희', 1, 80, 80, 15, 3, 7, 0),
-    ('궁수 박민준', 1, 90, 90, 12, 4, 9, 0);
-
 INSERT INTO monsters (name, hp, max_hp, attack_power, exp_reward)
 VALUES
     ('슬라임', 30, 30, 5, 20),
@@ -17,9 +11,6 @@ VALUES
     ('마법 지팡이', 'WEAPON', 10, 0),
     ('철 방패', 'ARMOR', 0, 8),
     ('민첩의 반지', 'ACCESSORY', 2, 2);
-
-INSERT INTO inventories (player_id)
-VALUES (1), (2), (3);
 
 INSERT INTO quests (title, description)
 VALUES

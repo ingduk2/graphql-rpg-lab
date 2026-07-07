@@ -1,11 +1,8 @@
 package com.rpg.lab.battle;
 
 import com.netflix.graphql.dgs.DgsComponent;
-import com.netflix.graphql.dgs.DgsDataFetchingEnvironment;
 import com.netflix.graphql.dgs.DgsSubscription;
 import com.netflix.graphql.dgs.InputArgument;
-import com.netflix.graphql.dgs.context.DgsContext;
-import com.rpg.lab.config.PlayerContext;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 
@@ -17,10 +14,9 @@ public class BattleSubscription {
 
     @DgsSubscription
     public Flux<BattleEvent> battleEvents(
-            @InputArgument Long monsterId,
-            DgsDataFetchingEnvironment dfe
+            @InputArgument Long playerId,
+            @InputArgument Long monsterId
     ) {
-        PlayerContext context = DgsContext.getCustomContext(dfe);
-        return battleService.streamBattle(context.playerId(), monsterId);
+        return battleService.streamBattle(playerId, monsterId);
     }
 }

@@ -60,6 +60,41 @@
             letter-spacing: 2px;
         }
 
+        /* 플레이어 생성 화면 */
+        .create-screen {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .create-screen .prompt {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 11px;
+            color: var(--green-dim);
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .create-screen input {
+            width: 100%;
+            background: #060906;
+            color: var(--green);
+            border: 2px solid var(--green-dim);
+            font-family: 'VT323', monospace;
+            font-size: 24px;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            outline: none;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .create-screen input:focus { border-color: var(--green); }
+
+        .create-screen input::placeholder { color: var(--green-dim); }
+
+        /* 전투 화면 */
+        .battle-screen { display: none; }
+
         .row {
             display: grid;
             grid-template-columns: 1fr auto 1fr;
@@ -228,10 +263,7 @@
             font-size: 13px;
         }
 
-        .inventory-empty {
-            color: var(--green-dim);
-            font-size: 15px;
-        }
+        .inventory-empty { color: var(--green-dim); font-size: 15px; }
 
         .footer-note {
             margin-top: 14px;
@@ -248,55 +280,66 @@
     <div class="title">⚔ BATTLE.EXE</div>
     <div class="subtitle">graphql-rpg-lab // turn-based combat test console</div>
 
-    <div class="row">
-        <div class="unit player">
-            <div class="unit-label">PLAYER</div>
-            <select id="playerSelect"></select>
-            <div class="stats-row">
-                LV.<span id="statLv">-</span>
-                &nbsp;ATK.<span id="statAtk">-</span>
-                &nbsp;DEF.<span id="statDef">-</span>
-                &nbsp;SPD.<span id="statSpd">-</span>
+    <!-- 플레이어 생성 화면 -->
+    <div class="create-screen" id="createScreen">
+        <div class="prompt">ENTER YOUR NAME, HERO</div>
+        <input type="text" id="playerNameInput" placeholder="HERO NAME" maxlength="20">
+        <button onclick="createPlayer()">▶ START GAME</button>
+    </div>
+
+    <!-- 전투 화면 -->
+    <div class="battle-screen" id="battleScreen">
+        <div class="row">
+            <div class="unit player">
+                <div class="unit-label">PLAYER</div>
+                <div style="font-size:18px; color:var(--green); margin-bottom:8px;" id="playerName">-</div>
+                <div class="stats-row">
+                    LV.<span id="statLv">-</span>
+                    &nbsp;ATK.<span id="statAtk">-</span>
+                    &nbsp;DEF.<span id="statDef">-</span>
+                    &nbsp;SPD.<span id="statSpd">-</span>
+                </div>
+                <div class="bar-label"><span>HP</span><span id="playerHpText">--/--</span></div>
+                <div class="bar"><div class="bar-fill hp" id="playerHpFill"></div></div>
+                <div class="bar-label"><span>EXP</span><span id="playerExpText">-/-</span></div>
+                <div class="bar"><div class="bar-fill exp" id="playerExpFill"></div></div>
+                <div class="inventory-label" style="margin-top:10px;">INVENTORY</div>
+                <div class="inventory-items" id="inventoryItems">
+                    <span class="inventory-empty">empty</span>
+                </div>
             </div>
-            <div class="bar-label"><span>HP</span><span id="playerHpText">--/--</span></div>
-            <div class="bar"><div class="bar-fill hp" id="playerHpFill"></div></div>
-            <div class="bar-label"><span>EXP</span><span id="playerExpText">-/-</span></div>
-            <div class="bar"><div class="bar-fill exp" id="playerExpFill"></div></div>
-            <div class="inventory-label" style="margin-top:10px;">INVENTORY</div>
-            <div class="inventory-items" id="inventoryItems">
-                <span class="inventory-empty">empty</span>
+
+            <div class="vs">VS</div>
+
+            <div class="unit monster">
+                <div class="unit-label">MONSTER</div>
+                <select id="monsterSelect"></select>
+                <div class="stats-row">
+                    ATK.<span id="statMonsterAtk">-</span>
+                </div>
+                <div class="bar-label"><span>HP</span><span id="monsterHpText">--/--</span></div>
+                <div class="bar"><div class="bar-fill hp" id="monsterHpFill"></div></div>
             </div>
         </div>
 
-        <div class="vs">VS</div>
+        <div class="controls">
+            <button id="attackBtn" onclick="doAttack()">⚔ ATTACK</button>
+            <button id="fleeBtn" class="flee" onclick="doFlee()">🏃 FLEE</button>
+            <button id="autoBtn" class="auto" onclick="doAutoBattle()">⚡ AUTO</button>
+        </div>
 
-        <div class="unit monster">
-            <div class="unit-label">MONSTER</div>
-            <select id="monsterSelect"></select>
-            <div class="stats-row">
-                ATK.<span id="statMonsterAtk">-</span>
-            </div>
-            <div class="bar-label"><span>HP</span><span id="monsterHpText">--/--</span></div>
-            <div class="bar"><div class="bar-fill hp" id="monsterHpFill"></div></div>
+        <div class="log" id="log">
+            <p class="sys">&gt; system ready. select a monster and press attack.<span class="cursor">&nbsp;</span></p>
         </div>
     </div>
 
-    <div class="controls">
-        <button id="attackBtn" onclick="doAttack()">⚔ ATTACK</button>
-        <button id="fleeBtn" class="flee" onclick="doFlee()">🏃 FLEE</button>
-        <button id="autoBtn" class="auto" onclick="doAutoBattle()">⚡ AUTO</button>
-    </div>
-
-    <div class="log" id="log">
-        <p class="sys">&gt; system ready. select your fighters and press attack.<span class="cursor">&nbsp;</span></p>
-    </div>
-
-    <div class="footer-note">localhost:8080/graphql — Step 7 Subscription</div>
+    <div class="footer-note">localhost:8080/graphql — Step 8 Context</div>
 </div>
 
 <script>
     const API = 'http://localhost:8080/graphql';
     const WS_URL = 'ws://localhost:8080/graphql';
+    const PLAYER_ID_KEY = 'rpg_player_id';
 
     let currentMonsterMaxHp = 100;
     let currentPlayerMaxHp = 100;
@@ -304,11 +347,16 @@
     let currentPlayerLevel = 1;
     let currentPlayerExp = 0;
     let monsterDefeated = false;
+    let playerId = null;
 
+    // X-Player-Id 헤더 자동 추가
     async function graphql(query) {
+        const headers = { 'Content-Type': 'application/json' };
+        if (playerId) headers['X-Player-Id'] = playerId;
+
         const res = await fetch(API, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify({ query })
         });
         const json = await res.json();
@@ -356,6 +404,7 @@
         const items = player.inventory?.items || [];
         const atkBonus = items.reduce((sum, i) => sum + i.attackBonus, 0);
         const defBonus = items.reduce((sum, i) => sum + i.defenseBonus, 0);
+        document.getElementById('playerName').textContent = player.name;
         document.getElementById('statLv').textContent = player.level;
         document.getElementById('statAtk').textContent = atkBonus > 0 ? `${player.stats.attack}+${atkBonus}` : player.stats.attack;
         document.getElementById('statDef').textContent = defBonus > 0 ? `${player.stats.defense}+${defBonus}` : player.stats.defense;
@@ -386,41 +435,68 @@
         }).join('');
     }
 
-    async function loadFighters() {
-        const data = await graphql(`{
-            players { id name }
-            monsters { id name }
-        }`);
+    async function createPlayer() {
+        const name = document.getElementById('playerNameInput').value.trim();
+        if (!name) return;
 
-        document.getElementById('playerSelect').innerHTML =
-            data.players.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        const data = await graphql(`
+            mutation {
+                createPlayer(input: { name: "${name}" }) {
+                    id name
+                }
+            }
+        `);
+
+        playerId = data.createPlayer.id;
+        localStorage.setItem(PLAYER_ID_KEY, playerId);
+        showBattleScreen();
+    }
+
+    async function showBattleScreen() {
+        document.getElementById('createScreen').style.display = 'none';
+        document.getElementById('battleScreen').style.display = 'block';
+
+        // 몬스터 목록 로드
+        const data = await graphql(`{ monsters { id name } }`);
         document.getElementById('monsterSelect').innerHTML =
             data.monsters.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
-
-        document.getElementById('playerSelect').onchange = syncSelection;
         document.getElementById('monsterSelect').onchange = syncSelection;
+
+        // 플레이어 정보 로드
+        await loadPlayer();
         syncSelection();
     }
 
-    async function syncSelection() {
-        const pid = document.getElementById('playerSelect').value;
-        const mid = document.getElementById('monsterSelect').value;
-        if (!pid || !mid) return;
-
-        const data = await graphql(`{
-            player(id: ${pid}) {
+    async function loadPlayer() {
+        try {
+            const data = await graphql(`{
+            player(id: ${playerId}) {
                 id name level hp maxHp exp
                 stats { attack defense speed }
                 inventory { items { id name attackBonus defenseBonus } }
             }
+        }`);
+            updatePlayerDisplay(data.player);
+            updateInventoryDisplay(data.player.inventory?.items);
+        } catch (e) {
+            localStorage.removeItem(PLAYER_ID_KEY);
+            playerId = null;
+            document.getElementById('battleScreen').style.display = 'none';
+            document.getElementById('createScreen').style.display = 'block';
+        }
+    }
+
+    async function syncSelection() {
+        const mid = document.getElementById('monsterSelect').value;
+        if (!mid) return;
+
+        const data = await graphql(`{
             monster(id: ${mid}) { id name hp maxHp attackPower }
         }`);
 
         monsterDefeated = false;
-        updatePlayerDisplay(data.player);
         updateMonsterDisplay(data.monster);
-        updateInventoryDisplay(data.player.inventory?.items);
-        setButtonsDisabled(data.player.hp <= 0);
+        setButtonsDisabled(false);
     }
 
     function setButtonsDisabled(disabled) {
@@ -431,15 +507,14 @@
 
     async function doAttack() {
         if (monsterDefeated) return;
-        const playerId = document.getElementById('playerSelect').value;
         const monsterId = document.getElementById('monsterSelect').value;
-        if (!playerId || !monsterId) return;
+        if (!monsterId) return;
 
         setButtonsDisabled(true);
         try {
             const data = await graphql(`
                 mutation {
-                    attack(playerId: ${playerId}, monsterId: ${monsterId}, currentMonsterHp: ${currentMonsterHp}) {
+                    attack(monsterId: ${monsterId}, currentMonsterHp: ${currentMonsterHp}) {
                         playerDamage monsterDamage monsterRemainHp playerRemainHp
                         isCritical monsterDefeated playerDefeated
                         expGained levelUps
@@ -470,15 +545,7 @@
             }
 
             if (r.levelUps > 0 || r.droppedItem) {
-                const playerData = await graphql(`{
-                    player(id: ${playerId}) {
-                        id name level hp maxHp exp
-                        stats { attack defense speed }
-                        inventory { items { id name attackBonus defenseBonus } }
-                    }
-                }`);
-                updatePlayerDisplay(playerData.player);
-                updateInventoryDisplay(playerData.player.inventory?.items);
+                await loadPlayer();
             } else if (r.expGained > 0) {
                 setExpBar(currentPlayerExp + r.expGained, currentPlayerLevel);
             }
@@ -499,15 +566,14 @@
     }
 
     async function doFlee() {
-        const playerId = document.getElementById('playerSelect').value;
         const monsterId = document.getElementById('monsterSelect').value;
-        if (!playerId || !monsterId) return;
+        if (!monsterId) return;
 
         setButtonsDisabled(true);
         try {
             const data = await graphql(`
                 mutation {
-                    flee(playerId: ${playerId}, monsterId: ${monsterId}) {
+                    flee(monsterId: ${monsterId}) {
                         message
                     }
                 }
@@ -522,9 +588,8 @@
 
     function doAutoBattle() {
         if (monsterDefeated) return;
-        const playerId = document.getElementById('playerSelect').value;
         const monsterId = document.getElementById('monsterSelect').value;
-        if (!playerId || !monsterId) return;
+        if (!monsterId) return;
 
         setButtonsDisabled(true);
         log('⚡ AUTO BATTLE START', 'auto');
@@ -532,7 +597,10 @@
         const ws = new WebSocket(WS_URL, 'graphql-transport-ws');
 
         ws.onopen = () => {
-            ws.send(JSON.stringify({ type: 'connection_init' }));
+            ws.send(JSON.stringify({
+                type: 'connection_init',
+                payload: { 'X-Player-Id': playerId }
+            }));
         };
 
         ws.onmessage = (event) => {
@@ -572,16 +640,15 @@
                     }
                     ws.close();
 
-                    // 전투 끝나면 플레이어 정보 재조회
-                    graphql(`{
-                        player(id: ${playerId}) {
-                            id name level hp maxHp exp
-                            stats { attack defense speed }
-                            inventory { items { id name attackBonus defenseBonus } }
-                        }
-                    }`).then(data => {
-                        updatePlayerDisplay(data.player);
-                        updateInventoryDisplay(data.player.inventory?.items);
+                    loadPlayer().then(() => {
+                        updateInventoryDisplay(null);
+                        graphql(`{
+                            player(id: ${playerId}) {
+                                inventory { items { id name attackBonus defenseBonus } }
+                            }
+                        }`).then(d => {
+                            updateInventoryDisplay(d.player.inventory?.items);
+                        });
                         if (!r.playerDefeated) setButtonsDisabled(false);
                     });
                 }
@@ -600,7 +667,20 @@
         };
     }
 
-    loadFighters();
+    // 초기화 — 로컬스토리지에 playerId 있으면 바로 전투 화면
+    function init() {
+        const savedId = localStorage.getItem(PLAYER_ID_KEY);
+        if (savedId) {
+            playerId = savedId;
+            showBattleScreen();
+        }
+        // 엔터키로 플레이어 생성
+        document.getElementById('playerNameInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') createPlayer();
+        });
+    }
+
+    init();
 </script>
 
 </body>
