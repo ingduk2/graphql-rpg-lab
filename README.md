@@ -202,13 +202,31 @@
 
 ---
 
-### Step 9. 성능 최적화 & 마무리
+### Step 9. 퀘스트 시스템 고도화
+- **9-1.** 퀘스트 조건 도메인 설계
+  - QuestCondition (type, targetCount)
+  - QuestType enum (KILL_MONSTER, REACH_LEVEL, BATTLE_COUNT)
+- **9-2.** 퀘스트 진행도 추적
+  - PlayerQuestProgress (currentCount)
+  - 몬스터 처치/레벨업 시 진행도 업데이트
+- **9-3.** 퀘스트 자동 완료
+  - 조건 달성 시 자동으로 COMPLETED
+  - BattleService에서 퀘스트 진행도 체크
+- **9-4.** 퀘스트 보상
+  - 완료 시 exp, 아이템 보상
+- **9-5.** HTML 퀘스트 화면
+  - 퀘스트 목록 및 진행도 표시
+  - 퀘스트 수락/완료 UI
+
+---
+
+### Step 10. 성능 최적화 & 마무리
 > "더 빠르게, 더 안전하게"
 
-- **9-1.** Query Complexity 분석 — 악의적인 중첩 쿼리 방어
-- **9-2.** Persisted Queries 개념 이해
-- **9-3.** DataLoader 캐싱 전략 정리
-- **9-4.** 전체 아키텍처 회고
+- **10-1.** Query Complexity 분석 — 악의적인 중첩 쿼리 방어
+- **10-2.** Persisted Queries 개념 이해
+- **10-3.** DataLoader 캐싱 전략 정리
+- **10-4.** 전체 아키텍처 회고
 
 **학습 포인트**
 - GraphQL의 보안 고려사항 (Depth Limit, Complexity Limit)
