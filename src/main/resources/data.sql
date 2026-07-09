@@ -18,6 +18,12 @@ VALUES
     ('고블린 토벌', '고블린 3마리를 처치하라'),
     ('던전 탐험', '던전 깊은 곳을 탐험하라');
 
+INSERT INTO quest_conditions (quest_id, type, target_count)
+VALUES
+    (1, 'KILL_MONSTER', 5),
+    (2, 'KILL_MONSTER', 3),
+    (3, 'REACH_LEVEL', 5);
+
 INSERT INTO monster_drops (monster_id, item_id, drop_rate)
 VALUES
     (1, 1, 0.5),
