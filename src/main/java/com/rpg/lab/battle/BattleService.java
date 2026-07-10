@@ -8,11 +8,14 @@ import com.rpg.lab.monster.Monster;
 import com.rpg.lab.monster.MonsterRepository;
 import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerRepository;
+import com.rpg.lab.quest.QuestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
+
+import static com.rpg.lab.quest.QuestType.KILL_MONSTER;
 
 @Slf4j
 @Service
@@ -24,6 +27,7 @@ public class BattleService {
     private final MonsterRepository monsterRepository;
     private final InventoryRepository inventoryRepository;
     private final ItemDropProcessor itemDropProcessor;
+    private final QuestService questService;
 
     @Transactional
     public BattleResult attack(Long playerId, Long monsterId, int currentMonsterHp) {
@@ -41,6 +45,7 @@ public class BattleService {
         if (battle.isMonsterDefeated()) {
             levelUps = player.gainExp(battle.getExpGained());
             droppedItem = itemDropProcessor.process(monsterId, playerId).orElse(null);
+            questService.updateProgress(playerId, KILL_MONSTER);
         }
 
         playerRepository.save(player);

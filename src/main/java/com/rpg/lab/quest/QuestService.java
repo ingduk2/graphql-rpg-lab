@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.rpg.lab.quest.QuestStatus.IN_PROGRESS;
+
 @Service
 @RequiredArgsConstructor
 public class QuestService {
@@ -16,6 +18,8 @@ public class QuestService {
     private final QuestRepository questRepository;
     private final PlayerRepository playerRepository;
     private final PlayerQuestRepository playerQuestRepository;
+    private final QuestConditionRepository questConditionRepository;
+    private final PlayerQuestProgressRepository playerQuestProgressRepository;
 
     public List<Quest> getQuests() {
         return questRepository.findAll();
@@ -32,10 +36,15 @@ public class QuestService {
                 .orElseThrow(() -> new EntityNotFoundException("Player not found: " + playerId));
         Quest quest = findQuestById(questId);
 
-        PlayerQuest playerQuest = PlayerQuest.create(player, quest);
-        playerQuestRepository.save(playerQuest);
+        PlayerQuest savedPlayerQuest = playerQuestRepository.save(PlayerQuest.create(player, quest));
 
-        return PlayerQuestResponse.from(playerQuest);
+        // 퀘스트 조건별 진행도 생성
+        List<QuestCondition> conditions = questConditionRepository.findByQuestId(questId);
+        for (QuestCondition condition : conditions) {
+            playerQuestProgressRepository.save(PlayerQuestProgress.create(savedPlayerQuest, condition));
+        }
+
+        return PlayerQuestResponse.from(savedPlayerQuest);
     }
 
     @Transactional
@@ -47,6 +56,29 @@ public class QuestService {
         playerQuestRepository.save(playerQuest);
 
         return PlayerQuestResponse.from(playerQuest);
+    }
+
+    @Transactional
+    public void updateProgress(Long playerId, QuestType questType) {
+        List<PlayerQuest> inProgressQuests = playerQuestRepository.findByPlayerIdAndStatus(playerId, IN_PROGRESS);
+
+        for (PlayerQuest playerQuest : inProgressQuests) {
+            List<PlayerQuestProgress> progressList = playerQuestProgressRepository
+                    .findAllWithConditionByPlayerQuestId(playerQuest.getId());
+
+            progressList.stream()
+                    .filter(p -> p.getQuestCondition().getType() == questType)
+                    .forEach(p -> {
+                        p.increment();
+                        playerQuestProgressRepository.save(p);
+                    });
+
+            boolean allCompleted = progressList.stream().allMatch(PlayerQuestProgress::isCompleted);
+            if (allCompleted && !progressList.isEmpty()) {
+                playerQuest.complete();
+                playerQuestRepository.save(playerQuest);
+            }
+        }
     }
 
     private Quest findQuestById(Long questId) {
