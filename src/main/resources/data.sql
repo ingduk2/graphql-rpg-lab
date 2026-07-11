@@ -10,7 +10,10 @@ VALUES
     ('가죽 갑옷', 'ARMOR', 0, 5),
     ('마법 지팡이', 'WEAPON', 10, 0),
     ('철 방패', 'ARMOR', 0, 8),
-    ('민첩의 반지', 'ACCESSORY', 2, 2);
+    ('민첩의 반지', 'ACCESSORY', 2, 2),
+    ('슬라임 결정', 'ACCESSORY', 3, 0),   -- 슬라임 사냥 퀘스트 보상 (id: 6)
+    ('고블린 귀', 'ACCESSORY', 0, 3),     -- 고블린 토벌 퀘스트 보상 (id: 7)
+    ('던전 열쇠', 'ACCESSORY', 5, 5);     -- 던전 탐험 퀘스트 보상 (id: 8)
 
 INSERT INTO quests (title, description)
 VALUES
@@ -30,3 +33,9 @@ VALUES
     (2, 3, 0.4),
     (3, 4, 0.3),
     (3, 5, 0.2);
+
+INSERT INTO quest_rewards (quest_id, reward_exp, item_id)
+VALUES
+    (1, 50, 6),
+    (2, 80, 7),
+    (3, 150, 8);
