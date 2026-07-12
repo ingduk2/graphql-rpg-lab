@@ -42,7 +42,9 @@ public class QuestService {
             playerQuestProgressRepository.save(PlayerQuestProgress.create(savedPlayerQuest, condition));
         }
 
-        return PlayerQuestResponse.from(savedPlayerQuest);
+        List<PlayerQuestProgress> progressList = playerQuestProgressRepository.findProgressByPlayerQuestId(savedPlayerQuest.getId());
+
+        return PlayerQuestResponse.from(savedPlayerQuest, progressList);
     }
 
     @Transactional
@@ -53,7 +55,21 @@ public class QuestService {
         playerQuest.complete();
         playerQuestRepository.save(playerQuest);
 
-        return PlayerQuestResponse.from(playerQuest);
+        List<PlayerQuestProgress> progressList = playerQuestProgressRepository.findProgressByPlayerQuestId(playerQuest.getId());
+
+        return PlayerQuestResponse.from(playerQuest, progressList);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PlayerQuestResponse> getMyQuests(Long playerId) {
+        List<PlayerQuest> playerQuests = playerQuestRepository.findByPlayerId(playerId);
+
+        return playerQuests.stream()
+                .map(quest -> {
+                    List<PlayerQuestProgress> progressList = playerQuestProgressRepository.findProgressByPlayerQuestId(quest.getId());
+                    return PlayerQuestResponse.from(quest, progressList);
+                })
+                .toList();
     }
 
     private Quest findQuestById(Long questId) {

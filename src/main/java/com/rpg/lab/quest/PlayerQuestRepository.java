@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface PlayerQuestRepository extends JpaRepository<PlayerQuest, Long> {
     Optional<PlayerQuest> findByPlayerIdAndQuestId(Long playerId, Long questId);
     List<PlayerQuest> findByPlayerIdAndStatus(Long playerId, QuestStatus status);
+    List<PlayerQuest> findByPlayerId(Long playerId);
 }

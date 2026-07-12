@@ -13,5 +13,5 @@ public interface PlayerQuestProgressRepository extends JpaRepository<PlayerQuest
             JOIN FETCH p.questCondition
             WHERE p.playerQuest.id = :playerQuestId
             """)
-    List<PlayerQuestProgress> findAllWithConditionByPlayerQuestId(@Param("playerQuestId") Long playerQuestId);
+    List<PlayerQuestProgress> findProgressByPlayerQuestId(@Param("playerQuestId") Long playerQuestId);
 }

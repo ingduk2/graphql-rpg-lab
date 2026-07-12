@@ -20,6 +20,12 @@ public class QuestDataFetcher {
                 .toList();
     }
 
+    @DgsQuery
+    public List<PlayerQuestResponse> myQuests(DgsDataFetchingEnvironment dfe) {
+        PlayerContext context = DgsContext.getCustomContext(dfe);
+        return questService.getMyQuests(context.playerId());
+    }
+
     @DgsMutation
     public PlayerQuestResponse acceptQuest(
             @InputArgument Long questId,

@@ -11,6 +11,7 @@ type Query {
 
     # Quest
     quests: [Quest!]!
+    myQuests: [PlayerQuest]!
 }
 
 type Mutation {
@@ -131,6 +132,13 @@ type PlayerQuest {
     status: QuestStatus!
     title: String!
     description: String
+    progress: [QuestProgress!]!
+}
+
+type QuestProgress {
+    type: String!
+    currentCount: Int!
+    targetCount: Int!
 }
 
 enum QuestStatus {

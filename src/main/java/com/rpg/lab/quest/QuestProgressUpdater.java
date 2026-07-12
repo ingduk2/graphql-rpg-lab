@@ -21,8 +21,7 @@ public class QuestProgressUpdater {
         List<PlayerQuest> inProgressQuests = playerQuestRepository.findByPlayerIdAndStatus(playerId, IN_PROGRESS);
 
         for (PlayerQuest playerQuest : inProgressQuests) {
-            List<PlayerQuestProgress> progressList = playerQuestProgressRepository
-                    .findAllWithConditionByPlayerQuestId(playerQuest.getId());
+            List<PlayerQuestProgress> progressList = playerQuestProgressRepository.findProgressByPlayerQuestId(playerQuest.getId());
 
             progressList.stream()
                     .filter(p -> p.getQuestCondition().getType() == questType)
