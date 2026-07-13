@@ -60,12 +60,7 @@
             letter-spacing: 2px;
         }
 
-        /* 플레이어 생성 화면 */
-        .create-screen {
-            text-align: center;
-            padding: 20px 0;
-        }
-
+        .create-screen { text-align: center; padding: 20px 0; }
         .create-screen .prompt {
             font-family: 'Press Start 2P', monospace;
             font-size: 11px;
@@ -73,7 +68,6 @@
             margin-bottom: 20px;
             letter-spacing: 1px;
         }
-
         .create-screen input {
             width: 100%;
             background: #060906;
@@ -87,12 +81,9 @@
             text-align: center;
             letter-spacing: 2px;
         }
-
         .create-screen input:focus { border-color: var(--green); }
-
         .create-screen input::placeholder { color: var(--green-dim); }
 
-        /* 전투 화면 */
         .battle-screen { display: none; }
 
         .row {
@@ -117,7 +108,6 @@
             padding: 12px 14px;
             background: rgba(0,0,0,0.25);
         }
-
         .unit.player { border-color: #2f6f8f; }
         .unit.monster { border-color: #8f2f2f; }
 
@@ -148,7 +138,6 @@
             margin-bottom: 8px;
             flex-wrap: wrap;
         }
-
         .stats-row span { color: var(--green); }
 
         .bar-label {
@@ -167,15 +156,11 @@
             margin-bottom: 6px;
         }
 
-        .bar-fill {
-            height: 100%;
-            width: 100%;
-            transition: width 0.4s steps(12);
-        }
-
+        .bar-fill { height: 100%; width: 100%; transition: width 0.4s steps(12); }
         .bar-fill.hp { background: linear-gradient(90deg, var(--green-dim), var(--green)); }
         .bar-fill.hp.low { background: linear-gradient(90deg, #7a1f1f, var(--red)); }
         .bar-fill.exp { background: linear-gradient(90deg, #1a4a8a, var(--blue)); }
+        .bar-fill.quest-bar { background: linear-gradient(90deg, #5a3a00, var(--amber)); }
 
         .controls {
             display: flex;
@@ -195,7 +180,6 @@
             letter-spacing: 1px;
             transition: all 0.1s;
         }
-
         button:hover:not(:disabled) { background: var(--green-dim); color: #060906; }
         button:active:not(:disabled) { transform: translateY(1px); }
         button.flee { color: var(--amber); border-color: #8a6000; }
@@ -204,21 +188,35 @@
         button.auto:hover:not(:disabled) { background: #1a4a8a; color: #060906; }
         button:disabled { opacity: 0.35; cursor: not-allowed; }
 
+        .sm-btn {
+            flex: 0;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 9px;
+            padding: 4px 8px;
+            background: #060906;
+            border: 1px solid;
+            cursor: pointer;
+            letter-spacing: 0;
+            transition: all 0.1s;
+        }
+        .sm-btn.amber { color: var(--amber); border-color: #5a3a00; }
+        .sm-btn.amber:hover { background: #5a3a00; color: #060906; }
+        .sm-btn.green { color: var(--green); border-color: var(--green-dim); }
+        .sm-btn.green:hover { background: var(--green-dim); color: #060906; }
+
         .log {
             border: 1px solid var(--line);
             background: #060906;
             padding: 10px 12px;
-            height: 160px;
+            height: 130px;
             overflow-y: auto;
             font-size: 16px;
             line-height: 1.5;
             margin-bottom: 12px;
         }
-
         .log::-webkit-scrollbar { width: 8px; }
         .log::-webkit-scrollbar-thumb { background: var(--green-dim); }
         .log::-webkit-scrollbar-track { background: #060906; }
-
         .log p { margin: 0 0 4px; }
         .log p.sys { color: var(--green-dim); }
         .log p.crit { color: var(--amber); }
@@ -226,16 +224,16 @@
         .log p.levelup { color: #4af; }
         .log p.drop { color: var(--amber); }
         .log p.auto { color: #4af; }
+        .log p.quest-log { color: var(--amber); }
         .log .cursor {
             display: inline-block;
             width: 8px;
             background: var(--green);
             animation: blink 1s steps(1) infinite;
         }
-
         @keyframes blink { 50% { opacity: 0; } }
 
-        .inventory-label {
+        .panel-label {
             font-family: 'Press Start 2P', monospace;
             font-size: 9px;
             color: var(--green-dim);
@@ -249,7 +247,6 @@
             gap: 6px;
             min-height: 28px;
         }
-
         .inventory-item {
             background: #0f1a0f;
             border: 1px solid var(--green-dim);
@@ -257,13 +254,78 @@
             font-size: 15px;
             color: var(--text);
         }
+        .inventory-item .bonus { color: var(--green); font-size: 13px; }
+        .inventory-empty { color: var(--green-dim); font-size: 15px; }
 
-        .inventory-item .bonus {
-            color: var(--green);
-            font-size: 13px;
+        /* 퀘스트 패널 */
+        .quest-panel {
+            border: 1px solid #3a2a00;
+            background: #060906;
+            padding: 10px 12px;
+            margin-bottom: 12px;
         }
 
-        .inventory-empty { color: var(--green-dim); font-size: 15px; }
+        .quest-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .tab-row {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .tab {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
+            padding: 4px 8px;
+            background: #060906;
+            border: 1px solid #3a2a00;
+            color: var(--green-dim);
+            cursor: pointer;
+        }
+        .tab.active { background: #3a2a00; color: var(--amber); }
+
+        .quest-list { display: flex; flex-direction: column; gap: 6px; }
+
+        .quest-item {
+            border: 1px solid #3a2a00;
+            padding: 8px 10px;
+            background: #0a0800;
+        }
+
+        .quest-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .quest-title { font-size: 16px; color: var(--amber); }
+        .quest-desc { font-size: 14px; color: var(--green-dim); margin-bottom: 4px; }
+
+        .quest-status {
+            font-size: 12px;
+            padding: 1px 6px;
+            border: 1px solid;
+        }
+        .quest-status.IN_PROGRESS { color: var(--green); border-color: var(--green-dim); }
+        .quest-status.COMPLETED { color: #4af; border-color: #1a4a8a; }
+        .quest-status.AVAILABLE { color: var(--green-dim); border-color: var(--line); }
+
+        .quest-progress-wrap { margin-top: 4px; }
+        .quest-progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--green-dim);
+            margin-bottom: 2px;
+        }
+
+        .quest-empty { color: var(--green-dim); font-size: 15px; }
 
         .footer-note {
             margin-top: 14px;
@@ -303,7 +365,7 @@
                 <div class="bar"><div class="bar-fill hp" id="playerHpFill"></div></div>
                 <div class="bar-label"><span>EXP</span><span id="playerExpText">-/-</span></div>
                 <div class="bar"><div class="bar-fill exp" id="playerExpFill"></div></div>
-                <div class="inventory-label" style="margin-top:10px;">INVENTORY</div>
+                <div class="panel-label" style="margin-top:10px;">INVENTORY</div>
                 <div class="inventory-items" id="inventoryItems">
                     <span class="inventory-empty">empty</span>
                 </div>
@@ -314,9 +376,7 @@
             <div class="unit monster">
                 <div class="unit-label">MONSTER</div>
                 <select id="monsterSelect"></select>
-                <div class="stats-row">
-                    ATK.<span id="statMonsterAtk">-</span>
-                </div>
+                <div class="stats-row">ATK.<span id="statMonsterAtk">-</span></div>
                 <div class="bar-label"><span>HP</span><span id="monsterHpText">--/--</span></div>
                 <div class="bar"><div class="bar-fill hp" id="monsterHpFill"></div></div>
             </div>
@@ -331,9 +391,24 @@
         <div class="log" id="log">
             <p class="sys">&gt; system ready. select a monster and press attack.<span class="cursor">&nbsp;</span></p>
         </div>
+
+        <!-- 퀘스트 패널 -->
+        <div class="quest-panel">
+            <div class="quest-panel-header">
+                <div class="panel-label" style="margin-bottom:0;">QUESTS</div>
+                <button class="sm-btn green" onclick="loadQuests()">↻</button>
+            </div>
+            <div class="tab-row">
+                <div class="tab active" onclick="switchTab('active')">ACTIVE</div>
+                <div class="tab" onclick="switchTab('available')">AVAILABLE</div>
+            </div>
+            <div class="quest-list" id="questList">
+                <span class="quest-empty">no active quests</span>
+            </div>
+        </div>
     </div>
 
-    <div class="footer-note">localhost:8080/graphql — Step 8 Context</div>
+    <div class="footer-note">localhost:8080/graphql — Step 9 Quest</div>
 </div>
 
 <script>
@@ -348,12 +423,13 @@
     let currentPlayerExp = 0;
     let monsterDefeated = false;
     let playerId = null;
+    let currentTab = 'active';
+    let allQuests = [];
+    let myQuests = [];
 
-    // X-Player-Id 헤더 자동 추가
     async function graphql(query) {
         const headers = { 'Content-Type': 'application/json' };
         if (playerId) headers['X-Player-Id'] = playerId;
-
         const res = await fetch(API, {
             method: 'POST',
             headers,
@@ -435,18 +511,100 @@
         }).join('');
     }
 
+    async function loadQuests() {
+        const [myData, allData] = await Promise.all([
+            graphql(`{ myQuests { id questId status title progress { type currentCount targetCount } } }`),
+            graphql(`{ quests { id title description } }`)
+        ]);
+        myQuests = myData.myQuests || [];
+        allQuests = allData.quests || [];
+        renderCurrentTab();
+    }
+
+    function switchTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        renderCurrentTab();
+    }
+
+    function renderCurrentTab() {
+        if (currentTab === 'active') {
+            renderActiveQuests();
+        } else {
+            renderAvailableQuests();
+        }
+    }
+
+    function renderActiveQuests() {
+        const el = document.getElementById('questList');
+        if (!myQuests || myQuests.length === 0) {
+            el.innerHTML = '<span class="quest-empty">no active quests — accept one from AVAILABLE tab</span>';
+            return;
+        }
+        el.innerHTML = myQuests.map(q => {
+            const progressBars = q.progress.map(p => `
+                <div class="quest-progress-wrap">
+                    <div class="quest-progress-label">
+                        <span>${p.type}</span>
+                        <span>${p.currentCount}/${p.targetCount}</span>
+                    </div>
+                    <div class="bar">
+                        <div class="bar-fill quest-bar" style="width:${Math.min(100, (p.currentCount/p.targetCount)*100)}%"></div>
+                    </div>
+                </div>
+            `).join('');
+            return `
+                <div class="quest-item">
+                    <div class="quest-item-header">
+                        <span class="quest-title">${q.title}</span>
+                        <span class="quest-status ${q.status}">${q.status}</span>
+                    </div>
+                    ${progressBars}
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderAvailableQuests() {
+        const el = document.getElementById('questList');
+        const acceptedIds = new Set(myQuests.map(q => String(q.questId)));
+        const available = allQuests.filter(q => !acceptedIds.has(String(q.id)));
+
+        if (available.length === 0) {
+            el.innerHTML = '<span class="quest-empty">all quests accepted</span>';
+            return;
+        }
+        el.innerHTML = available.map(q => `
+            <div class="quest-item">
+                <div class="quest-item-header">
+                    <span class="quest-title">${q.title}</span>
+                    <button class="sm-btn amber" onclick="acceptQuest(${q.id}, '${q.title}')">ACCEPT</button>
+                </div>
+                <div class="quest-desc">${q.description || ''}</div>
+            </div>
+        `).join('');
+    }
+
+    async function acceptQuest(questId, title) {
+        await graphql(`mutation { acceptQuest(questId: ${questId}) { id status } }`);
+        log(`퀘스트 수락: ${title}`, 'quest-log');
+        await loadQuests();
+        switchTabTo('active');
+    }
+
+    function switchTabTo(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.tab').forEach((t, i) => {
+            t.classList.toggle('active', (i === 0 && tab === 'active') || (i === 1 && tab === 'available'));
+        });
+        renderCurrentTab();
+    }
+
     async function createPlayer() {
         const name = document.getElementById('playerNameInput').value.trim();
         if (!name) return;
-
-        const data = await graphql(`
-            mutation {
-                createPlayer(input: { name: "${name}" }) {
-                    id name
-                }
-            }
-        `);
-
+        const data = await graphql(`mutation { createPlayer(input: { name: "${name}" }) { id name } }`);
         playerId = data.createPlayer.id;
         localStorage.setItem(PLAYER_ID_KEY, playerId);
         showBattleScreen();
@@ -455,27 +613,25 @@
     async function showBattleScreen() {
         document.getElementById('createScreen').style.display = 'none';
         document.getElementById('battleScreen').style.display = 'block';
+        document.getElementById('log').innerHTML = '<p class="sys">&gt; system ready. select a monster and press attack.<span class="cursor">&nbsp;</span></p>';
 
-        // 몬스터 목록 로드
         const data = await graphql(`{ monsters { id name } }`);
-        document.getElementById('monsterSelect').innerHTML =
-            data.monsters.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+        document.getElementById('monsterSelect').innerHTML = data.monsters.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
         document.getElementById('monsterSelect').onchange = syncSelection;
-
-        // 플레이어 정보 로드
         await loadPlayer();
+        await loadQuests();
         syncSelection();
     }
 
     async function loadPlayer() {
         try {
             const data = await graphql(`{
-            player(id: ${playerId}) {
-                id name level hp maxHp exp
-                stats { attack defense speed }
-                inventory { items { id name attackBonus defenseBonus } }
-            }
-        }`);
+                player(id: ${playerId}) {
+                    id name level hp maxHp exp
+                    stats { attack defense speed }
+                    inventory { items { id name attackBonus defenseBonus } }
+                }
+            }`);
             updatePlayerDisplay(data.player);
             updateInventoryDisplay(data.player.inventory?.items);
         } catch (e) {
@@ -489,11 +645,7 @@
     async function syncSelection() {
         const mid = document.getElementById('monsterSelect').value;
         if (!mid) return;
-
-        const data = await graphql(`{
-            monster(id: ${mid}) { id name hp maxHp attackPower }
-        }`);
-
+        const data = await graphql(`{ monster(id: ${mid}) { id name hp maxHp attackPower } }`);
         monsterDefeated = false;
         updateMonsterDisplay(data.monster);
         setButtonsDisabled(false);
@@ -509,7 +661,6 @@
         if (monsterDefeated) return;
         const monsterId = document.getElementById('monsterSelect').value;
         if (!monsterId) return;
-
         setButtonsDisabled(true);
         try {
             const data = await graphql(`
@@ -519,40 +670,39 @@
                         isCritical monsterDefeated playerDefeated
                         expGained levelUps
                         droppedItem { name type attackBonus defenseBonus }
+                        completedQuests
                         message
                     }
                 }
             `);
             const r = data.attack;
-
             currentMonsterHp = r.monsterRemainHp;
             setHpBar('monsterHpFill', 'monsterHpText', r.monsterRemainHp, currentMonsterMaxHp);
             setHpBar('playerHpFill', 'playerHpText', r.playerRemainHp, currentPlayerMaxHp);
             log(r.message, r.isCritical ? 'crit' : null);
-
             if (r.expGained > 0) log(`경험치 +${r.expGained} 획득!`, 'sys');
-
             if (r.droppedItem) {
                 const bonuses = [];
                 if (r.droppedItem.attackBonus > 0) bonuses.push(`ATK+${r.droppedItem.attackBonus}`);
                 if (r.droppedItem.defenseBonus > 0) bonuses.push(`DEF+${r.droppedItem.defenseBonus}`);
-                const bonusText = bonuses.length > 0 ? ` (${bonuses.join(' ')})` : '';
-                log(`★ 아이템 드롭! [${r.droppedItem.type}] ${r.droppedItem.name}${bonusText}`, 'drop');
+                log(`★ 아이템 드롭! [${r.droppedItem.type}] ${r.droppedItem.name}${bonuses.length ? ` (${bonuses.join(' ')})` : ''}`, 'drop');
             }
-
-            if (r.levelUps > 0) {
-                log(`★ LEVEL UP! Lv.${currentPlayerLevel} → Lv.${currentPlayerLevel + r.levelUps} ★`, 'levelup');
+            if (r.completedQuests && r.completedQuests.length > 0) {
+                r.completedQuests.forEach(title => {
+                    log(`★ 퀘스트 완료! ${title}`, 'quest-log');
+                });
+                await loadQuests();
             }
-
+            if (r.levelUps > 0) log(`★ LEVEL UP! Lv.${currentPlayerLevel} → Lv.${currentPlayerLevel + r.levelUps} ★`, 'levelup');
             if (r.levelUps > 0 || r.droppedItem) {
                 await loadPlayer();
             } else if (r.expGained > 0) {
                 setExpBar(currentPlayerExp + r.expGained, currentPlayerLevel);
             }
-
             if (r.monsterDefeated) {
                 monsterDefeated = true;
                 log('monster defeated. select a new monster to continue.', 'dead');
+                await loadQuests();
                 setButtonsDisabled(true);
                 return;
             }
@@ -561,23 +711,18 @@
                 setButtonsDisabled(true);
                 return;
             }
-        } catch (e) {}
+        } catch (e) {
+            console.error('doAttack error:', e);
+        }
         setButtonsDisabled(false);
     }
 
     async function doFlee() {
         const monsterId = document.getElementById('monsterSelect').value;
         if (!monsterId) return;
-
         setButtonsDisabled(true);
         try {
-            const data = await graphql(`
-                mutation {
-                    flee(monsterId: ${monsterId}) {
-                        message
-                    }
-                }
-            `);
+            const data = await graphql(`mutation { flee(monsterId: ${monsterId}) { message } }`);
             log(data.flee.message, 'sys');
             monsterDefeated = false;
             currentMonsterHp = currentMonsterMaxHp;
@@ -590,26 +735,15 @@
         if (monsterDefeated) return;
         const monsterId = document.getElementById('monsterSelect').value;
         if (!monsterId) return;
-
         setButtonsDisabled(true);
         log('⚡ AUTO BATTLE START', 'auto');
-
         const ws = new WebSocket(WS_URL, 'graphql-transport-ws');
-
-        ws.onopen = () => {
-            ws.send(JSON.stringify({
-                type: 'connection_init',
-                payload: { 'X-Player-Id': playerId }
-            }));
-        };
-
-        ws.onmessage = (event) => {
+        ws.onopen = () => ws.send(JSON.stringify({ type: 'connection_init', payload: { 'X-Player-Id': playerId } }));
+        ws.onmessage = async (event) => {
             const msg = JSON.parse(event.data);
-
             if (msg.type === 'connection_ack') {
                 ws.send(JSON.stringify({
-                    id: '1',
-                    type: 'subscribe',
+                    id: '1', type: 'subscribe',
                     payload: {
                         query: `subscription {
                             battleEvents(playerId: "${playerId}", monsterId: "${monsterId}") {
@@ -621,60 +755,41 @@
                     }
                 }));
             }
-
             if (msg.type === 'next') {
                 const r = msg.payload.data.battleEvents;
-
                 currentMonsterHp = r.monsterRemainHp;
                 setHpBar('monsterHpFill', 'monsterHpText', r.monsterRemainHp, currentMonsterMaxHp);
                 setHpBar('playerHpFill', 'playerHpText', r.playerRemainHp, currentPlayerMaxHp);
                 log(`[턴 ${r.turn}] ${r.message}`, r.isCritical ? 'crit' : null);
-
                 if (r.finished) {
                     if (r.monsterDefeated) {
                         monsterDefeated = true;
                         log('monster defeated. select a new monster to continue.', 'dead');
                     }
-                    if (r.playerDefeated) {
-                        log('player has fallen. battle lost.', 'dead');
-                    }
+                    if (r.playerDefeated) log('player has fallen. battle lost.', 'dead');
                     ws.close();
-
-                    loadPlayer().then(() => {
-                        updateInventoryDisplay(null);
-                        graphql(`{
-                            player(id: ${playerId}) {
-                                inventory { items { id name attackBonus defenseBonus } }
-                            }
-                        }`).then(d => {
-                            updateInventoryDisplay(d.player.inventory?.items);
-                        });
-                        if (!r.playerDefeated) setButtonsDisabled(false);
-                    });
+                    await loadPlayer();
+                    const invData = await graphql(`{ player(id: ${playerId}) { inventory { items { id name attackBonus defenseBonus } } } }`);
+                    updateInventoryDisplay(invData.player.inventory?.items);
+                    await loadQuests();
+                    if (!r.playerDefeated) setButtonsDisabled(false);
                 }
             }
-
             if (msg.type === 'error') {
                 log('auto battle error', 'dead');
                 ws.close();
                 setButtonsDisabled(false);
             }
         };
-
-        ws.onerror = () => {
-            log('websocket connection failed', 'dead');
-            setButtonsDisabled(false);
-        };
+        ws.onerror = () => { log('websocket connection failed', 'dead'); setButtonsDisabled(false); };
     }
 
-    // 초기화 — 로컬스토리지에 playerId 있으면 바로 전투 화면
     function init() {
         const savedId = localStorage.getItem(PLAYER_ID_KEY);
         if (savedId) {
             playerId = savedId;
             showBattleScreen();
         }
-        // 엔터키로 플레이어 생성
         document.getElementById('playerNameInput').addEventListener('keydown', e => {
             if (e.key === 'Enter') createPlayer();
         });

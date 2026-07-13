@@ -19,13 +19,16 @@ INSERT INTO quests (title, description)
 VALUES
     ('슬라임 사냥', '슬라임 5마리를 처치하라'),
     ('고블린 토벌', '고블린 3마리를 처치하라'),
-    ('던전 탐험', '던전 깊은 곳을 탐험하라');
+    ('레벨업 달인', '레벨을 5번 올려라'),
+    ('진정한 영웅', '몬스터 3마리 처치 + 레벨 2번 올리기');
 
 INSERT INTO quest_conditions (quest_id, type, target_count)
 VALUES
     (1, 'KILL_MONSTER', 5),
     (2, 'KILL_MONSTER', 3),
-    (3, 'REACH_LEVEL', 5);
+    (3, 'LEVEL_UP', 5),
+    (4, 'KILL_MONSTER', 3),
+    (4, 'LEVEL_UP', 2);
 
 INSERT INTO monster_drops (monster_id, item_id, drop_rate)
 VALUES
@@ -38,4 +41,5 @@ INSERT INTO quest_rewards (quest_id, reward_exp, item_id)
 VALUES
     (1, 50, 6),
     (2, 80, 7),
-    (3, 150, 8);
+    (3, 150, 8),
+    (4, 200, null);

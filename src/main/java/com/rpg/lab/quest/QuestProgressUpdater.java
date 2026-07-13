@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.rpg.lab.quest.QuestStatus.IN_PROGRESS;
@@ -17,7 +18,9 @@ public class QuestProgressUpdater {
     private final QuestRewardProcessor questRewardProcessor;
 
     @Transactional
-    public void update(Long playerId, QuestType questType) {
+    public List<String> update(Long playerId, QuestType questType) {
+        List<String> completedTitles = new ArrayList<>();
+
         List<PlayerQuest> inProgressQuests = playerQuestRepository.findByPlayerIdAndStatus(playerId, IN_PROGRESS);
 
         for (PlayerQuest playerQuest : inProgressQuests) {
@@ -35,7 +38,10 @@ public class QuestProgressUpdater {
                 playerQuest.complete();
                 playerQuestRepository.save(playerQuest);
                 questRewardProcessor.process(playerQuest.getPlayer(), playerQuest.getQuest().getId());
+                completedTitles.add(playerQuest.getQuest().getTitle());
             }
         }
+
+        return completedTitles;
     }
 }

@@ -15,7 +15,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.rpg.lab.quest.QuestType.KILL_MONSTER;
+import static com.rpg.lab.quest.QuestType.LEVEL_UP;
 
 @Slf4j
 @Service
@@ -42,15 +46,21 @@ public class BattleService {
         int levelUps = 0;
         Item droppedItem = null;
 
+        List<String> completedQuests = new ArrayList<>();
+
         if (battle.isMonsterDefeated()) {
             levelUps = player.gainExp(battle.getExpGained());
             droppedItem = itemDropProcessor.process(monsterId, playerId).orElse(null);
-            questProgressUpdater.update(playerId, KILL_MONSTER);
+            completedQuests.addAll(questProgressUpdater.update(playerId, KILL_MONSTER));
+
+            if (levelUps > 0) {
+                completedQuests.addAll(questProgressUpdater.update(playerId, LEVEL_UP));
+            }
         }
 
         playerRepository.save(player);
 
-        return BattleResult.from(battle, levelUps, droppedItem);
+        return BattleResult.from(battle, levelUps, droppedItem, completedQuests);
     }
 
     public BattleResult flee(Long playerId, Long monsterId) {
@@ -60,7 +70,7 @@ public class BattleService {
 
         Battle battle = new Battle(player, monster, inventory, monster.getHp()).flee();
 
-        return BattleResult.from(battle, 0, null);
+        return BattleResult.from(battle, 0, null, List.of());
     }
 
     @Transactional

@@ -58,6 +58,7 @@ type BattleResult {
     expGained: Int!
     levelUps: Int!
     droppedItem: DroppedItem
+    completedQuests: [String!]!
     message: String!
 }
 
