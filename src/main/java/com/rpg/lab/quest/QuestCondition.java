@@ -26,15 +26,20 @@ public class QuestCondition {
     @Column(nullable = false)
     private int targetCount;
 
+    @Column
+    private Long targetMonsterId; // null이면 모든 몬스터
+
     public static QuestCondition create(
             Quest quest,
             QuestType type,
-            int targetCount
+            int targetCount,
+            Long targetMonsterId
     ) {
         QuestCondition questCondition = new QuestCondition();
         questCondition.quest = quest;
         questCondition.type = type;
         questCondition.targetCount = targetCount;
+        questCondition.targetMonsterId = targetMonsterId;
         return questCondition;
     }
 }

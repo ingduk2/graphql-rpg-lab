@@ -22,13 +22,13 @@ VALUES
     ('레벨업 달인', '레벨을 5번 올려라'),
     ('진정한 영웅', '몬스터 3마리 처치 + 레벨 2번 올리기');
 
-INSERT INTO quest_conditions (quest_id, type, target_count)
+INSERT INTO quest_conditions (quest_id, type, target_count, target_monster_id)
 VALUES
-    (1, 'KILL_MONSTER', 5),
-    (2, 'KILL_MONSTER', 3),
-    (3, 'LEVEL_UP', 5),
-    (4, 'KILL_MONSTER', 3),
-    (4, 'LEVEL_UP', 2);
+    (1, 'KILL_MONSTER', 5, 1),   -- 슬라임(id:1) 5마리
+    (2, 'KILL_MONSTER', 3, 2),   -- 고블린(id:2) 3마리
+    (3, 'LEVEL_UP', 5, null),    -- 레벨업 5번
+    (4, 'KILL_MONSTER', 3, null), -- 진정한 영웅 - 모든 몬스터 3마리
+    (4, 'LEVEL_UP', 2, null);    -- 진정한 영웅 - 레벨업 2번
 
 INSERT INTO monster_drops (monster_id, item_id, drop_rate)
 VALUES

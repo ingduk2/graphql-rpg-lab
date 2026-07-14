@@ -18,7 +18,11 @@ public class QuestProgressUpdater {
     private final QuestRewardProcessor questRewardProcessor;
 
     @Transactional
-    public List<String> update(Long playerId, QuestType questType) {
+    public List<String> update(
+            Long playerId,
+            QuestType questType,
+            Long monsterId
+    ) {
         List<String> completedTitles = new ArrayList<>();
 
         List<PlayerQuest> inProgressQuests = playerQuestRepository.findByPlayerIdAndStatus(playerId, IN_PROGRESS);
@@ -28,6 +32,10 @@ public class QuestProgressUpdater {
 
             progressList.stream()
                     .filter(p -> p.getQuestCondition().getType() == questType)
+                    .filter(p -> {
+                        Long targetMonsterId = p.getQuestCondition().getTargetMonsterId();
+                        return targetMonsterId == null || targetMonsterId.equals(monsterId);
+                    })
                     .forEach(p -> {
                         p.increment();
                         playerQuestProgressRepository.save(p);

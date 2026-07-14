@@ -51,10 +51,10 @@ public class BattleService {
         if (battle.isMonsterDefeated()) {
             levelUps = player.gainExp(battle.getExpGained());
             droppedItem = itemDropProcessor.process(monsterId, playerId).orElse(null);
-            completedQuests.addAll(questProgressUpdater.update(playerId, KILL_MONSTER));
+            completedQuests.addAll(questProgressUpdater.update(playerId, KILL_MONSTER, monsterId));
 
             if (levelUps > 0) {
-                completedQuests.addAll(questProgressUpdater.update(playerId, LEVEL_UP));
+                completedQuests.addAll(questProgressUpdater.update(playerId, LEVEL_UP, monsterId));
             }
         }
 
