@@ -664,41 +664,41 @@
         setButtonsDisabled(true);
         try {
             const data = await graphql(`
-                mutation {
-                    attack(monsterId: ${monsterId}, currentMonsterHp: ${currentMonsterHp}) {
-                        playerDamage monsterDamage monsterRemainHp playerRemainHp
-                        isCritical monsterDefeated playerDefeated
-                        expGained levelUps
-                        droppedItem { name type attackBonus defenseBonus }
-                        completedQuests
-                        message
-                    }
+            mutation {
+                attack(monsterId: ${monsterId}, currentMonsterHp: ${currentMonsterHp}) {
+                    playerDamage monsterDamage monsterRemainHp playerRemainHp
+                    isCritical monsterDefeated playerDefeated
+                    expGained levelUps
+                    droppedItem { name type attackBonus defenseBonus }
+                    completedQuests
+                    message
                 }
-            `);
+            }
+        `);
             const r = data.attack;
+
+            // HP 업데이트
             currentMonsterHp = r.monsterRemainHp;
             setHpBar('monsterHpFill', 'monsterHpText', r.monsterRemainHp, currentMonsterMaxHp);
             setHpBar('playerHpFill', 'playerHpText', r.playerRemainHp, currentPlayerMaxHp);
+
+            // 로그
             log(r.message, r.isCritical ? 'crit' : null);
             if (r.expGained > 0) log(`경험치 +${r.expGained} 획득!`, 'sys');
-            if (r.droppedItem) {
-                const bonuses = [];
-                if (r.droppedItem.attackBonus > 0) bonuses.push(`ATK+${r.droppedItem.attackBonus}`);
-                if (r.droppedItem.defenseBonus > 0) bonuses.push(`DEF+${r.droppedItem.defenseBonus}`);
-                log(`★ 아이템 드롭! [${r.droppedItem.type}] ${r.droppedItem.name}${bonuses.length ? ` (${bonuses.join(' ')})` : ''}`, 'drop');
-            }
-            if (r.completedQuests && r.completedQuests.length > 0) {
-                r.completedQuests.forEach(title => {
-                    log(`★ 퀘스트 완료! ${title}`, 'quest-log');
-                });
-                await loadQuests();
-            }
             if (r.levelUps > 0) log(`★ LEVEL UP! Lv.${currentPlayerLevel} → Lv.${currentPlayerLevel + r.levelUps} ★`, 'levelup');
-            if (r.levelUps > 0 || r.droppedItem) {
+            if (r.droppedItem) logDroppedItem(r.droppedItem);
+            if (r.completedQuests?.length > 0) r.completedQuests.forEach(t => log(`★ 퀘스트 완료! ${t}`, 'quest-log'));
+
+            // 상태 업데이트
+            const needsRefresh = r.levelUps > 0 || r.droppedItem || r.completedQuests?.length > 0;
+            if (needsRefresh) {
                 await loadPlayer();
+                if (r.completedQuests?.length > 0) await loadQuests();
             } else if (r.expGained > 0) {
                 setExpBar(currentPlayerExp + r.expGained, currentPlayerLevel);
             }
+
+            // 전투 종료
             if (r.monsterDefeated) {
                 monsterDefeated = true;
                 log('monster defeated. select a new monster to continue.', 'dead');
@@ -715,6 +715,13 @@
             console.error('doAttack error:', e);
         }
         setButtonsDisabled(false);
+    }
+
+    function logDroppedItem(item) {
+        const bonuses = [];
+        if (item.attackBonus > 0) bonuses.push(`ATK+${item.attackBonus}`);
+        if (item.defenseBonus > 0) bonuses.push(`DEF+${item.defenseBonus}`);
+        log(`★ 아이템 드롭! [${item.type}] ${item.name}${bonuses.length ? ` (${bonuses.join(' ')})` : ''}`, 'drop');
     }
 
     async function doFlee() {
