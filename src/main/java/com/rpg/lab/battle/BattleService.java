@@ -3,23 +3,15 @@ package com.rpg.lab.battle;
 import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.inventory.Inventory;
 import com.rpg.lab.inventory.InventoryRepository;
-import com.rpg.lab.item.Item;
 import com.rpg.lab.monster.Monster;
 import com.rpg.lab.monster.MonsterRepository;
 import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerRepository;
-import com.rpg.lab.quest.QuestProgressUpdater;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.rpg.lab.quest.QuestType.KILL_MONSTER;
-import static com.rpg.lab.quest.QuestType.LEVEL_UP;
 
 @Slf4j
 @Service
@@ -31,7 +23,7 @@ public class BattleService {
     private final MonsterRepository monsterRepository;
     private final InventoryRepository inventoryRepository;
     private final ItemDropProcessor itemDropProcessor;
-    private final QuestProgressUpdater questProgressUpdater;
+    private final BattleVictoryProcessor battleVictoryProcessor;
 
     @Transactional
     public BattleResult attack(Long playerId, Long monsterId, int currentMonsterHp) {
@@ -43,24 +35,11 @@ public class BattleService {
 
         player.syncHp(battle.getPlayerRemainHp());
 
-        int levelUps = 0;
-        Item droppedItem = null;
-
-        List<String> completedQuests = new ArrayList<>();
-
-        if (battle.isMonsterDefeated()) {
-            levelUps = player.gainExp(battle.getExpGained());
-            droppedItem = itemDropProcessor.process(monsterId, playerId).orElse(null);
-            completedQuests.addAll(questProgressUpdater.update(playerId, KILL_MONSTER, monsterId));
-
-            if (levelUps > 0) {
-                completedQuests.addAll(questProgressUpdater.update(playerId, LEVEL_UP, monsterId));
-            }
-        }
+        BattleReward battleReward = battleVictoryProcessor.process(player, battle, monsterId, playerId);
 
         playerRepository.save(player);
 
-        return BattleResult.from(battle, levelUps, droppedItem, completedQuests);
+        return BattleResult.from(battle, battleReward);
     }
 
     public BattleResult flee(Long playerId, Long monsterId) {
@@ -70,7 +49,7 @@ public class BattleService {
 
         Battle battle = new Battle(player, monster, inventory, monster.getHp()).flee();
 
-        return BattleResult.from(battle, 0, null, List.of());
+        return BattleResult.from(battle, BattleReward.empty());
     }
 
     @Transactional

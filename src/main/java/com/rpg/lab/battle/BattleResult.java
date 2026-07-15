@@ -1,7 +1,5 @@
 package com.rpg.lab.battle;
 
-import com.rpg.lab.item.Item;
-
 import java.util.List;
 
 public record BattleResult(
@@ -21,9 +19,7 @@ public record BattleResult(
 
     public static BattleResult from(
             Battle battle,
-            int levelUps,
-            Item droppedItem,
-            List<String> completedQuests
+            BattleReward battleReward
     ) {
         return new BattleResult(
                 battle.getPlayerDamage(),
@@ -34,9 +30,9 @@ public record BattleResult(
                 battle.isMonsterDefeated(),
                 battle.isPlayerDefeated(),
                 battle.getExpGained(),
-                levelUps,
-                droppedItem != null ? DroppedItem.from(droppedItem) : null,
-                completedQuests,
+                battleReward.levelUps(),
+                battleReward.droppedItem() != null ? DroppedItem.from(battleReward.droppedItem()) : null,
+                battleReward.completedQuests(),
                 battle.getMessage()
         );
     }
