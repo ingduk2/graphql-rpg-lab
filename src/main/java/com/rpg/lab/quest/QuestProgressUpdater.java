@@ -15,15 +15,14 @@ public class QuestProgressUpdater {
 
     private final PlayerQuestRepository playerQuestRepository;
     private final PlayerQuestProgressRepository playerQuestProgressRepository;
-    private final QuestRewardProcessor questRewardProcessor;
 
     @Transactional
-    public List<String> update(
+    public List<PlayerQuest> update(
             Long playerId,
             QuestType questType,
             Long monsterId
     ) {
-        List<String> completedTitles = new ArrayList<>();
+        List<PlayerQuest> completedQuests = new ArrayList<>();
 
         List<PlayerQuest> inProgressQuests = playerQuestRepository.findByPlayerIdAndStatus(playerId, IN_PROGRESS);
 
@@ -45,11 +44,10 @@ public class QuestProgressUpdater {
             if (allCompleted && !progressList.isEmpty()) {
                 playerQuest.complete();
                 playerQuestRepository.save(playerQuest);
-                questRewardProcessor.process(playerQuest.getPlayer(), playerQuest.getQuest().getId());
-                completedTitles.add(playerQuest.getQuest().getTitle());
+                completedQuests.add(playerQuest);
             }
         }
 
-        return completedTitles;
+        return completedQuests;
     }
 }
