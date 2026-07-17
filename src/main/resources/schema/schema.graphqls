@@ -74,6 +74,9 @@ type BattleEvent {
     playerDefeated: Boolean!
     message: String!
     finished: Boolean!
+    levelUps: Int!
+    droppedItem: DroppedItem
+    completedQuests: [String!]!
 }
 
 type Player {

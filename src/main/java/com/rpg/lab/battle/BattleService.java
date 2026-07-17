@@ -69,21 +69,11 @@ public class BattleService {
                     monsterHp[0] = battle.getMonsterRemainHp();
                     player.syncHp(battle.getPlayerRemainHp());
 
+                    BattleReward battleReward = battleVictoryProcessor.process(player, battle, monsterId, playerId);
+
                     boolean finished = battle.isMonsterDefeated() || battle.isPlayerDefeated();
 
-                    if (battle.isMonsterDefeated()) {
-                        player.gainExp(battle.getExpGained());
-                        itemDropProcessor.process(monsterId, playerId);
-                    }
-
-                    sink.next(new BattleEvent(
-                            battleId, turn[0]++,
-                            battle.getPlayerDamage(), battle.getMonsterDamage(),
-                            battle.getMonsterRemainHp(), battle.getPlayerRemainHp(),
-                            battle.isCritical(), battle.isMonsterDefeated(),
-                            battle.isPlayerDefeated(), battle.getMessage(),
-                            finished
-                    ));
+                    sink.next(BattleEvent.of(battleId, turn[0]++, battle, battleReward, finished));
 
                     if (finished) break;
 
