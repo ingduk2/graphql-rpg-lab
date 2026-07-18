@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.rpg.lab.quest.QuestStatus.IN_PROGRESS;
+import static com.rpg.lab.quest.QuestType.KILL_MONSTER;
+import static com.rpg.lab.quest.QuestType.LEVEL_UP;
 
 @Component
 @RequiredArgsConstructor
@@ -17,7 +19,20 @@ public class QuestProgressUpdater {
     private final PlayerQuestProgressRepository playerQuestProgressRepository;
 
     @Transactional
-    public List<PlayerQuest> update(
+    public List<PlayerQuest> updateOnBattleVictory(
+            Long playerId,
+            Long monsterId,
+            int levelUps
+    ) {
+        List<PlayerQuest> completedQuests = new ArrayList<>(update(playerId, KILL_MONSTER, monsterId));
+        if (levelUps > 0) {
+            completedQuests.addAll(update(playerId, LEVEL_UP, null));
+        }
+
+        return completedQuests;
+    }
+
+    private List<PlayerQuest> update(
             Long playerId,
             QuestType questType,
             Long monsterId

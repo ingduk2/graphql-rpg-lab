@@ -8,11 +8,7 @@ import com.rpg.lab.quest.QuestRewardProcessor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import static com.rpg.lab.quest.QuestType.KILL_MONSTER;
-import static com.rpg.lab.quest.QuestType.LEVEL_UP;
 
 @Component
 @RequiredArgsConstructor
@@ -28,25 +24,32 @@ public class BattleVictoryProcessor {
             Long monsterId,
             Long playerId
     ) {
+        // 전투 HP 동기화
+        player.syncHp(battle.getPlayerRemainHp());
+
         if (!battle.isMonsterDefeated()) {
             return BattleReward.empty();
         }
 
+        // 전투 경험치 획득 및 레벨업
         int levelUps = player.gainExp(battle.getExpGained());
+
+        // 전투 아이템 드롭
         Item droppedItem = itemDropProcessor.process(monsterId, playerId).orElse(null);
 
-        List<PlayerQuest> completedQuests = new ArrayList<>();
-        completedQuests.addAll(questProgressUpdater.update(playerId, KILL_MONSTER, monsterId));
-        if (levelUps > 0) {
-            completedQuests.addAll(questProgressUpdater.update(playerId, LEVEL_UP, null));
-        }
+        // 퀘스트 진행도 업데이트
+        List<PlayerQuest> completedQuests = questProgressUpdater.updateOnBattleVictory(playerId, monsterId, levelUps);
 
+        // 퀘스트 완료 보상 지급
         completedQuests.forEach(quest -> questRewardProcessor.process(player, quest.getQuest().getId()));
 
-        List<String> completedTitles = completedQuests.stream()
+        List<String> completedTitles = getCompletedTitles(completedQuests);
+        return BattleReward.of(levelUps, droppedItem, completedTitles);
+    }
+
+    private static List<String> getCompletedTitles(List<PlayerQuest> completedQuests) {
+        return completedQuests.stream()
                 .map(quest -> quest.getQuest().getTitle())
                 .toList();
-
-        return BattleReward.of(levelUps, droppedItem, completedTitles);
     }
 }

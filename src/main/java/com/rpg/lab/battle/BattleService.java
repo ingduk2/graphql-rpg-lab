@@ -1,12 +1,12 @@
 package com.rpg.lab.battle;
 
-import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.inventory.Inventory;
-import com.rpg.lab.inventory.InventoryRepository;
+import com.rpg.lab.inventory.InventoryReader;
 import com.rpg.lab.monster.Monster;
-import com.rpg.lab.monster.MonsterRepository;
+import com.rpg.lab.monster.MonsterReader;
 import com.rpg.lab.player.Player;
-import com.rpg.lab.player.PlayerRepository;
+import com.rpg.lab.player.PlayerManager;
+import com.rpg.lab.player.PlayerReader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,33 +19,29 @@ import reactor.core.publisher.Flux;
 @Transactional(readOnly = true)
 public class BattleService {
 
-    private final PlayerRepository playerRepository;
-    private final MonsterRepository monsterRepository;
-    private final InventoryRepository inventoryRepository;
-    private final ItemDropProcessor itemDropProcessor;
+    private final PlayerReader playerReader;
+    private final PlayerManager playerManager;
+    private final MonsterReader monsterReader;
+    private final InventoryReader inventoryReader;
     private final BattleVictoryProcessor battleVictoryProcessor;
 
     @Transactional
     public BattleResult attack(Long playerId, Long monsterId, int currentMonsterHp) {
-        Player player = getPlayer(playerId);
-        Monster monster = getMonster(monsterId);
-        Inventory inventory = getInventoryWithItems(playerId);
+        Player player = playerReader.getById(playerId);
+        Monster monster = monsterReader.getById(monsterId);
+        Inventory inventory = inventoryReader.getWithItemsByPlayerId(playerId);
 
         Battle battle = new Battle(player, monster, inventory, currentMonsterHp).attack();
 
-        player.syncHp(battle.getPlayerRemainHp());
-
         BattleReward battleReward = battleVictoryProcessor.process(player, battle, monsterId, playerId);
-
-        playerRepository.save(player);
 
         return BattleResult.from(battle, battleReward);
     }
 
     public BattleResult flee(Long playerId, Long monsterId) {
-        Player player = getPlayer(playerId);
-        Monster monster = getMonster(monsterId);
-        Inventory inventory = getInventoryWithItems(playerId);
+        Player player = playerReader.getById(playerId);
+        Monster monster = monsterReader.getById(monsterId);
+        Inventory inventory = inventoryReader.getWithItemsByPlayerId(playerId);
 
         Battle battle = new Battle(player, monster, inventory, monster.getHp()).flee();
 
@@ -54,9 +50,9 @@ public class BattleService {
 
     @Transactional
     public Flux<BattleEvent> streamBattle(Long playerId, Long monsterId) {
-        Player player = getPlayer(playerId);
-        Monster monster = getMonster(monsterId);
-        Inventory inventory = getInventoryWithItems(playerId);
+        Player player = playerReader.getById(playerId);
+        Monster monster = monsterReader.getById(monsterId);
+        Inventory inventory = inventoryReader.getWithItemsByPlayerId(playerId);
         String battleId = playerId + ":" + monsterId;
 
         return Flux.create(sink -> {
@@ -67,7 +63,6 @@ public class BattleService {
                 while (monsterHp[0] > 0 && player.getHp() > 0) {
                     Battle battle = new Battle(player, monster, inventory, monsterHp[0]).attack();
                     monsterHp[0] = battle.getMonsterRemainHp();
-                    player.syncHp(battle.getPlayerRemainHp());
 
                     BattleReward battleReward = battleVictoryProcessor.process(player, battle, monsterId, playerId);
 
@@ -79,27 +74,12 @@ public class BattleService {
 
                     Thread.sleep(1000);
                 }
-                playerRepository.save(player);
+                playerManager.save(player);
                 sink.complete();
             } catch (Exception e) {
                 log.error("Battle stream error: {}", e.getMessage(), e);
                 sink.error(e);
             }
         });
-    }
-
-    private Player getPlayer(Long playerId) {
-        return playerRepository.findById(playerId)
-                .orElseThrow(() -> new EntityNotFoundException("Player not found: " + playerId));
-    }
-
-    private Monster getMonster(Long monsterId) {
-        return monsterRepository.findById(monsterId)
-                .orElseThrow(() -> new EntityNotFoundException("Monster not found: " + monsterId));
-    }
-
-    private Inventory getInventoryWithItems(Long playerId) {
-        return inventoryRepository.findWithItemsByPlayerId(playerId)
-                .orElseThrow(() -> new EntityNotFoundException("Inventory not found: " + playerId));
     }
 }
