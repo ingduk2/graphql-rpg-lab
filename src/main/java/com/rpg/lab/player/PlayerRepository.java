@@ -1,6 +1,12 @@
 package com.rpg.lab.player;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.Repository;
 
-public interface PlayerRepository extends JpaRepository<Player, Long> {
+import java.util.List;
+import java.util.Optional;
+
+public interface PlayerRepository extends Repository<Player, Long> {
+    Optional<Player> findById(Long id);
+    Player save(Player player);
+    List<Player> findAll();
 }

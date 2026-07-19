@@ -1,9 +1,9 @@
 package com.rpg.lab.item;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.Repository;
 
-import java.util.List;
+import java.util.Optional;
 
-public interface ItemRepository extends JpaRepository<Item, Long> {
-    List<Item> findAllByIdIn(List<Long> ids);
+public interface ItemRepository extends Repository<Item, Long> {
+    Optional<Item> findById(Long id);
 }
