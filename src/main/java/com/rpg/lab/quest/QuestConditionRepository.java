@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface QuestConditionRepository extends Repository<QuestCondition, Long> {
     List<QuestCondition> findByQuestId(Long questId);
+    QuestCondition save(QuestCondition questCondition);
 }

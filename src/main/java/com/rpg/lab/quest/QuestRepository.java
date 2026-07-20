@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface QuestRepository extends Repository<Quest, Long> {
     Optional<Quest> findById(Long id);
     List<Quest> findAll();
+    Quest save(Quest quest);
 }
