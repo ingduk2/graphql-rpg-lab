@@ -14,4 +14,6 @@ public interface QuestRewardRepository extends Repository<QuestReward, Long> {
             WHERE r.quest.id = :questId
             """)
     List<QuestReward> findAllWithItemByQuestId(@Param("questId") Long questId);
+
+    QuestReward save(QuestReward questReward);
 }
