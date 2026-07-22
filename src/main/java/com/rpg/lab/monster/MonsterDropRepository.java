@@ -14,4 +14,6 @@ public interface MonsterDropRepository extends Repository<MonsterDrop, Long> {
         WHERE md.monster.id = :monsterId
     """)
     List<MonsterDrop> findAllWithItemByMonsterId(@Param("monsterId") Long monsterId);
+
+    MonsterDrop save(MonsterDrop monsterDrop);
 }

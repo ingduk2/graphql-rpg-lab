@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: graphql-rpg
+  sql:
+    init:
+      mode: never
+
+  datasource:
+    url: jdbc:h2:mem:rpgdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  graphql:
+    websocket:
+      path: /graphql
+
+  h2:
+    console:
+      enabled: true
