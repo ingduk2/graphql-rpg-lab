@@ -1,5 +1,6 @@
 package com.rpg.lab.battle;
 
+import com.rpg.lab.common.RandomProvider;
 import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.inventory.Inventory;
 import com.rpg.lab.inventory.InventoryRepository;
@@ -12,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Component
 @RequiredArgsConstructor
@@ -20,6 +20,7 @@ public class ItemDropProcessor {
 
     private final MonsterDropRepository monsterDropRepository;
     private final InventoryRepository inventoryRepository;
+    private final RandomProvider randomProvider;
 
     @Transactional
     public Optional<Item> process(Long monsterId, Long playerId) {
@@ -34,7 +35,7 @@ public class ItemDropProcessor {
 
     private Optional<Item> calculateDrop(List<MonsterDrop> drops) {
         return drops.stream()
-                .filter(drop -> ThreadLocalRandom.current().nextDouble() < drop.getDropRate())
+                .filter(drop -> randomProvider.nextDouble() < drop.getDropRate())
                 .map(MonsterDrop::getItem)
                 .findFirst();
     }
