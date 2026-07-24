@@ -11,4 +11,8 @@ public class MonsterFixture {
     public static Monster createOrc() {
         return Monster.create("오크", 100, 20, 80);
     }
+
+    public static Monster createBoss() {
+        return Monster.create("보스", 1, 1, 9999);
+    }
 }
