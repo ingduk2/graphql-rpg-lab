@@ -48,9 +48,8 @@ class QuestProgressUpdaterTest {
 
         @BeforeEach
         void setUp() {
-            Quest quest = questRepository.save(QuestFixture.createKillMonster());
-            questCondition = questConditionRepository.save(
-                    QuestFixture.killMonsterCondition(quest, monster.getId(), 3));
+            Quest quest = questRepository.save(QuestFixture.createKillMonster(monster.getId(), 3));
+            questCondition = quest.getConditions().get(0);
             playerQuest = playerQuestRepository.save(PlayerQuest.create(player, quest));
             playerQuestProgressRepository.save(PlayerQuestProgress.create(playerQuest, questCondition));
         }
@@ -104,9 +103,8 @@ class QuestProgressUpdaterTest {
 
         @BeforeEach
         void setUp() {
-            Quest quest = questRepository.save(QuestFixture.createLevelUp());
-            questCondition = questConditionRepository.save(
-                    QuestFixture.levelUpCondition(quest, 3));
+            Quest quest = questRepository.save(QuestFixture.createLevelUp(3));
+            questCondition = quest.getConditions().get(0);
             playerQuest = playerQuestRepository.save(PlayerQuest.create(player, quest));
             playerQuestProgressRepository.save(PlayerQuestProgress.create(playerQuest, questCondition));
         }

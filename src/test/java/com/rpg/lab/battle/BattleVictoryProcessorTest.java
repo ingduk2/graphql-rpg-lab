@@ -124,12 +124,13 @@ class BattleVictoryProcessorTest {
     @DisplayName("몬스터 처치로 퀘스트가 완료되면 보상까지 지급된다")
     void test4() {
         Monster monster = monsterRepository.save(MonsterFixture.createSlime());
-        Quest quest = questRepository.save(QuestFixture.createKillMonster());
-        QuestCondition questCondition = questConditionRepository.save(QuestFixture.killMonsterCondition(quest, monster.getId(), 1));
+        Quest quest = questRepository.save(QuestFixture.createKillMonster(monster.getId(), 1));
+        QuestCondition questCondition = quest.getConditions().get(0);
         PlayerQuest playerQuest = playerQuestRepository.save(PlayerQuest.create(player, quest));
         playerQuestProgressRepository.save(PlayerQuestProgress.create(playerQuest, questCondition));
+
         Item rewardItem = itemRepository.save(ItemFixture.createSwordItem());
-        questRewardRepository.save(QuestReward.create(quest, 50, rewardItem));
+        quest.addReward(50, rewardItem);
 
         int expBefore = player.getExp();
         Battle battle = winningBattle(monster);
@@ -151,8 +152,8 @@ class BattleVictoryProcessorTest {
     @DisplayName("몬스터 처치로 레벨업하면 보상에 반영되고 LEVEL_UP 퀘스트 진행도도 오른다")
     void test5() {
         Monster monster = monsterRepository.save(MonsterFixture.createBoss());
-        Quest levelUpQuest = questRepository.save(QuestFixture.createLevelUp());
-        QuestCondition questCondition = questConditionRepository.save(QuestFixture.levelUpCondition(levelUpQuest, 1));
+        Quest levelUpQuest = questRepository.save(QuestFixture.createLevelUp(1));
+        QuestCondition questCondition = levelUpQuest.getConditions().get(0);
         PlayerQuest playerQuest = playerQuestRepository.save(PlayerQuest.create(player, levelUpQuest));
         playerQuestProgressRepository.save(PlayerQuestProgress.create(playerQuest, questCondition));
 

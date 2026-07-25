@@ -40,7 +40,7 @@ class QuestRewardProcessorTest {
     @BeforeEach
     void setUp() {
         player = playerRepository.save(PlayerFixture.create());
-        quest = questRepository.save(QuestFixture.createLevelUp());
+        quest = questRepository.save(QuestFixture.createLevelUp(1));
     }
 
     @Test
