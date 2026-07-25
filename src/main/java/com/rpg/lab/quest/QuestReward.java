@@ -29,7 +29,7 @@ public class QuestReward {
     @JoinColumn(name = "item_id")
     private Item item;
 
-    public static QuestReward create(
+    static QuestReward create(
             Quest quest,
             int rewardExp,
             Item item

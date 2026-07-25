@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "quest_conditions")
 @Getter
@@ -29,15 +31,15 @@ public class QuestCondition {
     @Column
     private Long targetMonsterId; // null이면 모든 몬스터
 
-    public static QuestCondition create(
+    static QuestCondition create(
             Quest quest,
             QuestType type,
             int targetCount,
             Long targetMonsterId
     ) {
         QuestCondition questCondition = new QuestCondition();
-        questCondition.quest = quest;
-        questCondition.type = type;
+        questCondition.quest = Objects.requireNonNull(quest);
+        questCondition.type = Objects.requireNonNull(type);
         questCondition.targetCount = targetCount;
         questCondition.targetMonsterId = targetMonsterId;
         return questCondition;
