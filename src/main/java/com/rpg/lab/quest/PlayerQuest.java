@@ -6,6 +6,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -30,11 +32,16 @@ public class PlayerQuest {
     @Enumerated(EnumType.STRING)
     private QuestStatus status;
 
-    public static PlayerQuest create(Player player, Quest quest) {
+    @OneToMany(mappedBy = "playerQuest", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PlayerQuestProgress> progressList = new ArrayList<>();
+
+    public static PlayerQuest start(Player player, Quest quest) {
         PlayerQuest playerQuest = new PlayerQuest();
         playerQuest.player = Objects.requireNonNull(player);
         playerQuest.quest = Objects.requireNonNull(quest);
         playerQuest.status = QuestStatus.IN_PROGRESS;
+        quest.getConditions().forEach(condition ->
+                playerQuest.progressList.add(PlayerQuestProgress.create(playerQuest, condition)));
         return playerQuest;
     }
 

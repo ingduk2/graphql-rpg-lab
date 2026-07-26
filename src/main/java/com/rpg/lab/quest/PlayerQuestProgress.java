@@ -26,7 +26,7 @@ public class PlayerQuestProgress {
     @Column(nullable = false)
     private int currentCount;
 
-    public static PlayerQuestProgress create(
+    static PlayerQuestProgress create(
             PlayerQuest playerQuest,
             QuestCondition questCondition
     ) {

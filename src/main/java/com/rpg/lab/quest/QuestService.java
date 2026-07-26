@@ -16,7 +16,6 @@ public class QuestService {
     private final QuestRepository questRepository;
     private final PlayerRepository playerRepository;
     private final PlayerQuestRepository playerQuestRepository;
-    private final QuestConditionRepository questConditionRepository;
     private final PlayerQuestProgressRepository playerQuestProgressRepository;
 
     public List<Quest> getQuests() {
@@ -34,13 +33,7 @@ public class QuestService {
                 .orElseThrow(() -> new EntityNotFoundException("Player not found: " + playerId));
         Quest quest = findQuestById(questId);
 
-        PlayerQuest savedPlayerQuest = playerQuestRepository.save(PlayerQuest.create(player, quest));
-
-        // 퀘스트 조건별 진행도 생성
-        List<QuestCondition> conditions = questConditionRepository.findByQuestId(questId);
-        for (QuestCondition condition : conditions) {
-            playerQuestProgressRepository.save(PlayerQuestProgress.create(savedPlayerQuest, condition));
-        }
+        PlayerQuest savedPlayerQuest = playerQuestRepository.save(PlayerQuest.start(player, quest));
 
         List<PlayerQuestProgress> progressList = playerQuestProgressRepository.findProgressByPlayerQuestId(savedPlayerQuest.getId());
 
