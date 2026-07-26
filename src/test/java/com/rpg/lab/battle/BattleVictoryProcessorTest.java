@@ -125,9 +125,7 @@ class BattleVictoryProcessorTest {
     void test4() {
         Monster monster = monsterRepository.save(MonsterFixture.createSlime());
         Quest quest = questRepository.save(QuestFixture.createKillMonster(monster.getId(), 1));
-        QuestCondition questCondition = quest.getConditions().get(0);
-        PlayerQuest playerQuest = playerQuestRepository.save(PlayerQuest.create(player, quest));
-        playerQuestProgressRepository.save(PlayerQuestProgress.create(playerQuest, questCondition));
+        playerQuestRepository.save(PlayerQuest.start(player, quest));
 
         Item rewardItem = itemRepository.save(ItemFixture.createSwordItem());
         quest.addReward(50, rewardItem);
@@ -153,9 +151,7 @@ class BattleVictoryProcessorTest {
     void test5() {
         Monster monster = monsterRepository.save(MonsterFixture.createBoss());
         Quest levelUpQuest = questRepository.save(QuestFixture.createLevelUp(1));
-        QuestCondition questCondition = levelUpQuest.getConditions().get(0);
-        PlayerQuest playerQuest = playerQuestRepository.save(PlayerQuest.create(player, levelUpQuest));
-        playerQuestProgressRepository.save(PlayerQuestProgress.create(playerQuest, questCondition));
+        playerQuestRepository.save(PlayerQuest.start(player, levelUpQuest));
 
         Battle battle = winningBattle(monster);
 

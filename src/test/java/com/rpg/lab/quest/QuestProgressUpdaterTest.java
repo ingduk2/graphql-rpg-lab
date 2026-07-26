@@ -29,7 +29,6 @@ class QuestProgressUpdaterTest {
     private final PlayerRepository playerRepository;
     private final MonsterRepository monsterRepository;
     private final QuestRepository questRepository;
-    private final QuestConditionRepository questConditionRepository;
 
     private Player player;
     private Monster monster;
@@ -50,8 +49,7 @@ class QuestProgressUpdaterTest {
         void setUp() {
             Quest quest = questRepository.save(QuestFixture.createKillMonster(monster.getId(), 3));
             questCondition = quest.getConditions().get(0);
-            playerQuest = playerQuestRepository.save(PlayerQuest.create(player, quest));
-            playerQuestProgressRepository.save(PlayerQuestProgress.create(playerQuest, questCondition));
+            playerQuest = playerQuestRepository.save(PlayerQuest.start(player, quest));
         }
 
         @Test
@@ -105,8 +103,7 @@ class QuestProgressUpdaterTest {
         void setUp() {
             Quest quest = questRepository.save(QuestFixture.createLevelUp(3));
             questCondition = quest.getConditions().get(0);
-            playerQuest = playerQuestRepository.save(PlayerQuest.create(player, quest));
-            playerQuestProgressRepository.save(PlayerQuestProgress.create(playerQuest, questCondition));
+            playerQuest = playerQuestRepository.save(PlayerQuest.start(player, quest));
         }
 
         @Test
