@@ -1,6 +1,5 @@
 package com.rpg.lab.battle;
 
-import com.rpg.lab.common.RandomProvider;
 import com.rpg.lab.fixture.ItemFixture;
 import com.rpg.lab.fixture.MonsterFixture;
 import com.rpg.lab.fixture.PlayerFixture;
@@ -17,33 +16,19 @@ import com.rpg.lab.monster.MonsterRepository;
 import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerRepository;
 import com.rpg.lab.quest.*;
+import com.rpg.lab.testsupport.IntegrationTest;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ActiveProfiles("test")
-@SpringBootTest
-@Transactional
+@IntegrationTest
 @RequiredArgsConstructor
 class BattleVictoryProcessorTest {
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public RandomProvider randomProvider() {
-            return () -> 0;
-        }
-    }
 
     private final BattleVictoryProcessor sut;
 
@@ -53,10 +38,7 @@ class BattleVictoryProcessorTest {
     private final MonsterDropRepository monsterDropRepository;
     private final ItemRepository itemRepository;
     private final QuestRepository questRepository;
-    private final QuestConditionRepository questConditionRepository;
     private final PlayerQuestRepository playerQuestRepository;
-    private final PlayerQuestProgressRepository playerQuestProgressRepository;
-    private final QuestRewardRepository questRewardRepository;
 
     private Player player;
 

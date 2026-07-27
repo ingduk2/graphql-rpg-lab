@@ -10,19 +10,17 @@ import com.rpg.lab.item.Item;
 import com.rpg.lab.item.ItemRepository;
 import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerRepository;
+import com.rpg.lab.testsupport.IntegrationTest;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-@Transactional
+@IntegrationTest
 @RequiredArgsConstructor
 class QuestRewardProcessorTest {
 

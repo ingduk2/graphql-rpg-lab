@@ -1,6 +1,5 @@
 package com.rpg.lab.battle;
 
-import com.rpg.lab.common.RandomProvider;
 import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.fixture.ItemFixture;
 import com.rpg.lab.fixture.MonsterFixture;
@@ -16,15 +15,11 @@ import com.rpg.lab.monster.MonsterDropRepository;
 import com.rpg.lab.monster.MonsterRepository;
 import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerRepository;
+import com.rpg.lab.testsupport.IntegrationTest;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,19 +27,9 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@ActiveProfiles("test")
-@SpringBootTest
-@Transactional
+@IntegrationTest
 @RequiredArgsConstructor
 class ItemDropProcessorTest {
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public RandomProvider randomProvider() {
-            return () -> 0;
-        }
-    }
 
     private final ItemDropProcessor sut;
     private final MonsterDropRepository monsterDropRepository;
