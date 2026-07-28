@@ -83,6 +83,34 @@ class BattleTest {
             assertThat(battle.isMonsterDefeated()).isFalse();
             assertThat(battle.getExpGained()).isEqualTo(0);
         }
+
+        @Test
+        @DisplayName("몬스터 처치 시 처치 메시지가 포함된다")
+        void test7() {
+            Battle battle = attackWithHp(slime, 1);
+
+            assertThat(battle.getMessage()).contains("처치");
+        }
+
+        @Test
+        @DisplayName("몬스터가 살아있으면 반격 메시지가 포함된다")
+        void test8() {
+            Battle battle = attack(orc);
+
+            assertThat(battle.getMessage()).contains("반격");
+        }
+
+        @Test
+        @DisplayName("몬스터 반격으로 플레이어가 사망하면 playerDefeated 가 true 이고 사망 메시지가 포함된다")
+        void test9() {
+            Monster deadlyMonster = Monster.create("보스", 9999, player.getHp() * 9999, 0);
+
+            Battle battle = attack(deadlyMonster);
+
+            assertThat(battle.isPlayerDefeated()).isTrue();
+            assertThat(battle.getPlayerRemainHp()).isEqualTo(0);
+            assertThat(battle.getMessage()).contains("사망");
+        }
     }
 
     @Nested
@@ -120,6 +148,19 @@ class BattleTest {
 
             assertThat(battle.getPlayerDamage()).isGreaterThanOrEqualTo(player.getAttack() + 2);
             assertThat(battle.getMonsterDamage()).isEqualTo(orc.getAttackPower() - 2);
+        }
+    }
+
+    @Nested
+    class NullInventory {
+
+        @Test
+        @DisplayName("인벤토리가 null 이어도 보너스 없이 정상 동작한다")
+        void test1() {
+            Battle battle = new Battle(player, orc, null, orc.getHp()).attack();
+
+            assertThat(battle.getPlayerDamage()).isGreaterThanOrEqualTo(player.getAttack());
+            assertThat(battle.getMonsterDamage()).isEqualTo(orc.getAttackPower());
         }
     }
 
