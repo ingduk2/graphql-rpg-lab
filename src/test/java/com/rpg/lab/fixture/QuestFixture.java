@@ -24,4 +24,9 @@ public class QuestFixture {
                 null
         );
     }
+
+    public static Quest createComposite(Long monsterId) {
+        return Quest.create("진정한 영웅", "몬스터 3마리 처치 + 레벨 2번 올리기", QuestType.KILL_MONSTER, 3, monsterId)
+                .addCondition(QuestType.LEVEL_UP, 2, null);
+    }
 }
