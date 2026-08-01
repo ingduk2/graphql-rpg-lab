@@ -27,7 +27,7 @@ class InventoryTest {
         @DisplayName("아이템을 추가하면 inventoryItems 에 반영된다")
         void test1() {
             Inventory inventory = Inventory.create(player);
-            Item item = ItemFixture.createSwordItem();
+            Item item = ItemFixture.createSwordItemWithId();
 
             inventory.addItem(item);
 
@@ -40,7 +40,7 @@ class InventoryTest {
         @DisplayName("같은 아이템을 여러 번 addItem 하면 중복으로 다 쌓인다")
         void test2() {
             Inventory inventory = Inventory.create(player);
-            Item item = ItemFixture.createSwordItem();
+            Item item = ItemFixture.createSwordItemWithId();
 
             inventory.addItem(item);
             inventory.addItem(item);
@@ -59,9 +59,9 @@ class InventoryTest {
         @DisplayName("보유하지 않은 아이템이면 추가된다")
         void test1() {
             Inventory inventory = Inventory.create(player);
-            Item swordItem = ItemFixture.createSwordItem();
+            Item swordItem = ItemFixture.createSwordItemWithId();
             inventory.addItem(swordItem);
-            Item shieldItem = ItemFixture.createShieldItem();
+            Item shieldItem = ItemFixture.createShieldItemWithId();
 
             inventory.addItemIfNotOwned(shieldItem);
 
@@ -74,7 +74,7 @@ class InventoryTest {
         @DisplayName("이미 보유한 아이템이면 추가되지 않는다 (개수 그대로)")
         void test2() {
             Inventory inventory = Inventory.create(player);
-            Item swordItem = ItemFixture.createSwordItem();
+            Item swordItem = ItemFixture.createSwordItemWithId();
             inventory.addItem(swordItem);
 
             inventory.addItemIfNotOwned(swordItem);
@@ -93,7 +93,7 @@ class InventoryTest {
         @DisplayName("보유 중인 아이템을 제거하면 목록에서 사라진다")
         void test1() {
             Inventory inventory = Inventory.create(player);
-            Item item = ItemFixture.createSwordItem();
+            Item item = ItemFixture.createSwordItemWithId();
             inventory.addItem(item);
 
             inventory.removeItem(item.getId());
@@ -130,8 +130,8 @@ class InventoryTest {
         @DisplayName("여러 아이템의 공격 보너스가 합산된다")
         void test2() {
             Inventory inventory = Inventory.create(player);
-            Item swordItem = ItemFixture.createSwordItem();
-            Item axeItem = ItemFixture.createAxeItem();
+            Item swordItem = ItemFixture.createSwordItemWithId();
+            Item axeItem = ItemFixture.createAxeItemWithId();
             inventory.addItem(swordItem);
             inventory.addItem(axeItem);
 
@@ -158,8 +158,8 @@ class InventoryTest {
         @DisplayName("여러 아이템의 방어 보너스가 합산된다")
         void test2() {
             Inventory inventory = Inventory.create(player);
-            Item shieldItem = ItemFixture.createShieldItem();
-            Item armorItem = ItemFixture.createArmorItem();
+            Item shieldItem = ItemFixture.createShieldItemWithId();
+            Item armorItem = ItemFixture.createArmorItemWithId();
             inventory.addItem(shieldItem);
             inventory.addItem(armorItem);
 
