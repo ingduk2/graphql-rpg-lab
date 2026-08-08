@@ -28,4 +28,6 @@ public interface InventoryRepository extends Repository<Inventory, Long> {
     Optional<Inventory> findWithItemsByPlayerId(@Param("playerId") Long playerId);
 
     Optional<Inventory> findByPlayerId(Long playerId);
+
+    void delete(Inventory inventory);
 }

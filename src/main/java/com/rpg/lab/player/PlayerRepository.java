@@ -9,4 +9,5 @@ public interface PlayerRepository extends Repository<Player, Long> {
     Optional<Player> findById(Long id);
     Player save(Player player);
     List<Player> findAll();
+    void deleteById(Long id);
 }

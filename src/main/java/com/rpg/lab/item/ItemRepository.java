@@ -8,4 +8,6 @@ public interface ItemRepository extends Repository<Item, Long> {
     Optional<Item> findById(Long id);
 
     Item save(Item item);
+
+    void deleteById(Long id);
 }
