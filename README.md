@@ -242,13 +242,34 @@
 
 ---
 
-### Step 11. 성능 최적화 & 마무리
+### Step 11. 퀘스트 체인
+> "이야기가 있는 성장"
+
+- **11-1.** `Quest`에 선행 퀘스트(`prerequisiteQuestId` 또는 `Quest` 자기참조) 필드 추가
+  - Aggregate Root 설계 원칙 유지 — 필요하다면 생성 시점에 선택적으로 받도록
+- **11-2.** `acceptQuest` 시점에 선행 퀘스트 완료 여부 검증
+  - 선행 퀘스트가 없거나 이미 `COMPLETED` 상태여야 수락 가능
+  - 조건 미충족 시 명확한 예외(예: `PrerequisiteQuestNotCompletedException`) 발생
+- **11-3.** 스키마에 체인 정보 노출 여부 결정
+  - `Quest` 타입에 `prerequisiteQuest: Quest` 필드를 추가할지, 아니면 서버에서만 검증하고 클라이언트엔 안 보여줄지
+- **11-4.** 테스트 보강
+  - `QuestServiceTest`에 선행 퀘스트 미완료 시 수락 실패 케이스 추가
+  - `QuestDataFetcherTest`에 GraphQL 레벨 에러 응답 케이스 추가
+- **11-5.** HTML 퀘스트 화면에 잠긴 퀘스트(미충족) 표시
+
+**학습 포인트**
+- 자기참조 연관관계(`Quest → Quest`) 설계 시 순환 방지 고려
+- 도메인 규칙(선행 조건)을 어느 계층(엔티티 vs 서비스)에서 검증할지 판단
+
+---
+
+### Step 12. 성능 최적화 & 마무리
 > "더 빠르게, 더 안전하게"
 
-- **11-1.** Query Complexity 분석 — 악의적인 중첩 쿼리 방어
-- **11-2.** Persisted Queries 개념 이해
-- **11-3.** DataLoader 캐싱 전략 정리
-- **11-4.** 전체 아키텍처 회고
+- **12-1.** Query Complexity 분석 — 악의적인 중첩 쿼리 방어
+- **12-2.** Persisted Queries 개념 이해
+- **12-3.** DataLoader 캐싱 전략 정리
+- **12-4.** 전체 아키텍처 회고
 
 **학습 포인트**
 - GraphQL의 보안 고려사항 (Depth Limit, Complexity Limit)
