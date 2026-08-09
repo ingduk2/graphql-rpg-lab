@@ -220,13 +220,35 @@
 
 ---
 
-### Step 10. 성능 최적화 & 마무리
+### Step 10. 테스트 커버리지 완성 & 도메인 리팩토링
+> "더 견고하게, 더 안전하게"
+
+**도메인 리팩토링**
+- `Quest`, `PlayerQuest`를 Aggregate Root로 리팩토링
+  - `QuestCondition`/`QuestReward`, `PlayerQuestProgress`를 각각 캡슐화 (package-private 생성자)
+  - 생성 시점에 최소 1개 조건을 필수로 받도록 강제 (불변식 컴파일 타임 보장)
+- `ItemDropProcessor`의 `ThreadLocalRandom` 직접 호출을 `RandomProvider` 인터페이스로 추상화
+  → 테스트에서 결정론적 값 주입 가능
+
+**테스트 커버리지**
+- 도메인 단위 테스트: `Player`, `Battle`, `Inventory`
+- 서비스 통합 테스트: `QuestService`, `InventoryService`, `BattleService`(최소)
+- GraphQL 리졸버 통합 테스트: `PlayerDataFetcher`, `MonsterDataFetcher`, `QuestDataFetcher`, `InventoryDataFetcher`, `BattleDataFetcher`
+- `InventoryDataLoader` 배치 로딩 테스트 (`TestTransaction`으로 별도 스레드 커밋 이슈 해결)
+- `@IntegrationTest` 메타 어노테이션 + 공용 `@TestConfiguration`으로 컨텍스트 캐싱 최적화 (4개 → 1개)
+
+**문서**
+- `docs/erd.md` — Aggregate 구조를 포함한 ERD (Mermaid)
+
+---
+
+### Step 11. 성능 최적화 & 마무리
 > "더 빠르게, 더 안전하게"
 
-- **10-1.** Query Complexity 분석 — 악의적인 중첩 쿼리 방어
-- **10-2.** Persisted Queries 개념 이해
-- **10-3.** DataLoader 캐싱 전략 정리
-- **10-4.** 전체 아키텍처 회고
+- **11-1.** Query Complexity 분석 — 악의적인 중첩 쿼리 방어
+- **11-2.** Persisted Queries 개념 이해
+- **11-3.** DataLoader 캐싱 전략 정리
+- **11-4.** 전체 아키텍처 회고
 
 **학습 포인트**
 - GraphQL의 보안 고려사항 (Depth Limit, Complexity Limit)
