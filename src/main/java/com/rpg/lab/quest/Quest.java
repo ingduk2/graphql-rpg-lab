@@ -25,6 +25,10 @@ public class Quest {
 
     private String description;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "prerequisite_quest_id")
+    private Quest prerequisiteQuest;
+
     @OneToMany(mappedBy = "quest", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<QuestCondition> conditions = new ArrayList<>();
 
@@ -43,6 +47,15 @@ public class Quest {
         quest.description = description;
         quest.conditions.add(QuestCondition.create(quest, conditionType, targetCount, targetMonsterId));
         return quest;
+    }
+
+    public Quest withPrerequisite(Quest prerequisiteQuest) {
+        this.prerequisiteQuest = Objects.requireNonNull(prerequisiteQuest);
+        return this;
+    }
+
+    public boolean hasPrerequisite() {
+        return prerequisiteQuest != null;
     }
 
     public Quest addCondition(QuestType type, int targetCount, Long targetMonsterId) {
