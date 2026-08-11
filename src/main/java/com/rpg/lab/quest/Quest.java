@@ -1,5 +1,6 @@
 package com.rpg.lab.quest;
 
+import com.rpg.lab.exception.PrerequisiteQuestNotCompletedException;
 import com.rpg.lab.item.Item;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -66,5 +67,11 @@ public class Quest {
     public Quest addReward(int rewardExp, Item item) {
         rewards.add(QuestReward.create(this, rewardExp, item));
         return this;
+    }
+
+    public void validatePrerequisiteCompleted(boolean prerequisiteCompleted) {
+        if (hasPrerequisite() && !prerequisiteCompleted) {
+            throw new PrerequisiteQuestNotCompletedException("Prerequisite quest not completed: " + prerequisiteQuest.getId());
+        }
     }
 }

@@ -33,6 +33,14 @@ public class QuestService {
                 .orElseThrow(() -> new EntityNotFoundException("Player not found: " + playerId));
         Quest quest = findQuestById(questId);
 
+        if (quest.hasPrerequisite()) {
+            Long prerequisiteQuestId = quest.getPrerequisiteQuest().getId();
+            boolean completed = playerQuestRepository.findByPlayerIdAndQuestId(playerId, prerequisiteQuestId)
+                    .map(pq -> pq.getStatus() == QuestStatus.COMPLETED)
+                    .orElse(false);
+            quest.validatePrerequisiteCompleted(completed);
+        }
+
         PlayerQuest savedPlayerQuest = playerQuestRepository.save(PlayerQuest.start(player, quest));
 
         List<PlayerQuestProgress> progressList = playerQuestProgressRepository.findProgressByPlayerQuestId(savedPlayerQuest.getId());

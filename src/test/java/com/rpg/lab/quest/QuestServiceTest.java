@@ -1,6 +1,7 @@
 package com.rpg.lab.quest;
 
 import com.rpg.lab.exception.EntityNotFoundException;
+import com.rpg.lab.exception.PrerequisiteQuestNotCompletedException;
 import com.rpg.lab.fixture.MonsterFixture;
 import com.rpg.lab.fixture.PlayerFixture;
 import com.rpg.lab.fixture.QuestFixture;
@@ -81,11 +82,12 @@ class QuestServiceTest {
 
         private Player player;
         private Quest quest;
+        private Monster monster;
 
         @BeforeEach
         void setUp() {
             player = playerRepository.save(PlayerFixture.create());
-            Monster monster = monsterRepository.save(MonsterFixture.createSlime());
+            monster = monsterRepository.save(MonsterFixture.createSlime());
             quest = questRepository.save(QuestFixture.createKillMonster(monster.getId(), 1));
         }
 
@@ -136,6 +138,28 @@ class QuestServiceTest {
 
             assertThatThrownBy(() -> sut.acceptQuest(player.getId(), invalidQuestId))
                     .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("선행 퀘스트를 완료했다면 수락할 수 있다")
+        void test5() {
+            Quest chainedQuest = questRepository.save(QuestFixture.createWithPrerequisite(quest, monster.getId(), 1));
+
+            sut.acceptQuest(player.getId(), quest.getId());
+            sut.completeQuest(player.getId(), quest.getId());
+
+            PlayerQuestResponse result = sut.acceptQuest(player.getId(), chainedQuest.getId());
+
+            assertThat(result.status()).isEqualTo(QuestStatus.IN_PROGRESS);
+        }
+
+        @Test
+        @DisplayName("선행 퀘스트를 완료하지 않으면 PrerequisiteQuestNotCompletedException 이 발생한다")
+        void test6() {
+            Quest chainedQuest = questRepository.save(QuestFixture.createWithPrerequisite(quest, monster.getId(), 1));
+
+            assertThatThrownBy(() -> sut.acceptQuest(player.getId(), chainedQuest.getId()))
+                    .isInstanceOf(PrerequisiteQuestNotCompletedException.class);
         }
     }
 
