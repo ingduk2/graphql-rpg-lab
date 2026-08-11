@@ -1,10 +1,11 @@
 package com.rpg.lab.quest;
 
+import com.rpg.lab.exception.PrerequisiteQuestNotCompletedException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 class QuestTest {
 
@@ -55,6 +56,41 @@ class QuestTest {
             Quest quest = Quest.create("1단계", "설명", QuestType.KILL_MONSTER, 1, 1L);
 
             assertThat(quest.hasPrerequisite()).isFalse();
+        }
+    }
+
+    @Nested
+    class ValidatePrerequisiteCompleted {
+
+        @Test
+        @DisplayName("선행 퀘스트가 없으면 완료 여부와 무관하게 예외가 발생하지 않는다")
+        void test1() {
+            Quest quest = Quest.create("1단계", "설명", QuestType.KILL_MONSTER, 1, 1L);
+
+            assertThatCode(() -> quest.validatePrerequisiteCompleted(false))
+                    .doesNotThrowAnyException();
+        }
+
+        @Test
+        @DisplayName("선행 퀘스트가 있고 완료했다면 예외가 발생하지 않는다")
+        void test2() {
+            Quest prerequisite = Quest.create("1단계", "설명", QuestType.KILL_MONSTER, 1, 1L);
+            Quest quest = Quest.create("2단계", "설명", QuestType.KILL_MONSTER, 1, 1L)
+                    .withPrerequisite(prerequisite);
+
+            assertThatCode(() -> quest.validatePrerequisiteCompleted(true))
+                    .doesNotThrowAnyException();
+        }
+
+        @Test
+        @DisplayName("선행 퀘스트가 있는데 완료하지 않았다면 PrerequisiteQuestNotCompletedException 이 발생한다")
+        void test3() {
+            Quest prerequisite = Quest.create("1단계", "설명", QuestType.KILL_MONSTER, 1, 1L);
+            Quest quest = Quest.create("2단계", "설명", QuestType.KILL_MONSTER, 1, 1L)
+                    .withPrerequisite(prerequisite);
+
+            assertThatThrownBy(() -> quest.validatePrerequisiteCompleted(false))
+                    .isInstanceOf(PrerequisiteQuestNotCompletedException.class);
         }
     }
 }
