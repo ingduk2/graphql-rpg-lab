@@ -61,6 +61,24 @@ class QuestDataFetcherTest {
 
             assertThat(results).hasSize(1);
         }
+
+        @Test
+        @DisplayName("선행 퀘스트가 있으면 응답에 prerequisiteQuest 가 포함된다")
+        void test2() {
+            Monster monster = monsterRepository.save(MonsterFixture.createSlime());
+            Quest prerequisite = questRepository.save(QuestFixture.createKillMonster(monster.getId(), 1));
+            questRepository.save(QuestFixture.createWithPrerequisite(prerequisite, monster.getId(), 1));
+
+            List<String> prerequisiteTitles = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
+                    """
+                            { quests { title prerequisiteQuest { title } } }
+                            """,
+                    "data.quests[*].prerequisiteQuest.title",
+                    new TypeRef<>() {}
+            );
+
+            assertThat(prerequisiteTitles).contains(prerequisite.getTitle());
+        }
     }
 
     @Nested
