@@ -17,18 +17,28 @@ public class GlobalExceptionHandler extends DefaultDataFetcherExceptionHandler {
         Throwable exception = handlerParameters.getException();
 
         if (exception instanceof EntityNotFoundException e) {
-            DataFetcherExceptionHandlerResult result = DataFetcherExceptionHandlerResult.newResult()
-                    .error(GraphqlErrorBuilder.newError()
-                            .message(e.getMessage())
-                            .extensions(ErrorCode.NOT_FOUND.toExtensions())
-                            .path(handlerParameters.getPath())
-                            .build()
-                    )
-                    .build();
+            return CompletableFuture.completedFuture(buildResult(e, ErrorCode.NOT_FOUND, handlerParameters));
+        }
 
-            return CompletableFuture.completedFuture(result);
+        if (exception instanceof PrerequisiteQuestNotCompletedException e) {
+            return CompletableFuture.completedFuture(buildResult(e, ErrorCode.PREREQUISITE_NOT_COMPLETED, handlerParameters));
         }
 
         return super.handleException(handlerParameters);
+    }
+
+    private DataFetcherExceptionHandlerResult buildResult(
+            Throwable e,
+            ErrorCode errorCode,
+            DataFetcherExceptionHandlerParameters handlerParameters
+    ) {
+        return DataFetcherExceptionHandlerResult.newResult()
+                .error(GraphqlErrorBuilder.newError()
+                        .message(e.getMessage())
+                        .extensions(errorCode.toExtensions())
+                        .path(handlerParameters.getPath())
+                        .build()
+                )
+                .build();
     }
 }
