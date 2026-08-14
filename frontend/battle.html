@@ -327,6 +327,18 @@
 
         .quest-empty { color: var(--green-dim); font-size: 15px; }
 
+        .quest-item-locked { opacity: 0.55; }
+        .quest-locked {
+            font-size: 12px;
+            color: var(--red);
+            letter-spacing: 1px;
+        }
+        .quest-lock-note {
+            font-size: 13px;
+            color: var(--red);
+            margin-top: 4px;
+        }
+
         .footer-note {
             margin-top: 14px;
             font-size: 13px;
@@ -518,7 +530,7 @@
     async function loadQuests() {
         const [myData, allData] = await Promise.all([
             graphql(`{ myQuests { id questId status title progress { type currentCount targetCount } } }`),
-            graphql(`{ quests { id title description } }`)
+            graphql(`{ quests { id title description prerequisiteQuest { id title } } }`)
         ]);
         myQuests = myData.myQuests || [];
         allQuests = allData.quests || [];
@@ -573,21 +585,33 @@
     function renderAvailableQuests() {
         const el = document.getElementById('questList');
         const acceptedIds = new Set(myQuests.map(q => String(q.questId)));
+        const completedIds = new Set(myQuests.filter(q => q.status === 'COMPLETED').map(q => String(q.questId)));
         const available = allQuests.filter(q => !acceptedIds.has(String(q.id)));
 
         if (available.length === 0) {
             el.innerHTML = '<span class="quest-empty">all quests accepted</span>';
             return;
         }
-        el.innerHTML = available.map(q => `
-            <div class="quest-item">
+        el.innerHTML = available.map(q => {
+            const prereq = q.prerequisiteQuest;
+            const locked = prereq && !completedIds.has(String(prereq.id));
+            const actionHtml = locked
+                ? `<span class="quest-locked">🔒 LOCKED</span>`
+                : `<button class="sm-btn amber" onclick="acceptQuest(${q.id}, '${q.title}')">ACCEPT</button>`;
+            const lockNote = locked
+                ? `<div class="quest-lock-note">⚠ requires: ${prereq.title}</div>`
+                : '';
+            return `
+            <div class="quest-item${locked ? ' quest-item-locked' : ''}">
                 <div class="quest-item-header">
                     <span class="quest-title">${q.title}</span>
-                    <button class="sm-btn amber" onclick="acceptQuest(${q.id}, '${q.title}')">ACCEPT</button>
+                    ${actionHtml}
                 </div>
                 <div class="quest-desc">${q.description || ''}</div>
+                ${lockNote}
             </div>
-        `).join('');
+        `;
+        }).join('');
     }
 
     async function acceptQuest(questId, title) {
