@@ -36,6 +36,10 @@ public class ItemFixture {
         return withId("테스트갑옷", ItemType.ARMOR, 0, 5);
     }
 
+    public static Item createRingItemWithId() {
+        return withId("테스트반지", ItemType.ACCESSORY, 2, 2);
+    }
+
     private static Item withId(
             String name,
             ItemType type,

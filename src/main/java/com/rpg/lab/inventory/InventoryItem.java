@@ -1,7 +1,6 @@
 package com.rpg.lab.inventory;
 
 import com.rpg.lab.item.Item;
-import com.rpg.lab.item.ItemType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -25,10 +24,22 @@ public class InventoryItem {
     @JoinColumn(name = "item_id")
     private Item item;
 
+    @Column(nullable = false)
+    private boolean equipped;
+
     public static InventoryItem create(Inventory inventory, Item item) {
         InventoryItem inventoryItem = new InventoryItem();
         inventoryItem.inventory = inventory;
         inventoryItem.item = item;
+        inventoryItem.equipped = false;
         return inventoryItem;
+    }
+
+    void equip() {
+        this.equipped = true;
+    }
+
+    void unequip() {
+        this.equipped = false;
     }
 }

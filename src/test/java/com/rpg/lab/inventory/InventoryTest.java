@@ -1,5 +1,6 @@
 package com.rpg.lab.inventory;
 
+import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.fixture.ItemFixture;
 import com.rpg.lab.fixture.PlayerFixture;
 import com.rpg.lab.item.Item;
@@ -9,7 +10,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.*;
 
 class InventoryTest {
 
@@ -127,17 +130,29 @@ class InventoryTest {
         }
 
         @Test
-        @DisplayName("여러 아이템의 공격 보너스가 합산된다")
+        @DisplayName("보유만 하고 장착하지 않으면 반영되지 않는다")
         void test2() {
             Inventory inventory = Inventory.create(player);
             Item swordItem = ItemFixture.createSwordItemWithId();
-            Item axeItem = ItemFixture.createAxeItemWithId();
             inventory.addItem(swordItem);
-            inventory.addItem(axeItem);
+
+            assertThat(inventory.getAttackBonus()).isEqualTo(0);
+        }
+
+        @Test
+        @DisplayName("서로 다른 타입의 장착 아이템의 공격 보너스가 합산된다")
+        void test3() {
+            Inventory inventory = Inventory.create(player);
+            Item swordItem = ItemFixture.createSwordItemWithId();
+            Item ringItem = ItemFixture.createRingItemWithId();
+            inventory.addItem(swordItem);
+            inventory.addItem(ringItem);
+            inventory.equip(swordItem.getId());
+            inventory.equip(ringItem.getId());
 
             int attackBonus = inventory.getAttackBonus();
 
-            assertThat(attackBonus).isEqualTo(swordItem.getAttackBonus() + axeItem.getAttackBonus());
+            assertThat(attackBonus).isEqualTo(swordItem.getAttackBonus() + ringItem.getAttackBonus());
         }
     }
 
@@ -155,18 +170,96 @@ class InventoryTest {
         }
 
         @Test
-        @DisplayName("여러 아이템의 방어 보너스가 합산된다")
+        @DisplayName("보유만 하고 장착하지 않으면 반영되지 않는다")
         void test2() {
             Inventory inventory = Inventory.create(player);
             Item shieldItem = ItemFixture.createShieldItemWithId();
-            Item armorItem = ItemFixture.createArmorItemWithId();
             inventory.addItem(shieldItem);
-            inventory.addItem(armorItem);
+
+            assertThat(inventory.getDefenseBonus()).isEqualTo(0);
+        }
+
+        @Test
+        @DisplayName("서로 다른 타입의 장착 아이템 방어 보너스가 합산된다")
+        void test3() {
+            Inventory inventory = Inventory.create(player);
+            Item shieldItem = ItemFixture.createShieldItemWithId();
+            Item ringItem = ItemFixture.createRingItemWithId();
+            inventory.addItem(shieldItem);
+            inventory.addItem(ringItem);
+            inventory.equip(shieldItem.getId());
+            inventory.equip(ringItem.getId());
 
             int defenseBonus = inventory.getDefenseBonus();
 
-            assertThat(defenseBonus).isEqualTo(shieldItem.getDefenseBonus() + armorItem.getDefenseBonus());
+            assertThat(defenseBonus).isEqualTo(shieldItem.getDefenseBonus() + ringItem.getDefenseBonus());
         }
     }
 
+    @Nested
+    class Equip {
+
+        @Test
+        @DisplayName("아이템을 장착하면 equipped 가 true 가 된다")
+        void test1() {
+            Inventory inventory = Inventory.create(player);
+            Item swordItem = ItemFixture.createSwordItemWithId();
+            inventory.addItem(swordItem);
+
+            inventory.equip(swordItem.getId());
+
+            InventoryItem equipped = inventory.getInventoryItems().get(0);
+            assertThat(equipped.isEquipped()).isTrue();
+        }
+
+        @Test
+        @DisplayName("같은 타입의 다른 아이템을 장착하면 기존 장착 아이템은 해제된다")
+        void test2() {
+            Inventory inventory = Inventory.create(player);
+            Item swordItem = ItemFixture.createSwordItemWithId();
+            Item axeItem = ItemFixture.createAxeItemWithId();
+            inventory.addItem(swordItem);
+            inventory.addItem(axeItem);
+
+            inventory.equip(swordItem.getId());
+            inventory.equip(axeItem.getId());
+
+            List<InventoryItem> items = inventory.getInventoryItems();
+            assertThat(items)
+                    .filteredOn(it -> it.getItem().equals(swordItem))
+                    .extracting(InventoryItem::isEquipped)
+                    .containsExactly(false);
+            assertThat(items)
+                    .filteredOn(it -> it.getItem().equals(axeItem))
+                    .extracting(InventoryItem::isEquipped)
+                    .containsExactly(true);
+        }
+
+        @Test
+        @DisplayName("보유하지 않은 아이템을 장착하려 하면 EntityNotFoundException")
+        void test3() {
+            Inventory inventory = Inventory.create(player);
+            Long invalidItemId = 999L;
+
+            assertThatThrownBy(() -> inventory.equip(invalidItemId))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+    }
+
+    @Nested
+    class Unequip {
+
+        @Test
+        @DisplayName("장착 아이템을 해제하면 equipped 가 false 가 된다")
+        void test1() {
+            Inventory inventory = Inventory.create(player);
+            Item swordItem = ItemFixture.createSwordItemWithId();
+            inventory.addItem(swordItem);
+            inventory.equip(swordItem.getId());
+
+            inventory.unequip(swordItem.getId());
+
+            assertThat(inventory.getInventoryItems().get(0).isEquipped()).isFalse();
+        }
+    }
 }

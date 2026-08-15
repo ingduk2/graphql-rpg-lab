@@ -1,5 +1,6 @@
 package com.rpg.lab.inventory;
 
+import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.item.Item;
 import com.rpg.lab.player.Player;
 import jakarta.persistence.*;
@@ -53,14 +54,37 @@ public class Inventory {
                 .anyMatch(it -> it.getItem().getId().equals(itemId));
     }
 
+    public void equip(Long itemId) {
+        InventoryItem target = findByItemId(itemId);
+
+        inventoryItems.stream()
+                .filter(it -> it.isEquipped() && it.getItem().getType() == target.getItem().getType())
+                .forEach(InventoryItem::unequip);
+
+        target.equip();
+    }
+
+    public void unequip(Long itemId) {
+        findByItemId(itemId).unequip();
+    }
+
+    private InventoryItem findByItemId(Long itemId) {
+        return inventoryItems.stream()
+                .filter(it -> it.getItem().getId().equals(itemId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Item not owned: " + itemId));
+    }
+
     public int getAttackBonus() {
         return inventoryItems.stream()
+                .filter(InventoryItem::isEquipped)
                 .mapToInt(it -> it.getItem().getAttackBonus())
                 .sum();
     }
 
     public int getDefenseBonus() {
         return inventoryItems.stream()
+                .filter(InventoryItem::isEquipped)
                 .mapToInt(it -> it.getItem().getDefenseBonus())
                 .sum();
     }
