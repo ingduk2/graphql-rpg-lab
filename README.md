@@ -263,13 +263,47 @@
 
 ---
 
-### Step 12. 성능 최적화 & 마무리
+### Step 12. 장비 슬롯 시스템
+> "가지고 있는 것과 쓰고 있는 것은 다르다"
+
+- **12-1.** 도메인 모델 설계
+  - `InventoryItem`에 `equipped: boolean`(또는 `EquipmentSlot` enum: WEAPON/ARMOR/ACCESSORY) 필드 추가
+  - `Inventory`에 슬롯별 장착 로직 캡슐화 — 같은 슬롯에 이미 장착된 아이템이 있으면 자동 교체
+  - `getAttackBonus()`/`getDefenseBonus()`를 "장착된 아이템만" 집계하도록 변경
+  - `InventoryTest`에 장착/해제/교체/보너스 집계 케이스 보강
+
+- **12-2.** 서비스 레벨 반영
+  - `InventoryService.equipItem`을 "인벤토리에 추가"가 아니라 "보유 중인 아이템을 장착 상태로 전환"으로 의미 변경
+  - 보유하지 않은 아이템 장착 시도 시 예외 처리
+  - 같은 슬롯에 이미 장착된 아이템이 있으면 자동 교체되는지 검증
+  - `InventoryServiceTest` 케이스 갱신 (기존 "보유=효과" 가정 테스트들 새 로직에 맞게 수정)
+
+- **12-3.** 전투 반영 확인
+  - `Battle.attack()`이 장착된 아이템 보너스만 반영하는지 확인 (`Inventory.getAttackBonus/getDefenseBonus`를 그대로 쓰므로 자연히 반영되는지 검증)
+  - `BattleTest`의 `AttackWithItems` 케이스가 "장착 상태"를 전제로 하도록 갱신
+
+- **12-4.** GraphQL 스키마/응답 반영
+  - `Item` 또는 `InventoryItem` 타입에 `equipped: Boolean!` 필드 노출
+  - `InventoryDataFetcherTest`에 장착 상태가 응답에 반영되는지 케이스 추가
+
+- **12-5.** HTML 인벤토리 화면 개선
+  - 보유 아이템 목록에서 장착 중인 아이템 시각적으로 구분 (예: 테두리 강조, "EQUIPPED" 배지)
+  - 장착/해제 버튼 추가
+
+**학습 포인트**
+- "상태(장착 여부)"를 엔티티 필드로 모델링할지, 별도 값 객체(슬롯)로 분리할지 트레이드오프
+- 기존 API(`equipItem`/`unequipItem`)의 의미를 재정의할 때 하위 호환성 고려
+- 기존 테스트가 새 도메인 규칙과 충돌할 때(회귀) 어떻게 접근하는지
+
+---
+
+### Step 13. 성능 최적화 & 마무리 (예정)
 > "더 빠르게, 더 안전하게"
 
-- **12-1.** Query Complexity 분석 — 악의적인 중첩 쿼리 방어
-- **12-2.** Persisted Queries 개념 이해
-- **12-3.** DataLoader 캐싱 전략 정리
-- **12-4.** 전체 아키텍처 회고
+- **13-1.** Query Complexity 분석 — 악의적인 중첩 쿼리 방어
+- **13-2.** Persisted Queries 개념 이해
+- **13-3.** DataLoader 캐싱 전략 정리
+- **13-4.** 전체 아키텍처 회고
 
 **학습 포인트**
 - GraphQL의 보안 고려사항 (Depth Limit, Complexity Limit)
