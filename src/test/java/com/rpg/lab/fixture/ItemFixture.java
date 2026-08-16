@@ -50,4 +50,8 @@ public class ItemFixture {
         ReflectionTestUtils.setField(item, "id", ID_GENERATOR.getAndIncrement());
         return item;
     }
+
+    public static Item createCustomItemWithId(String name, ItemType type, int attackBonus, int defenseBonus) {
+        return withId(name, type, attackBonus, defenseBonus);
+    }
 }
