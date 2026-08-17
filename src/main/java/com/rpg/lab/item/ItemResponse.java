@@ -5,15 +5,17 @@ public record ItemResponse(
         String name,
         ItemType type,
         int attackBonus,
-        int defenseBonus
+        int defenseBonus,
+        boolean equipped
 ) {
-    public static ItemResponse from(Item item) {
+    public static ItemResponse from(Item item, boolean equipped) {
         return new ItemResponse(
                 item.getId(),
                 item.getName(),
                 item.getType(),
                 item.getAttackBonus(),
-                item.getDefenseBonus()
+                item.getDefenseBonus(),
+                equipped
         );
     }
 }

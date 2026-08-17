@@ -10,6 +10,7 @@ import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerRepository;
 import com.rpg.lab.testsupport.IntegrationTest;
 import lombok.RequiredArgsConstructor;
+import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -29,32 +30,37 @@ class InventoryServiceTest {
     private final ItemRepository itemRepository;
 
     private Player player;
+    private Inventory inventory;
 
     @BeforeEach
     void setUp() {
         player = playerRepository.save(PlayerFixture.create());
-        inventoryRepository.save(Inventory.create(player));
+        inventory = inventoryRepository.save(Inventory.create(player));
     }
 
     @Nested
     class EquipItem {
 
         @Test
-        @DisplayName("아이템을 장착하면 인벤토리에 반영된다")
+        @DisplayName("보유한 아이템을 장착하면 equipped 상태가 된다")
         void test1() {
-            Item item = itemRepository.save(ItemFixture.createSwordItem());
+            Item item = ownItem();
 
             InventoryResponse result = sut.equipItem(player.getId(), item.getId());
 
             assertThat(result.items())
-                    .extracting(ItemResponse::name)
-                    .contains(item.getName());
+                    .filteredOn(i -> i.id().equals(item.getId()))
+                    .extracting(
+                            ItemResponse::name,
+                            ItemResponse::equipped
+                    )
+                    .contains(Tuple.tuple(item.getName(), true));
         }
 
         @Test
         @DisplayName("존재하지 않는 player 로 장착 시도하면 EntityNotFoundException")
         void test2() {
-            Item item = itemRepository.save(ItemFixture.createSwordItem());
+            Item item = ownItem();
             Long invalidPlayerId = 999L;
 
             assertThatThrownBy(() -> sut.equipItem(invalidPlayerId, item.getId()))
@@ -62,7 +68,7 @@ class InventoryServiceTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 item 으로 장착 시도하면 EntityNotFoundException")
+        @DisplayName("보유하지 않은 item 으로 장착 시도하면 EntityNotFoundException")
         void test3() {
             Long invalidItemId = 999L;
 
@@ -75,35 +81,46 @@ class InventoryServiceTest {
     class UnequipItem {
 
         @Test
-        @DisplayName("아이템을 해제하면 인벤토리에서 사라진다")
+        @DisplayName("장착한 아이템을 해제하면 equipped 가 false 가 된다")
         void test1() {
-            Item item = itemRepository.save(ItemFixture.createSwordItem());
+            Item item = ownItem();
             sut.equipItem(player.getId(), item.getId());
 
             InventoryResponse result = sut.unequipItem(player.getId(), item.getId());
 
             assertThat(result.items())
-                    .extracting(ItemResponse::name)
-                    .doesNotContain(item.getName());
+                    .filteredOn(i -> i.id().equals(item.getId()))
+                    .extracting(
+                            ItemResponse::name,
+                            ItemResponse::equipped
+                    )
+                    .containsExactly(Tuple.tuple(item.getName(), false));
         }
 
         @Test
-        @DisplayName("보유하지 않은 item을 해제해도 예외 없이 그냥 무시된다")
+        @DisplayName("보유하지 않은 item을 해제하려 하면 EntityNotFoundException")
         void test2() {
             Long notOwnedItemId = 999L;
 
-            InventoryResponse result = sut.unequipItem(player.getId(), notOwnedItemId);
-
-            assertThat(result.items()).isEmpty();
+            assertThatThrownBy(() -> sut.unequipItem(player.getId(), notOwnedItemId))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         @DisplayName("존재하지 않는 player 로 해제 시도하면 EntityNotFoundException")
         void test3() {
+            Item item = ownItem();
             Long invalidPlayerId = 999L;
 
-            assertThatThrownBy(() -> sut.unequipItem(invalidPlayerId, 1L))
+            assertThatThrownBy(() -> sut.unequipItem(invalidPlayerId, item.getId()))
                     .isInstanceOf(EntityNotFoundException.class);
         }
+    }
+
+    private Item ownItem() {
+        Item item = itemRepository.save(ItemFixture.createSwordItem());
+        inventory.addItem(item);
+        inventoryRepository.save(inventory);
+        return item;
     }
 }

@@ -1,8 +1,6 @@
 package com.rpg.lab.inventory;
 
 import com.rpg.lab.exception.EntityNotFoundException;
-import com.rpg.lab.item.Item;
-import com.rpg.lab.item.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
@@ -13,15 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class InventoryService {
 
     private final InventoryRepository inventoryRepository;
-    private final ItemRepository itemRepository;
 
     @Transactional
     public InventoryResponse equipItem(Long playerId, Long itemId) {
         Inventory inventory = findInventoryByPlayerId(playerId);
-        Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("Item not found: " + itemId));
 
-        inventory.addItem(item);
+        inventory.equip(itemId);
         inventoryRepository.save(inventory);
         return InventoryResponse.from(inventory);
     }
@@ -30,7 +25,7 @@ public class InventoryService {
     public InventoryResponse unequipItem(Long playerId, Long itemId) {
         Inventory inventory = findInventoryByPlayerId(playerId);
 
-        inventory.removeItem(itemId);
+        inventory.unequip(itemId);
         inventoryRepository.save(inventory);
         return InventoryResponse.from(inventory);
     }
