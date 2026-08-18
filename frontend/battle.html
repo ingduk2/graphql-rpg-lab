@@ -253,6 +253,19 @@
             padding: 3px 8px;
             font-size: 15px;
             color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .inventory-item.equipped {
+            border-color: var(--amber);
+            box-shadow: 0 0 4px rgba(255,176,0,0.4);
+        }
+        .equipped-badge {
+            font-size: 11px;
+            color: var(--amber);
+            border: 1px solid var(--amber);
+            padding: 0 3px;
         }
         .inventory-item .bonus { color: var(--green); font-size: 13px; }
         .inventory-empty { color: var(--green-dim); font-size: 15px; }
@@ -494,8 +507,9 @@
         currentPlayerLevel = player.level;
         currentPlayerMaxHp = player.maxHp;
         const items = player.inventory?.items || [];
-        const atkBonus = items.reduce((sum, i) => sum + i.attackBonus, 0);
-        const defBonus = items.reduce((sum, i) => sum + i.defenseBonus, 0);
+        const equippedItems = items.filter(i => i.equipped);
+        const atkBonus = equippedItems.reduce((sum, i) => sum + i.attackBonus, 0);
+        const defBonus = equippedItems.reduce((sum, i) => sum + i.defenseBonus, 0);
         document.getElementById('playerName').textContent = player.name;
         document.getElementById('statLv').textContent = player.level;
         document.getElementById('statAtk').textContent = atkBonus > 0 ? `${player.stats.attack}+${atkBonus}` : player.stats.attack;
@@ -523,7 +537,15 @@
             if (item.attackBonus > 0) bonuses.push(`ATK+${item.attackBonus}`);
             if (item.defenseBonus > 0) bonuses.push(`DEF+${item.defenseBonus}`);
             const bonusText = bonuses.length > 0 ? ` <span class="bonus">${bonuses.join(' ')}</span>` : '';
-            return `<div class="inventory-item">${item.name}${bonusText}</div>`;
+            const equippedBadge = item.equipped ? ' <span class="equipped-badge">E</span>' : '';
+            const toggleFn = item.equipped ? 'unequipItem' : 'equipItem';
+            const toggleLabel = item.equipped ? 'UNEQUIP' : 'EQUIP';
+            return `
+            <div class="inventory-item${item.equipped ? ' equipped' : ''}">
+                ${item.name}${bonusText}${equippedBadge}
+                <button class="sm-btn ${item.equipped ? 'amber' : 'green'}" onclick="${toggleFn}(${item.id})">${toggleLabel}</button>
+            </div>
+        `;
         }).join('');
     }
 
@@ -654,10 +676,10 @@
     async function loadPlayer() {
         try {
             const data = await graphql(`{
-                player(id: ${playerId}) {
+            player(id: ${playerId}) {
                     id name level hp maxHp exp
                     stats { attack defense speed }
-                    inventory { items { id name attackBonus defenseBonus } }
+                    inventory { items { id name type attackBonus defenseBonus equipped } }
                 }
             }`);
             updatePlayerDisplay(data.player);
@@ -766,6 +788,16 @@
         setButtonsDisabled(false);
     }
 
+    async function equipItem(itemId) {
+        await graphql(`mutation { equipItem(itemId: ${itemId}) { id } }`);
+        await loadPlayer();
+    }
+
+    async function unequipItem(itemId) {
+        await graphql(`mutation { unequipItem(itemId: ${itemId}) { id } }`);
+        await loadPlayer();
+    }
+
     function doAutoBattle() {
         if (monsterDefeated) return;
         const monsterId = document.getElementById('monsterSelect').value;
@@ -804,7 +836,7 @@
                     if (r.playerDefeated) log('player has fallen. battle lost.', 'dead');
                     ws.close();
                     await loadPlayer();
-                    const invData = await graphql(`{ player(id: ${playerId}) { inventory { items { id name attackBonus defenseBonus } } } }`);
+                    const invData = await graphql(`{ player(id: ${playerId}) { inventory { items { id name type attackBonus defenseBonus equipped } } } }`);
                     updateInventoryDisplay(invData.player.inventory?.items);
                     await loadQuests();
                     if (!r.playerDefeated) setButtonsDisabled(false);
