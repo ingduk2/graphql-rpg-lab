@@ -32,12 +32,13 @@ class InventoryDataFetcherTest {
     private final InventoryRepository inventoryRepository;
 
     private Player player;
+    private Inventory inventory;
     private HttpHeaders headers;
 
     @BeforeEach
     void setUp() {
         player = playerRepository.save(PlayerFixture.create());
-        inventoryRepository.save(Inventory.create(player));
+        inventory = inventoryRepository.save(Inventory.create(player));
         headers = new HttpHeaders();
         headers.add(PlayerContextBuilder.X_PLAYER_ID, String.valueOf(player.getId()));
     }
@@ -46,23 +47,23 @@ class InventoryDataFetcherTest {
     class EquipItem {
 
         @Test
-        @DisplayName("아이템을 장착하면 인벤토리에 반영된다")
+        @DisplayName("보유한 아이템을 장착하면 equipped 가 true 로 응답된다")
         void test1() {
-            Item item = itemRepository.save(ItemFixture.createSwordItem());
+            Item item = ownItem();
 
-            List<String> itemNames = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
+            List<Boolean> equippedFlags = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
                     """
                             mutation {
-                                equipItem(itemId: "%d") { items { name } }
+                                equipItem(itemId: "%d") { items { id equipped } }
                             }
                             """.formatted(item.getId()),
-                    "data.equipItem.items[*].name",
+                    "data.equipItem.items[?(@.id=='%d')].equipped".formatted(item.getId()),
                     Collections.emptyMap(),
                     new TypeRef<>() {},
                     headers
             );
 
-            assertThat(itemNames).contains(item.getName());
+            assertThat(equippedFlags).containsExactly(true);
         }
     }
 
@@ -70,26 +71,32 @@ class InventoryDataFetcherTest {
     class UnequipItem {
 
         @Test
-        @DisplayName("아이템을 해제하면 인벤토리에서 사라진다")
+        @DisplayName("장착한 아이템을 해제하면 equipped가 false로 응답된다")
         void test1() {
-            Item item = itemRepository.save(ItemFixture.createSwordItem());
-            Inventory inventory = inventoryRepository.findByPlayerId(player.getId()).orElseThrow();
-            inventory.addItem(item);
+            Item item = ownItem();
+            inventory.equip(item.getId());
             inventoryRepository.save(inventory);
 
-            List<String> itemNames = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
+            List<Boolean> equippedFlags = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
                     """
                             mutation {
-                                unequipItem(itemId: "%d") { items { name } }
+                                unequipItem(itemId: "%d") { items { id equipped } }
                             }
                             """.formatted(item.getId()),
-                    "data.unequipItem.items[*].name",
+                    "data.unequipItem.items[?(@.id=='%d')].equipped".formatted(item.getId()),
                     Collections.emptyMap(),
                     new TypeRef<>() {},
                     headers
             );
 
-            assertThat(itemNames).doesNotContain(item.getName());
+            assertThat(equippedFlags).containsExactly(false);
         }
+    }
+
+    private Item ownItem() {
+        Item item = itemRepository.save(ItemFixture.createSwordItem());
+        inventory.addItem(item);
+        inventoryRepository.save(inventory);
+        return item;
     }
 }

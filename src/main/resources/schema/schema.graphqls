@@ -111,6 +111,7 @@ type Item {
     type: ItemType!
     attackBonus: Int!
     defenseBonus: Int!
+    equipped: Boolean!
 }
 
 enum ItemType {
