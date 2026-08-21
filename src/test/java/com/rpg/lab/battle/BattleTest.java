@@ -161,7 +161,7 @@ class BattleTest {
         @Test
         @DisplayName("인벤토리가 null 이어도 보너스 없이 정상 동작한다")
         void test1() {
-            Battle battle = new Battle(player, orc, null, orc.getHp()).attack();
+            Battle battle = new Battle(player, orc, null, orc.getHp(), orc.getHp(), orc.getAttackPower()).attack();
 
             assertThat(battle.getPlayerDamage()).isGreaterThanOrEqualTo(player.getAttack());
             assertThat(battle.getMonsterDamage()).isEqualTo(orc.getAttackPower());
@@ -183,14 +183,14 @@ class BattleTest {
     }
 
     private Battle attack(Monster monster) {
-        return new Battle(player, monster, inventory, monster.getHp()).attack();
+        return new Battle(player, monster, inventory, monster.getHp(), monster.getHp(), monster.getAttackPower()).attack();
     }
 
     private Battle attackWithHp(Monster monster, int monsterHp) {
-        return new Battle(player, monster, inventory, monsterHp).attack();
+        return new Battle(player, monster, inventory, monsterHp, monster.getHp(), monster.getAttackPower()).attack();
     }
 
     private Battle flee(Monster monster) {
-        return new Battle(player, monster, inventory, monster.getHp()).flee();
+        return new Battle(player, monster, inventory, monster.getHp(), monster.getHp(), monster.getAttackPower()).flee();
     }
 }

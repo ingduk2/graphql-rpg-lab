@@ -49,7 +49,7 @@ class BattleVictoryProcessorTest {
     }
 
     private Battle winningBattle(Monster monster) {
-        return new Battle(player, monster, getInventory(), 1).attack();
+        return new Battle(player, monster, getInventory(), 1, monster.getHp(), monster.getAttackPower()).attack();
     }
 
     private Inventory getInventory() {
@@ -60,7 +60,7 @@ class BattleVictoryProcessorTest {
     @DisplayName("몬스터 처치 실패 시 보상 없이 HP 만 동기화된다")
     void test1() {
         Monster monster = monsterRepository.save(MonsterFixture.createOrc());
-        Battle battle = new Battle(player, monster, getInventory(), Integer.MAX_VALUE).attack();
+        Battle battle = new Battle(player, monster, getInventory(), Integer.MAX_VALUE, monster.getHp(), monster.getAttackPower()).attack();
 
         BattleReward result = sut.process(player, battle, monster.getId());
 

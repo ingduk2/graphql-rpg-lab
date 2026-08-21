@@ -13,6 +13,8 @@ public class Battle {
     private final Monster monster;
     private final Inventory inventory;
     private final int currentMonsterHp;
+    private final int monsterMaxHp;
+    private final int monsterAttackPower;
     private int playerDamage;
     private int monsterDamage;
     private int monsterRemainHp;
@@ -27,12 +29,16 @@ public class Battle {
             Player player,
             Monster monster,
             Inventory inventory,
-            int currentMonsterHp
+            int currentMonsterHp,
+            int monsterMaxHp,
+            int monsterAttackPower
     ) {
         this.player = player;
         this.monster = monster;
         this.currentMonsterHp = currentMonsterHp;
         this.inventory = inventory;
+        this.monsterMaxHp = monsterMaxHp;
+        this.monsterAttackPower = monsterAttackPower;
     }
 
     public Battle attack() {
@@ -55,7 +61,7 @@ public class Battle {
             playerDefeated = false;
             expGained = monster.getExpReward();
         } else {
-            monsterDamage = Math.max(0, monster.getAttackPower() - defenseBonus);
+            monsterDamage = Math.max(0, monsterAttackPower - defenseBonus);
             playerRemainHp = Math.max(0, player.getHp() - monsterDamage);
             playerDefeated = playerRemainHp == 0;
             expGained = 0;
@@ -83,7 +89,7 @@ public class Battle {
     public Battle flee() {
         playerDamage = 0;
         monsterDamage = 0;
-        monsterRemainHp = monster.getHp();
+        monsterRemainHp = monsterMaxHp;
         playerRemainHp = player.getHp();
         isCritical = false;
         monsterDefeated = false;

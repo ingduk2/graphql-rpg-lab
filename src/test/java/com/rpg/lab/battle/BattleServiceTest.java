@@ -68,5 +68,21 @@ class BattleServiceTest {
             assertThatThrownBy(() -> sut.attack(player.getId(), invalidMonsterId, 10))
                     .isInstanceOf(EntityNotFoundException.class);
         }
+
+        @Test
+        @DisplayName("플레이어 레벨이 높으면 몬스터 반격 데미지가 더 크다 (스케일링 반영)")
+        void test4() {
+            Monster orc = monsterRepository.save(MonsterFixture.createOrc());
+            int baseAttackPower = orc.getAttackPower();
+
+            Player highLevelPlayer = playerRepository.save(PlayerFixture.create());
+            highLevelPlayer.gainExp(100_000);
+            playerRepository.save(highLevelPlayer);
+            inventoryRepository.save(Inventory.create(highLevelPlayer));
+
+            BattleResult result = sut.attack(highLevelPlayer.getId(), orc.getId(), Integer.MAX_VALUE);
+
+            assertThat(result.monsterDamage()).isGreaterThan(baseAttackPower);
+        }
     }
 }
