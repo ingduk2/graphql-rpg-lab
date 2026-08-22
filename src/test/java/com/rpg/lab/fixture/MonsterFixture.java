@@ -1,6 +1,7 @@
 package com.rpg.lab.fixture;
 
 import com.rpg.lab.monster.Monster;
+import com.rpg.lab.monster.ScaledMonster;
 
 public class MonsterFixture {
 
@@ -14,5 +15,9 @@ public class MonsterFixture {
 
     public static Monster createBoss() {
         return Monster.create("보스", 1, 1, 9999);
+    }
+
+    public static ScaledMonster unscaled(Monster monster) {
+        return ScaledMonster.from(monster, monster.getHp(), monster.getAttackPower());
     }
 }

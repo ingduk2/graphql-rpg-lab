@@ -1,10 +1,12 @@
 package com.rpg.lab.battle;
 
 import com.rpg.lab.fixture.ItemFixture;
+import com.rpg.lab.fixture.MonsterFixture;
 import com.rpg.lab.inventory.Inventory;
 import com.rpg.lab.item.Item;
 import com.rpg.lab.item.ItemType;
 import com.rpg.lab.monster.Monster;
+import com.rpg.lab.monster.ScaledMonster;
 import com.rpg.lab.player.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -161,7 +163,7 @@ class BattleTest {
         @Test
         @DisplayName("인벤토리가 null 이어도 보너스 없이 정상 동작한다")
         void test1() {
-            Battle battle = new Battle(player, orc, null, orc.getHp(), orc.getHp(), orc.getAttackPower()).attack();
+            Battle battle = new Battle(player, MonsterFixture.unscaled(orc), null, orc.getHp()).attack();
 
             assertThat(battle.getPlayerDamage()).isGreaterThanOrEqualTo(player.getAttack());
             assertThat(battle.getMonsterDamage()).isEqualTo(orc.getAttackPower());
@@ -183,14 +185,14 @@ class BattleTest {
     }
 
     private Battle attack(Monster monster) {
-        return new Battle(player, monster, inventory, monster.getHp(), monster.getHp(), monster.getAttackPower()).attack();
+        return new Battle(player, MonsterFixture.unscaled(monster), inventory, monster.getHp()).attack();
     }
 
     private Battle attackWithHp(Monster monster, int monsterHp) {
-        return new Battle(player, monster, inventory, monsterHp, monster.getHp(), monster.getAttackPower()).attack();
+        return new Battle(player, MonsterFixture.unscaled(monster), inventory, monsterHp).attack();
     }
 
     private Battle flee(Monster monster) {
-        return new Battle(player, monster, inventory, monster.getHp(), monster.getHp(), monster.getAttackPower()).flee();
+        return new Battle(player, MonsterFixture.unscaled(monster), inventory, monster.getHp()).flee();
     }
 }

@@ -1,7 +1,7 @@
 package com.rpg.lab.battle;
 
 import com.rpg.lab.inventory.Inventory;
-import com.rpg.lab.monster.Monster;
+import com.rpg.lab.monster.ScaledMonster;
 import com.rpg.lab.player.Player;
 import lombok.Getter;
 
@@ -10,11 +10,9 @@ import java.util.concurrent.ThreadLocalRandom;
 @Getter
 public class Battle {
     private final Player player;
-    private final Monster monster;
+    private final ScaledMonster monster;
     private final Inventory inventory;
     private final int currentMonsterHp;
-    private final int monsterMaxHp;
-    private final int monsterAttackPower;
     private int playerDamage;
     private int monsterDamage;
     private int monsterRemainHp;
@@ -27,18 +25,14 @@ public class Battle {
 
     public Battle(
             Player player,
-            Monster monster,
+            ScaledMonster monster,
             Inventory inventory,
-            int currentMonsterHp,
-            int monsterMaxHp,
-            int monsterAttackPower
+            int currentMonsterHp
     ) {
         this.player = player;
         this.monster = monster;
         this.currentMonsterHp = currentMonsterHp;
         this.inventory = inventory;
-        this.monsterMaxHp = monsterMaxHp;
-        this.monsterAttackPower = monsterAttackPower;
     }
 
     public Battle attack() {
@@ -59,9 +53,9 @@ public class Battle {
             monsterDamage = 0;
             playerRemainHp = player.getHp();
             playerDefeated = false;
-            expGained = monster.getExpReward();
+            expGained = monster.expReward();
         } else {
-            monsterDamage = Math.max(0, monsterAttackPower - defenseBonus);
+            monsterDamage = Math.max(0, monster.attackPower() - defenseBonus);
             playerRemainHp = Math.max(0, player.getHp() - monsterDamage);
             playerDefeated = playerRemainHp == 0;
             expGained = 0;
@@ -74,13 +68,13 @@ public class Battle {
     private String buildMessage() {
         StringBuilder sb = new StringBuilder();
         sb.append(isCritical
-                ? String.format("크리티컬! %s이(가) %s에게 %d 데미지!", player.getName(), monster.getName(), playerDamage)
-                : String.format("%s이(가) %s에게 %d 데미지!", player.getName(), monster.getName(), playerDamage));
+                ? String.format("크리티컬! %s이(가) %s에게 %d 데미지!", player.getName(), monster.name(), playerDamage)
+                : String.format("%s이(가) %s에게 %d 데미지!", player.getName(), monster.name(), playerDamage));
 
         if (monsterDefeated) {
-            sb.append(String.format(" %s 처치!", monster.getName()));
+            sb.append(String.format(" %s 처치!", monster.name()));
         } else {
-            sb.append(String.format(" %s이(가) %d 반격!", monster.getName(), monsterDamage));
+            sb.append(String.format(" %s이(가) %d 반격!", monster.name(), monsterDamage));
             if (playerDefeated) sb.append(" 플레이어 사망...");
         }
         return sb.toString();
@@ -89,7 +83,7 @@ public class Battle {
     public Battle flee() {
         playerDamage = 0;
         monsterDamage = 0;
-        monsterRemainHp = monsterMaxHp;
+        monsterRemainHp = monster.hp();
         playerRemainHp = player.getHp();
         isCritical = false;
         monsterDefeated = false;

@@ -27,9 +27,9 @@ class MonsterScalerTest {
         void test1() {
             Monster monster = MonsterFixture.createSlime();
 
-            int scaledHp = sut.scaleHp(monster, 1);
+            ScaledMonster result = sut.scale(monster, 1);
 
-            assertThat(scaledHp).isEqualTo(monster.getMaxHp());
+            assertThat(result.hp()).isEqualTo(monster.getMaxHp());
         }
 
         @Test
@@ -37,9 +37,9 @@ class MonsterScalerTest {
         void test2() {
             Monster monster = MonsterFixture.createSlime();
 
-            int scaledHp = sut.scaleHp(monster, 5);
+            ScaledMonster result = sut.scale(monster, 5);
 
-            assertThat(scaledHp).isEqualTo(42);
+            assertThat(result.hp()).isEqualTo(42);
         }
     }
 
@@ -51,9 +51,9 @@ class MonsterScalerTest {
         void test1() {
             Monster monster = MonsterFixture.createSlime();
 
-            int scaledAttackPower = sut.scaleAttackPower(monster, 1);
+            ScaledMonster result = sut.scale(monster, 1);
 
-            assertThat(scaledAttackPower).isEqualTo(monster.getAttackPower());
+            assertThat(result.attackPower()).isEqualTo(monster.getAttackPower());
         }
 
         @Test
@@ -61,9 +61,9 @@ class MonsterScalerTest {
         void test2() {
             Monster monster = MonsterFixture.createSlime();
 
-            int scaledAttackPower = sut.scaleAttackPower(monster, 10);
+            ScaledMonster result = sut.scale(monster, 10);
 
-            assertThat(scaledAttackPower).isEqualTo(10);
+            assertThat(result.attackPower()).isEqualTo(10);
         }
     }
 }

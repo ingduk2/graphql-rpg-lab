@@ -9,10 +9,7 @@ import com.rpg.lab.inventory.InventoryItem;
 import com.rpg.lab.inventory.InventoryRepository;
 import com.rpg.lab.item.Item;
 import com.rpg.lab.item.ItemRepository;
-import com.rpg.lab.monster.Monster;
-import com.rpg.lab.monster.MonsterDrop;
-import com.rpg.lab.monster.MonsterDropRepository;
-import com.rpg.lab.monster.MonsterRepository;
+import com.rpg.lab.monster.*;
 import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerRepository;
 import com.rpg.lab.quest.*;
@@ -49,7 +46,7 @@ class BattleVictoryProcessorTest {
     }
 
     private Battle winningBattle(Monster monster) {
-        return new Battle(player, monster, getInventory(), 1, monster.getHp(), monster.getAttackPower()).attack();
+        return new Battle(player, MonsterFixture.unscaled(monster), getInventory(), 1).attack();
     }
 
     private Inventory getInventory() {
@@ -60,7 +57,7 @@ class BattleVictoryProcessorTest {
     @DisplayName("몬스터 처치 실패 시 보상 없이 HP 만 동기화된다")
     void test1() {
         Monster monster = monsterRepository.save(MonsterFixture.createOrc());
-        Battle battle = new Battle(player, monster, getInventory(), Integer.MAX_VALUE, monster.getHp(), monster.getAttackPower()).attack();
+        Battle battle = new Battle(player, MonsterFixture.unscaled(monster), getInventory(), Integer.MAX_VALUE).attack();
 
         BattleReward result = sut.process(player, battle, monster.getId());
 

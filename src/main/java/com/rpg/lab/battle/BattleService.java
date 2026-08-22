@@ -5,6 +5,7 @@ import com.rpg.lab.inventory.InventoryReader;
 import com.rpg.lab.monster.Monster;
 import com.rpg.lab.monster.MonsterReader;
 import com.rpg.lab.monster.MonsterScaler;
+import com.rpg.lab.monster.ScaledMonster;
 import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerManager;
 import com.rpg.lab.player.PlayerReader;
@@ -33,10 +34,9 @@ public class BattleService {
         Monster monster = monsterReader.getById(monsterId);
         Inventory inventory = inventoryReader.getWithItemsByPlayerId(playerId);
 
-        int scaledMaxHp = monsterScaler.scaleHp(monster, player.getLevel());
-        int scaledAttackPower = monsterScaler.scaleAttackPower(monster, player.getLevel());
+        ScaledMonster scaledMonster = monsterScaler.scale(monster, player.getLevel());
 
-        Battle battle = new Battle(player, monster, inventory, currentMonsterHp, scaledMaxHp, scaledAttackPower).attack();
+        Battle battle = new Battle(player, scaledMonster, inventory, currentMonsterHp).attack();
 
         BattleReward battleReward = battleVictoryProcessor.process(player, battle, monsterId);
 
@@ -48,10 +48,9 @@ public class BattleService {
         Monster monster = monsterReader.getById(monsterId);
         Inventory inventory = inventoryReader.getWithItemsByPlayerId(playerId);
 
-        int scaledMaxHp = monsterScaler.scaleHp(monster, player.getLevel());
-        int scaledAttackPower = monsterScaler.scaleAttackPower(monster, player.getLevel());
+        ScaledMonster scaledMonster = monsterScaler.scale(monster, player.getLevel());
 
-        Battle battle = new Battle(player, monster, inventory, monster.getHp(), scaledMaxHp, scaledAttackPower).flee();
+        Battle battle = new Battle(player, scaledMonster, inventory, monster.getHp()).flee();
 
         return BattleResult.from(battle, BattleReward.empty());
     }
@@ -63,16 +62,15 @@ public class BattleService {
         Inventory inventory = inventoryReader.getWithItemsByPlayerId(playerId);
         String battleId = playerId + ":" + monsterId;
 
-        int scaledMaxHp = monsterScaler.scaleHp(monster, player.getLevel());
-        int scaledAttackPower = monsterScaler.scaleAttackPower(monster, player.getLevel());
+        ScaledMonster scaledMonster = monsterScaler.scale(monster, player.getLevel());
 
         return Flux.create(sink -> {
             try {
-                int[] monsterHp = {scaledMaxHp};
+                int[] monsterHp = {scaledMonster.hp()};
                 int[] turn = {1};
 
                 while (monsterHp[0] > 0 && player.getHp() > 0) {
-                    Battle battle = new Battle(player, monster, inventory, monsterHp[0], scaledMaxHp, scaledAttackPower).attack();
+                    Battle battle = new Battle(player, scaledMonster, inventory, monsterHp[0]).attack();
                     monsterHp[0] = battle.getMonsterRemainHp();
 
                     BattleReward battleReward = battleVictoryProcessor.process(player, battle, monsterId);
