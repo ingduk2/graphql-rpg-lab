@@ -2,14 +2,21 @@ package com.rpg.lab.monster;
 
 import com.jayway.jsonpath.TypeRef;
 import com.netflix.graphql.dgs.DgsQueryExecutor;
+import com.rpg.lab.config.PlayerContextBuilder;
 import com.rpg.lab.fixture.MonsterFixture;
+import com.rpg.lab.fixture.PlayerFixture;
+import com.rpg.lab.player.Player;
+import com.rpg.lab.player.PlayerRepository;
 import com.rpg.lab.testsupport.IntegrationTest;
 import graphql.ExecutionResult;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,6 +27,17 @@ class MonsterDataFetcherTest {
 
     private final DgsQueryExecutor dgsQueryExecutor;
     private final MonsterRepository monsterRepository;
+    private final PlayerRepository playerRepository;
+
+    private Player player;
+    private HttpHeaders headers;
+
+    @BeforeEach
+    void setUp() {
+        player = playerRepository.save(PlayerFixture.create());
+        headers = new HttpHeaders();
+        headers.add(PlayerContextBuilder.X_PLAYER_ID, String.valueOf(player.getId()));
+    }
 
     @Nested
     class Monsters {
@@ -68,7 +86,9 @@ class MonsterDataFetcherTest {
                             { monster(id: "%d") { name hp attackPower } }
                             """.formatted(monster.getId()),
                     "data.monster.name",
-                    String.class
+                    Collections.emptyMap(),
+                    String.class,
+                    headers
             );
 
             assertThat(result).isEqualTo(monster.getName());

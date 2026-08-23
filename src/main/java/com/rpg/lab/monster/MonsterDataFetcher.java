@@ -1,8 +1,11 @@
 package com.rpg.lab.monster;
 
 import com.netflix.graphql.dgs.DgsComponent;
+import com.netflix.graphql.dgs.DgsDataFetchingEnvironment;
 import com.netflix.graphql.dgs.DgsQuery;
 import com.netflix.graphql.dgs.InputArgument;
+import com.netflix.graphql.dgs.context.DgsContext;
+import com.rpg.lab.config.PlayerContext;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -23,9 +26,12 @@ public class MonsterDataFetcher {
     }
 
     @DgsQuery
-    public MonsterResponse monster(@InputArgument Long id) {
-        Monster monster = monsterService.getMonster(id);
+    public MonsterResponse monster(
+            @InputArgument Long id,
+            DgsDataFetchingEnvironment dfe
+    ) {
+        PlayerContext context = DgsContext.getCustomContext(dfe);
 
-        return MonsterResponse.from(monster);
+        return monsterService.getMonster(id, context.playerId());
     }
 }

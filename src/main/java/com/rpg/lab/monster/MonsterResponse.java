@@ -16,4 +16,14 @@ public record MonsterResponse(
                 monster.getAttackPower()
         );
     }
+
+    public static MonsterResponse from(Monster monster, ScaledMonster scaledMonster) {
+        return new MonsterResponse(
+                monster.getId(),
+                scaledMonster.name(),
+                scaledMonster.hp(),
+                scaledMonster.hp(),
+                scaledMonster.attackPower()
+        );
+    }
 }
