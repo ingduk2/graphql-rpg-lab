@@ -5,13 +5,17 @@ public record MonsterResponse(
         String name,
         int hp,
         int maxHp,
-        int attackPower
+        int attackPower,
+        int baseHp,
+        int baseAttackPower
 ) {
     public static MonsterResponse from(Monster monster) {
         return new MonsterResponse(
                 monster.getId(),
                 monster.getName(),
                 monster.getHp(),
+                monster.getMaxHp(),
+                monster.getAttackPower(),
                 monster.getMaxHp(),
                 monster.getAttackPower()
         );
@@ -23,7 +27,9 @@ public record MonsterResponse(
                 scaledMonster.name(),
                 scaledMonster.hp(),
                 scaledMonster.hp(),
-                scaledMonster.attackPower()
+                scaledMonster.attackPower(),
+                monster.getMaxHp(),
+                monster.getAttackPower()
         );
     }
 }

@@ -103,6 +103,8 @@ type Monster {
     hp: Int!
     maxHp: Int!
     attackPower: Int!
+    baseHp: Int!
+    baseAttackPower: Int!
 }
 
 type Item {

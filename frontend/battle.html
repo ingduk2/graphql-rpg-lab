@@ -401,6 +401,7 @@
             <div class="unit monster">
                 <div class="unit-label">MONSTER</div>
                 <select id="monsterSelect"></select>
+                <div id="monsterScaleNote" style="font-size:11px; color:var(--amber); margin-bottom:6px;"></div>
                 <div class="stats-row">ATK.<span id="statMonsterAtk">-</span></div>
                 <div class="bar-label"><span>HP</span><span id="monsterHpText">--/--</span></div>
                 <div class="bar"><div class="bar-fill hp" id="monsterHpFill"></div></div>
@@ -520,10 +521,17 @@
     }
 
     function updateMonsterDisplay(monster) {
-        document.getElementById('statMonsterAtk').textContent = monster.attackPower;
+        const atkDiff = monster.attackPower - monster.baseAttackPower;
+
+        document.getElementById('statMonsterAtk').textContent =
+            atkDiff > 0 ? `${monster.baseAttackPower}+${atkDiff}` : monster.attackPower;
+
         currentMonsterMaxHp = monster.maxHp;
         currentMonsterHp = monster.maxHp;
         setHpBar('monsterHpFill', 'monsterHpText', monster.maxHp, monster.maxHp);
+
+        document.getElementById('monsterScaleNote').textContent =
+            atkDiff > 0 ? `⚡ Lv.${currentPlayerLevel} 기준 강화됨` : '';
     }
 
     function updateInventoryDisplay(items) {
@@ -695,7 +703,7 @@
     async function syncSelection() {
         const mid = document.getElementById('monsterSelect').value;
         if (!mid) return;
-        const data = await graphql(`{ monster(id: ${mid}) { id name hp maxHp attackPower } }`);
+        const data = await graphql(`{ monster(id: ${mid}) { id name hp maxHp attackPower baseHp baseAttackPower } }`);
         monsterDefeated = false;
         updateMonsterDisplay(data.monster);
         setButtonsDisabled(false);
