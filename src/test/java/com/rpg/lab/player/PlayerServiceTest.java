@@ -97,4 +97,62 @@ class PlayerServiceTest {
             assertThat(inventoryRepository.findByPlayerId(result.id())).isPresent();
         }
     }
+
+    @Nested
+    class GetLeaderboard {
+
+        @Test
+        @DisplayName("레벨 내림차순으로 정렬된 순위를 반환한다")
+        void test1() {
+            Player lowPlayer = playerRepository.save(PlayerFixture.create());
+            Player midPlayer = playerRepository.save(PlayerFixture.create());
+            Player highPlayer = playerRepository.save(PlayerFixture.create());
+            midPlayer.gainExp(100);
+            highPlayer.gainExp(1000);
+
+            playerRepository.save(midPlayer);
+            playerRepository.save(highPlayer);
+
+            List<LeaderboardEntry> results = sut.getLeaderboard(10);
+
+            assertThat(results)
+                    .extracting(LeaderboardEntry::playerId)
+                    .containsExactly(highPlayer.getId(), midPlayer.getId(), lowPlayer.getId());
+        }
+
+        @Test
+        @DisplayName("순위가 1부터 순서대로 매겨진다")
+        void test2() {
+            playerRepository.save(PlayerFixture.create());
+            playerRepository.save(PlayerFixture.create());
+
+            List<LeaderboardEntry> results = sut.getLeaderboard(10);
+
+            assertThat(results)
+                    .extracting(LeaderboardEntry::rank)
+                    .containsExactly(1, 2);
+        }
+
+        @Test
+        @DisplayName("limit 보다 플레이어가 많으면 limit 만큼만 반환한다")
+        void test3() {
+            playerRepository.save(PlayerFixture.create());
+            playerRepository.save(PlayerFixture.create());
+            playerRepository.save(PlayerFixture.create());
+
+            int limit = 2;
+
+            List<LeaderboardEntry> results = sut.getLeaderboard(limit);
+
+            assertThat(results).hasSize(limit);
+        }
+
+        @Test
+        @DisplayName("플레이어가 없으면 빈 리스트를 반환한다")
+        void test4() {
+            List<LeaderboardEntry> results = sut.getLeaderboard(10);
+
+            assertThat(results).isEmpty();
+        }
+    }
 }

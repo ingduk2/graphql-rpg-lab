@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +28,14 @@ public class PlayerService {
         return playerRepository.findById(id)
                 .map(PlayerResponse::from)
                 .orElseThrow(() -> new EntityNotFoundException("Player not found: " + id));
+    }
+
+    public List<LeaderboardEntry> getLeaderboard(int limit) {
+        List<Player> players = playerRepository.findAllOrderByLevelDescExpDesc();
+
+        return IntStream.range(0, Math.min(limit, players.size()))
+                .mapToObj(i -> LeaderboardEntry.of(i + 1, players.get(i)))
+                .toList();
     }
 
     @Transactional
