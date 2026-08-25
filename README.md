@@ -322,13 +322,44 @@
 
 ---
 
-### Step 14. 성능 최적화 & 마무리 (예정)
+### Step 14. 리더보드
+> "누가 제일 강한가"
+
+- **14-1.** 레벨 기준 랭킹 조회
+  - PlayerRepository에 정렬 쿼리 추가 (레벨 내림차순, 동률이면 exp 내림차순)
+  - LeaderboardEntry 타입 설계 (rank, playerId, playerName, level, exp)
+  - PlayerService(또는 LeaderboardService)에 leaderboard(limit) 메서드 추가
+  - 단위/서비스 테스트 작성
+
+- **14-2.** GraphQL 스키마/리졸버 반영
+  - schema.graphqls에 leaderboard(limit: Int): [LeaderboardEntry!]! 추가
+  - PlayerDataFetcher(또는 신규 LeaderboardDataFetcher)에 리졸버 구현
+  - DataFetcherTest 작성
+
+- **14-3.** HTML 리더보드 화면
+  - 순위/이름/레벨/exp 목록 표시
+  - 내 순위 하이라이트(선택)
+
+- **14-4.** (고도화) 처치 수 기준 랭킹 추가
+  - Player에 killCount 필드 추가
+  - BattleVictoryProcessor에서 몬스터 처치 시 killCount 증가
+  - leaderboard에 정렬 기준(SortBy: LEVEL/KILL_COUNT) 파라미터 추가
+  - 관련 테스트 보강, HTML에 정렬 기준 토글 추가
+
+**학습 포인트**
+- 정렬/페이징 쿼리 설계 (Pageable, Sort)
+- 랭킹(rank) 계산을 서버에서 할지 클라이언트에서 할지 트레이드오프
+- 기존 통계 없이 새 집계 필드(killCount)를 도입할 때 마이그레이션/초기값 고려
+
+---
+
+### Step 15. 성능 최적화 & 마무리 (예정)
 > "더 빠르게, 더 안전하게"
 
-- **14-1.** Query Complexity 분석 — 악의적인 중첩 쿼리 방어
-- **14-2.** Persisted Queries 개념 이해
-- **14-3.** DataLoader 캐싱 전략 정리
-- **14-4.** 전체 아키텍처 회고
+- **15-1.** Query Complexity 분석 — 악의적인 중첩 쿼리 방어
+- **15-2.** Persisted Queries 개념 이해
+- **15-3.** DataLoader 캐싱 전략 정리
+- **15-4.** 전체 아키텍처 회고
 
 **학습 포인트**
 - GraphQL의 보안 고려사항 (Depth Limit, Complexity Limit)
