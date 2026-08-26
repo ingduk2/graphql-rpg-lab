@@ -12,6 +12,8 @@ type Query {
     # Quest
     quests: [Quest!]!
     myQuests: [PlayerQuest]!
+
+    leaderboard(limit: Int): [LeaderboardEntry!]!
 }
 
 type Mutation {
@@ -158,4 +160,12 @@ enum QuestStatus {
     AVAILABLE
     IN_PROGRESS
     COMPLETED
+}
+
+type LeaderboardEntry {
+    rank: Int!
+    playerId: ID!
+    playerName: String!
+    level: Int!
+    exp: Int!
 }

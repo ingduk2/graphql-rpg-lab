@@ -31,6 +31,12 @@ public class PlayerDataFetcher {
         return playerService.getPlayer(id);
     }
 
+    @DgsQuery
+    public List<LeaderboardEntry> leaderboard(@InputArgument Integer limit) {
+        int effectiveLimit = limit != null ? limit : 10;
+        return playerService.getLeaderboard(effectiveLimit);
+    }
+
     @DgsMutation
     public PlayerResponse createPlayer(@InputArgument CreatePlayerInput input) {
         return playerService.createPlayer(input.name());

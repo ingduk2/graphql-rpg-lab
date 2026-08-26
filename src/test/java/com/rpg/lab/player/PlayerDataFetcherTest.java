@@ -124,4 +124,45 @@ class PlayerDataFetcherTest {
             assertThat(inventoryRepository.findByPlayerId(Long.parseLong(id))).isPresent();
         }
     }
+
+    @Nested
+    class Leaderboard {
+
+        @Test
+        @DisplayName("리더보드를 조회하면 레벨 순으로 정렬된 결과가 온다")
+        void test1() {
+            Player low = playerRepository.save(PlayerFixture.create());
+            Player high = playerRepository.save(PlayerFixture.create());
+            high.gainExp(1000);
+            playerRepository.save(high);
+
+            List<String> results = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
+                    """
+                    { leaderboard(limit: 10) { rank playerName level } }
+                    """,
+                    "data.leaderboard[*].playerName",
+                    new TypeRef<>() {}
+            );
+
+            assertThat(results).containsExactly(high.getName(), low.getName());
+        }
+
+        @Test
+        @DisplayName("limit 을 생략하면 기본값으로 조회된다")
+        void test2() {
+            for (int i = 0; i < 15; i++) {
+                playerRepository.save(PlayerFixture.create());
+            }
+
+            List<Integer> results = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
+                    """
+                    { leaderboard { rank } }
+                    """,
+                    "data.leaderboard[*].rank",
+                    new TypeRef<>() {}
+            );
+
+            assertThat(results).hasSize(10);
+        }
+    }
 }
