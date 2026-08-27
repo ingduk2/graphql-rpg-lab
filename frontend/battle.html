@@ -359,6 +359,26 @@
             text-align: center;
             letter-spacing: 1px;
         }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #3a2a00;
+            padding: 6px 10px;
+            background: #0a0800;
+            font-size: 15px;
+        }
+        .leaderboard-item.me {
+            border-color: var(--green);
+            background: #0a1a0a;
+        }
+        .leaderboard-rank {
+            color: var(--amber);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 11px;
+            width: 28px;
+        }
     </style>
 </head>
 <body>
@@ -430,6 +450,17 @@
             </div>
             <div class="quest-list" id="questList">
                 <span class="quest-empty">no active quests</span>
+            </div>
+        </div>
+
+        <!-- 리더보드 패널 -->
+        <div class="quest-panel">
+            <div class="quest-panel-header">
+                <div class="panel-label" style="margin-bottom:0;">LEADERBOARD</div>
+                <button class="sm-btn green" onclick="loadLeaderboard()">↻</button>
+            </div>
+            <div class="quest-list" id="leaderboardList">
+                <span class="quest-empty">loading...</span>
             </div>
         </div>
     </div>
@@ -678,6 +709,7 @@
         document.getElementById('monsterSelect').onchange = syncSelection;
         await loadPlayer();
         await loadQuests();
+        await loadLeaderboard();
         syncSelection();
     }
 
@@ -752,6 +784,7 @@
             if (needsRefresh) {
                 await loadPlayer();
                 if (r.completedQuests?.length > 0) await loadQuests();
+                if (r.levelUps > 0) await loadLeaderboard();
             } else if (r.expGained > 0) {
                 setExpBar(currentPlayerExp + r.expGained, currentPlayerLevel);
             }
@@ -857,6 +890,29 @@
             }
         };
         ws.onerror = () => { log('websocket connection failed', 'dead'); setButtonsDisabled(false); };
+    }
+
+    async function loadLeaderboard() {
+        const data = await graphql(`{ leaderboard(limit: 10) { rank playerId playerName level exp } }`);
+        renderLeaderboard(data.leaderboard || []);
+    }
+
+    function renderLeaderboard(entries) {
+        const el = document.getElementById('leaderboardList');
+        if (entries.length === 0) {
+            el.innerHTML = '<span class="quest-empty">no players yet</span>';
+            return;
+        }
+        el.innerHTML = entries.map(e => {
+            const isMe = String(e.playerId) === String(playerId);
+            return `
+            <div class="leaderboard-item${isMe ? ' me' : ''}">
+                <span class="leaderboard-rank">#${e.rank}</span>
+                <span>${e.playerName}${isMe ? ' (YOU)' : ''}</span>
+                <span>Lv.${e.level}</span>
+            </div>
+        `;
+        }).join('');
     }
 
     function init() {
