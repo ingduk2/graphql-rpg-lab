@@ -42,6 +42,9 @@ public class Player {
     @Column(nullable = false)
     private int exp;
 
+    @Column(nullable = false)
+    private int killCount;
+
     public static Player create(String name) {
         Player player = new Player();
         player.name = Objects.requireNonNull(name);
@@ -52,11 +55,16 @@ public class Player {
         player.defense = PlayerDefaults.DEFENSE;
         player.speed = PlayerDefaults.SPEED;
         player.exp = PlayerDefaults.EXP;
+        player.killCount = 0;
         return player;
     }
 
     public void syncHp(int hp) {
         this.hp = hp;
+    }
+
+    public void increaseKillCount() {
+        this.killCount++;
     }
 
     public int gainExp(int amount) {

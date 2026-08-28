@@ -56,4 +56,31 @@ class PlayerTest {
             assertThat(player.getLevel()).isEqualTo(3);
         }
     }
+
+    @Nested
+    class IncreaseKillCount {
+
+        @Test
+        @DisplayName("처치 시 killCount 가 1 증가한다")
+        void test1() {
+            Player player = Player.create("user1");
+
+            player.increaseKillCount();
+
+            assertThat(player.getKillCount()).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("여러 번 처치하면 그만큼 누적된다")
+        void test2() {
+            Player player = Player.create("user1");
+
+            int killCount = 10;
+            for (int i = 0; i < killCount; i++) {
+                player.increaseKillCount();
+            }
+
+            assertThat(player.getKillCount()).isEqualTo(killCount);
+        }
+    }
 }
