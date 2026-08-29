@@ -139,4 +139,16 @@ class BattleVictoryProcessorTest {
         assertThat(result.levelUps()).isGreaterThan(0);
         assertThat(result.completedQuests()).contains(levelUpQuest.getTitle());
     }
+
+    @Test
+    @DisplayName("몬스터 처치 시 killCount 가 1 증가한다")
+    void test6() {
+        Monster monster = monsterRepository.save(MonsterFixture.createSlime());
+        int killCountBefore = player.getKillCount();
+        Battle battle = winningBattle(monster);
+
+        sut.process(player, battle, monster.getId());
+
+        assertThat(player.getKillCount()).isEqualTo(killCountBefore + 1);
+    }
 }

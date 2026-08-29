@@ -30,6 +30,9 @@ public class BattleVictoryProcessor {
             return BattleReward.empty();
         }
 
+        // 몬스터 처치 카운트 증가
+        player.increaseKillCount();
+
         // 전투 경험치 획득 및 레벨업
         int levelUps = player.gainExp(battle.getExpGained());
 
