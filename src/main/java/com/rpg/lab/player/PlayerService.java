@@ -30,8 +30,11 @@ public class PlayerService {
                 .orElseThrow(() -> new EntityNotFoundException("Player not found: " + id));
     }
 
-    public List<LeaderboardEntry> getLeaderboard(int limit) {
-        List<Player> players = playerRepository.findAllOrderByLevelDescExpDesc();
+    public List<LeaderboardEntry> getLeaderboard(int limit, LeaderboardSortBy sortBy) {
+        List<Player> players = switch (sortBy) {
+            case LEVEL -> playerRepository.findAllOrderByLevelDescExpDesc();
+            case KILL_COUNT -> playerRepository.findAllOrderByKillCountDesc();
+        };
 
         return IntStream.range(0, Math.min(limit, players.size()))
                 .mapToObj(i -> LeaderboardEntry.of(i + 1, players.get(i)))

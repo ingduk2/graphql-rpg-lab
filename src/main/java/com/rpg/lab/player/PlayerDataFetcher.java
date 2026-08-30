@@ -32,9 +32,13 @@ public class PlayerDataFetcher {
     }
 
     @DgsQuery
-    public List<LeaderboardEntry> leaderboard(@InputArgument Integer limit) {
+    public List<LeaderboardEntry> leaderboard(
+            @InputArgument Integer limit,
+            @InputArgument LeaderboardSortBy sortBy
+    ) {
         int effectiveLimit = limit != null ? limit : 10;
-        return playerService.getLeaderboard(effectiveLimit);
+        LeaderboardSortBy effectiveSortBy = sortBy != null ? sortBy : LeaderboardSortBy.LEVEL;
+        return playerService.getLeaderboard(effectiveLimit, effectiveSortBy);
     }
 
     @DgsMutation

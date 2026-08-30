@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static com.rpg.lab.player.LeaderboardSortBy.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -113,7 +114,7 @@ class PlayerServiceTest {
             playerRepository.save(midPlayer);
             playerRepository.save(highPlayer);
 
-            List<LeaderboardEntry> results = sut.getLeaderboard(10);
+            List<LeaderboardEntry> results = sut.getLeaderboard(10, LEVEL);
 
             assertThat(results)
                     .extracting(LeaderboardEntry::playerId)
@@ -126,7 +127,7 @@ class PlayerServiceTest {
             playerRepository.save(PlayerFixture.create());
             playerRepository.save(PlayerFixture.create());
 
-            List<LeaderboardEntry> results = sut.getLeaderboard(10);
+            List<LeaderboardEntry> results = sut.getLeaderboard(10, LEVEL);
 
             assertThat(results)
                     .extracting(LeaderboardEntry::rank)
@@ -142,7 +143,7 @@ class PlayerServiceTest {
 
             int limit = 2;
 
-            List<LeaderboardEntry> results = sut.getLeaderboard(limit);
+            List<LeaderboardEntry> results = sut.getLeaderboard(limit, LEVEL);
 
             assertThat(results).hasSize(limit);
         }
@@ -150,7 +151,7 @@ class PlayerServiceTest {
         @Test
         @DisplayName("플레이어가 없으면 빈 리스트를 반환한다")
         void test4() {
-            List<LeaderboardEntry> results = sut.getLeaderboard(10);
+            List<LeaderboardEntry> results = sut.getLeaderboard(10, LEVEL);
 
             assertThat(results).isEmpty();
         }

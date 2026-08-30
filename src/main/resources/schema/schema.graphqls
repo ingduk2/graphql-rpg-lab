@@ -13,7 +13,7 @@ type Query {
     quests: [Quest!]!
     myQuests: [PlayerQuest]!
 
-    leaderboard(limit: Int): [LeaderboardEntry!]!
+    leaderboard(limit: Int, sortBy: LeaderboardSortBy): [LeaderboardEntry!]!
 }
 
 type Mutation {
@@ -160,6 +160,11 @@ enum QuestStatus {
     AVAILABLE
     IN_PROGRESS
     COMPLETED
+}
+
+enum LeaderboardSortBy {
+    LEVEL
+    KILL_COUNT
 }
 
 type LeaderboardEntry {

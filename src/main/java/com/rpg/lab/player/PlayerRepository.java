@@ -14,4 +14,7 @@ public interface PlayerRepository extends Repository<Player, Long> {
 
     @Query("SELECT p FROM Player p ORDER BY p.level DESC, p.exp DESC")
     List<Player> findAllOrderByLevelDescExpDesc();
+
+    @Query("SELECT p FROM Player p ORDER BY p.killCount DESC")
+    List<Player> findAllOrderByKillCountDesc();
 }
