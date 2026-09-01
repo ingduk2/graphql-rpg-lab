@@ -353,13 +353,46 @@
 
 ---
 
-### Step 15. 성능 최적화 & 마무리 (예정)
+### Step 15. 골드/판매 시스템
+> "쓸모없는 검도 돈이 된다"
+
+- **15-1.** 도메인 모델 설계
+  - Player에 gold 필드 추가 (기본값 0)
+  - gainGold(int amount) 메서드 추가
+  - Item(또는 별도 정책 클래스)에 판매가 계산 로직 설계
+    (attackBonus/defenseBonus 기반? 고정가? 결정 필요)
+  - PlayerTest에 관련 케이스 추가
+
+- **15-2.** 서비스 레벨 반영
+  - InventoryService.sellItem(playerId, itemId) 추가
+    - 보유 여부 확인 → 인벤토리에서 제거 → 판매가만큼 골드 지급
+  - 장착 중인 아이템도 판매 가능한지, 판매 전 자동 해제할지 정책 결정
+  - InventoryServiceTest에 케이스 추가
+
+- **15-3.** GraphQL 스키마/응답 반영
+  - schema.graphqls에 sellItem(itemId: ID!): SellItemResult! 뮤테이션 추가
+    (또는 Inventory/Player를 그대로 반환할지 결정)
+  - Player 타입에 gold: Int! 필드 노출
+  - InventoryDataFetcherTest/PlayerDataFetcherTest에 케이스 추가
+
+- **15-4.** HTML 반영
+  - 플레이어 패널에 GOLD 표시
+  - 인벤토리 아이템에 SELL 버튼 추가
+  - 판매 로그 표시
+
+**학습 포인트**
+- 판매가 정책(고정가 vs 스탯 기반)을 어디에 둘지 — Item 엔티티 vs 별도 PricingPolicy
+- 장착 중인 아이템 판매 시 사이드이펙트(자동 해제) 처리 방식
+
+---
+
+### Step 16. 성능 최적화 & 마무리 (예정)
 > "더 빠르게, 더 안전하게"
 
-- **15-1.** Query Complexity 분석 — 악의적인 중첩 쿼리 방어
-- **15-2.** Persisted Queries 개념 이해
-- **15-3.** DataLoader 캐싱 전략 정리
-- **15-4.** 전체 아키텍처 회고
+- **16-1.** Query Complexity 분석 — 악의적인 중첩 쿼리 방어
+- **16-2.** Persisted Queries 개념 이해
+- **16-3.** DataLoader 캐싱 전략 정리
+- **16-4.** 전체 아키텍처 회고
 
 **학습 포인트**
 - GraphQL의 보안 고려사항 (Depth Limit, Complexity Limit)
