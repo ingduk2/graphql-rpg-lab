@@ -83,4 +83,20 @@ class PlayerTest {
             assertThat(player.getKillCount()).isEqualTo(killCount);
         }
     }
+
+    @Nested
+    class GainGold {
+
+        @Test
+        @DisplayName("골드를 획득하면 누적된다")
+        void test1() {
+            Player player = Player.create("user1");
+
+            player.gainGold(50);
+            player.gainGold(30);
+
+            assertThat(player.getGold()).isEqualTo(80);
+        }
+    }
+
 }

@@ -43,4 +43,8 @@ public class Item {
         item.defenseBonus = defenseBonus;
         return item;
     }
+
+    public int sellPrice() {
+        return Math.max(1, (attackBonus + defenseBonus) * 10);
+    }
 }
