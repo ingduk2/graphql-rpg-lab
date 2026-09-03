@@ -117,6 +117,42 @@ class InventoryServiceTest {
         }
     }
 
+    @Nested
+    class SellItem {
+
+        @Test
+        @DisplayName("아이템을 판매하면 인벤토리에서 사라지고 골드를 얻는다")
+        void test1() {
+            Item item = ownItem();
+            int goldBefore = player.getGold();
+
+            InventoryResponse result = sut.sellItem(player.getId(), item.getId());
+
+            assertThat(result.items()).extracting(ItemResponse::id).doesNotContain(item.getId());
+            assertThat(player.getGold()).isEqualTo(goldBefore + item.sellPrice());
+        }
+
+        @Test
+        @DisplayName("보유하지 않은 item 을 판매하려 하면 EntityNotFoundException")
+        void test2() {
+            Long notOwnedItemId = 999L;
+
+            assertThatThrownBy(() -> sut.sellItem(player.getId(), notOwnedItemId))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("장착 중인 아이템도 판매할 수 있다")
+        void test3() {
+            Item item = ownItem();
+            sut.equipItem(player.getId(), item.getId());
+
+            InventoryResponse result = sut.sellItem(player.getId(), item.getId());
+
+            assertThat(result.items()).isEmpty();
+        }
+    }
+
     private Item ownItem() {
         Item item = itemRepository.save(ItemFixture.createSwordItem());
         inventory.addItem(item);

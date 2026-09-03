@@ -262,4 +262,46 @@ class InventoryTest {
             assertThat(inventory.getInventoryItems().get(0).isEquipped()).isFalse();
         }
     }
+
+    @Nested
+    class SellItem {
+
+        @Test
+        @DisplayName("아이템을 판매하면 판매가를 반환하고 인벤토리에서 사라진다")
+        void test1() {
+            Inventory inventory = Inventory.create(player);
+            Item item = ItemFixture.createSwordItemWithId();
+            inventory.addItem(item);
+
+            int price = inventory.sellItem(item.getId());
+
+            assertThat(price).isEqualTo(item.sellPrice());
+            assertThat(inventory.getInventoryItems())
+                    .extracting(InventoryItem::getItem)
+                    .doesNotContain(item);
+        }
+
+        @Test
+        @DisplayName("장착 중인 아이템도 판매할 수 있다")
+        void test2() {
+            Inventory inventory = Inventory.create(player);
+            Item item = ItemFixture.createAxeItemWithId();
+            inventory.addItem(item);
+            inventory.equip(item.getId());
+
+            inventory.sellItem(item.getId());
+
+            assertThat(inventory.getInventoryItems()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("보유하지 않은 아이템을 판매하려 하면 EntityNotFoundException")
+        void test3() {
+            Inventory inventory = Inventory.create(player);
+            Long notOwnedItemId = 999L;
+
+            assertThatThrownBy(() -> inventory.sellItem(notOwnedItemId))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+    }
 }

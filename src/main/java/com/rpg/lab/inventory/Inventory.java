@@ -43,6 +43,13 @@ public class Inventory {
         this.inventoryItems.removeIf(li -> li.getItem().getId().equals(itemId));
     }
 
+    public int sellItem(Long itemId) {
+        InventoryItem target = findByItemId(itemId);
+        int price = target.getItem().sellPrice();
+        inventoryItems.remove(target);
+        return price;
+    }
+
     public void addItemIfNotOwned(Item item) {
         if (!hasItem(item.getId())) {
             addItem(item);
