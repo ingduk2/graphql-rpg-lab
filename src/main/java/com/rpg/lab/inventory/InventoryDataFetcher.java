@@ -31,4 +31,13 @@ public class InventoryDataFetcher {
         PlayerContext context = DgsContext.getCustomContext(dfe);
         return inventoryService.unequipItem(context.playerId(), itemId);
     }
+
+    @DgsMutation
+    public InventoryResponse sellItem(
+            @InputArgument Long itemId,
+            DgsDataFetchingEnvironment dfe
+    ) {
+        PlayerContext context = DgsContext.getCustomContext(dfe);
+        return inventoryService.sellItem(context.playerId(), itemId);
+    }
 }

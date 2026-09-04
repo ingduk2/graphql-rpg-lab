@@ -23,6 +23,7 @@ type Mutation {
     # Item
     equipItem(itemId: ID!): Inventory!
     unequipItem(itemId: ID!): Inventory!
+    sellItem(itemId: ID!): Inventory!
 
     # Quest
     acceptQuest(questId: ID!): PlayerQuest!
@@ -88,6 +89,7 @@ type Player {
     hp: Int!
     maxHp: Int!
     exp: Int!
+    gold: Int!
     stats: Stats!
     inventory: Inventory
     quests: [Quest!]!

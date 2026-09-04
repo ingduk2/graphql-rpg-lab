@@ -93,6 +93,32 @@ class InventoryDataFetcherTest {
         }
     }
 
+    @Nested
+    class SellItem {
+
+        @Test
+        @DisplayName("아이템을 판매하면 인벤토리에서 사라진다")
+        void test1() {
+            Item item = itemRepository.save(ItemFixture.createSwordItem());
+            inventory.addItem(item);
+            inventoryRepository.save(inventory);
+
+            List<Long> itemIds = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
+                    """
+                            mutation {
+                                sellItem(itemId: "%d") { items { id } }
+                            }
+                            """.formatted(item.getId()),
+                    "data.sellItem.items[*].id",
+                    Collections.emptyMap(),
+                    new TypeRef<>() {},
+                    headers
+            );
+
+            assertThat(itemIds).doesNotContain(item.getId());
+        }
+    }
+
     private Item ownItem() {
         Item item = itemRepository.save(ItemFixture.createSwordItem());
         inventory.addItem(item);

@@ -87,6 +87,22 @@ class PlayerDataFetcherTest {
 
             assertThat(result.getErrors()).isNotEmpty();
         }
+
+        @Test
+        @DisplayName("플레이어 조회 시 gold 가 응답에 담긴다")
+        void test3() {
+            Player player = playerRepository.save(PlayerFixture.create());
+
+            Integer gold = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
+                    """
+                            { player(id: %d) { gold } }
+                            """.formatted(player.getId()),
+                    "data.player.gold",
+                    Integer.class
+            );
+
+            assertThat(gold).isEqualTo(0);
+        }
     }
 
     @Nested

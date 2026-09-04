@@ -7,6 +7,7 @@ public record PlayerResponse(
         int hp,
         int maxHp,
         int exp,
+        int gold,
         StatsResponse stats
 ) {
     public static PlayerResponse from(Player player) {
@@ -17,6 +18,7 @@ public record PlayerResponse(
                 player.getHp(),
                 player.getMaxHp(),
                 player.getExp(),
+                player.getGold(),
                 StatsResponse.from(player)
         );
     }
