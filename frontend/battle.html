@@ -405,6 +405,7 @@
                     &nbsp;ATK.<span id="statAtk">-</span>
                     &nbsp;DEF.<span id="statDef">-</span>
                     &nbsp;SPD.<span id="statSpd">-</span>
+                     GOLD.<span id="statGold" style="color:var(--amber);">-</span>
                 </div>
                 <div class="bar-label"><span>HP</span><span id="playerHpText">--/--</span></div>
                 <div class="bar"><div class="bar-fill hp" id="playerHpFill"></div></div>
@@ -551,6 +552,7 @@
         document.getElementById('statAtk').textContent = atkBonus > 0 ? `${player.stats.attack}+${atkBonus}` : player.stats.attack;
         document.getElementById('statDef').textContent = defBonus > 0 ? `${player.stats.defense}+${defBonus}` : player.stats.defense;
         document.getElementById('statSpd').textContent = player.stats.speed;
+        document.getElementById('statGold').textContent = player.gold;
         setHpBar('playerHpFill', 'playerHpText', player.hp, player.maxHp);
         setExpBar(player.exp, player.level);
     }
@@ -587,6 +589,7 @@
             <div class="inventory-item${item.equipped ? ' equipped' : ''}">
                 ${item.name}${bonusText}${equippedBadge}
                 <button class="sm-btn ${item.equipped ? 'amber' : 'green'}" onclick="${toggleFn}(${item.id})">${toggleLabel}</button>
+                <button class="sm-btn amber" onclick="sellItem(${item.id}, '${item.name}')">SELL</button>
             </div>
         `;
         }).join('');
@@ -679,6 +682,12 @@
         }).join('');
     }
 
+    async function sellItem(itemId, itemName) {
+        await graphql(`mutation { sellItem(itemId: ${itemId}) { id } }`);
+        log(`💰 ${itemName} 판매 완료!`, 'quest-log');
+        await loadPlayer();
+    }
+
     async function acceptQuest(questId, title) {
         await graphql(`mutation { acceptQuest(questId: ${questId}) { id status } }`);
         log(`퀘스트 수락: ${title}`, 'quest-log');
@@ -722,7 +731,7 @@
         try {
             const data = await graphql(`{
             player(id: ${playerId}) {
-                    id name level hp maxHp exp
+                    id name level hp maxHp exp gold
                     stats { attack defense speed }
                     inventory { items { id name type attackBonus defenseBonus equipped } }
                 }
