@@ -25,7 +25,7 @@ public class Inventory {
     @JoinColumn(name = "player_id")
     private Player player;
 
-    @OneToMany(mappedBy = "inventory", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "inventory", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InventoryItem> inventoryItems = new ArrayList<>();
 
     public static Inventory create(Player player) {
