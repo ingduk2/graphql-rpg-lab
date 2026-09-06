@@ -386,13 +386,45 @@
 
 ---
 
-### Step 16. 성능 최적화 & 마무리 (예정)
+### Step 16. 상점 시스템
+> "번 돈은 쓰라고 있는 것"
+
+- **16-1.** 도메인 모델 설계
+  - ShopItem 엔티티 추가 (Item 참조 + price)
+    - Item은 여전히 "아이템이 뭔지"에 대한 원천, ShopItem은 "상점에서 얼마에 파는지"라는 별도 맥락
+  - ShopItemRepository 추가
+  - ShopItemTest(순수 단위, 필요시) 작성
+
+- **16-2.** 서비스 레벨 반영
+  - ShopService(신설) 또는 InventoryService에 buyItem(playerId, shopItemId) 추가
+    - 골드 충분한지 확인 → 골드 차감 → 인벤토리에 아이템 추가
+    - 골드 부족 시 명확한 예외(예: InsufficientGoldException) 발생
+  - 상점 목록 조회 getShopItems() 추가
+  - 관련 서비스 테스트 작성 (구매 성공/골드 부족/존재하지 않는 shopItemId)
+
+- **16-3.** GraphQL 스키마/응답 반영
+  - schema.graphqls에 shopItems: [ShopItem!]! 쿼리, buyItem(shopItemId: ID!): InventoryResponse! (또는 별도 결과 타입) 뮤테이션 추가
+  - ShopItem 타입에 id, item(Item 정보), price 노출
+  - 관련 DataFetcher 및 테스트 작성
+
+- **16-4.** HTML 상점 화면
+  - 상점 패널 추가 (아이템명/가격/BUY 버튼)
+  - 구매 시 골드 차감 반영, 구매 로그 표시
+  - data.sql에 초기 ShopItem 데이터 추가
+
+**학습 포인트**
+- 아이템의 "정의"(Item)와 "유통 맥락"(MonsterDrop/QuestReward/ShopItem)을 분리하는 설계 패턴
+- 골드 부족 등 비즈니스 규칙 위반 시 예외 설계와 GraphQL 에러 코드 매핑
+
+---
+
+### Step 17. 성능 최적화 & 마무리 (예정)
 > "더 빠르게, 더 안전하게"
 
-- **16-1.** Query Complexity 분석 — 악의적인 중첩 쿼리 방어
-- **16-2.** Persisted Queries 개념 이해
-- **16-3.** DataLoader 캐싱 전략 정리
-- **16-4.** 전체 아키텍처 회고
+- **17-1.** Query Complexity 분석 — 악의적인 중첩 쿼리 방어
+- **17-2.** Persisted Queries 개념 이해
+- **17-3.** DataLoader 캐싱 전략 정리
+- **17-4.** 전체 아키텍처 회고
 
 **학습 포인트**
 - GraphQL의 보안 고려사항 (Depth Limit, Complexity Limit)
