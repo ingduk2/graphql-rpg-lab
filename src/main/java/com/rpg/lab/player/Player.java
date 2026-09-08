@@ -1,5 +1,6 @@
 package com.rpg.lab.player;
 
+import com.rpg.lab.exception.InsufficientGoldException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -84,6 +85,14 @@ public class Player {
 
     public void gainGold(int amount) {
         this.gold += amount;
+    }
+
+    public void spendGold(int amount) {
+        if (this.gold < amount) {
+            throw new InsufficientGoldException("Not enough gold: have " + this.gold + ", need " + amount);
+        }
+
+        this.gold -= amount;
     }
 
     private int expToNextLevel() {

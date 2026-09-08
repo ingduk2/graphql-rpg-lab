@@ -1,10 +1,12 @@
 package com.rpg.lab.player;
 
+import com.rpg.lab.exception.InsufficientGoldException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PlayerTest {
 
@@ -99,4 +101,39 @@ class PlayerTest {
         }
     }
 
+    @Nested
+    class SpendGold {
+
+        @Test
+        @DisplayName("골드가 충분하면 차감된다")
+        void test1() {
+            Player player = Player.create("user1");
+            player.gainGold(100);
+
+            player.spendGold(30);
+
+            assertThat(player.getGold()).isEqualTo(70);
+        }
+
+        @Test
+        @DisplayName("골드가 부족하면 InsufficientGoldException 이 발생한다")
+        void test2() {
+            Player player = Player.create("user1");
+            player.gainGold(10);
+
+            assertThatThrownBy(() -> player.spendGold(50))
+                    .isInstanceOf(InsufficientGoldException.class);
+        }
+
+        @Test
+        @DisplayName("정확히 보유한 만큼 쓰면 0이 된다")
+        void test3() {
+            Player player = Player.create("user1");
+            player.gainGold(50);
+
+            player.spendGold(50);
+
+            assertThat(player.getGold()).isEqualTo(0);
+        }
+    }
 }
