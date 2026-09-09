@@ -14,6 +14,9 @@ type Query {
     myQuests: [PlayerQuest]!
 
     leaderboard(limit: Int, sortBy: LeaderboardSortBy): [LeaderboardEntry!]!
+
+    # Item
+    shopItems: [ShopItemResponse!]!
 }
 
 type Mutation {
@@ -24,6 +27,7 @@ type Mutation {
     equipItem(itemId: ID!): Inventory!
     unequipItem(itemId: ID!): Inventory!
     sellItem(itemId: ID!): Inventory!
+    buyItem(shopItemId: ID!): Inventory!
 
     # Quest
     acceptQuest(questId: ID!): PlayerQuest!
@@ -118,6 +122,16 @@ type Item {
     attackBonus: Int!
     defenseBonus: Int!
     equipped: Boolean!
+}
+
+type ShopItemResponse {
+    id: ID!
+    itemId: ID!
+    itemName: String!
+    itemType: ItemType!
+    attackBonus: Int!
+    defenseBonus: Int!
+    price: Int!
 }
 
 enum ItemType {
