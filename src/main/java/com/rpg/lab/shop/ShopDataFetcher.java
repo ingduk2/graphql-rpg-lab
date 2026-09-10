@@ -16,9 +16,7 @@ public class ShopDataFetcher {
 
     @DgsQuery
     public List<ShopItemResponse> shopItems() {
-        return shopService.getShopItems().stream()
-                .map(ShopItemResponse::from)
-                .toList();
+        return shopService.getShopItems();
     }
 
     @DgsMutation

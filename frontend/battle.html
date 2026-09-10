@@ -468,6 +468,18 @@
                 <span class="quest-empty">loading...</span>
             </div>
         </div>
+
+        <!-- 상점 패널 -->
+        <div class="quest-panel" id="shopPanel">
+            <div class="quest-panel-header">
+                <div class="panel-label" style="margin-bottom:0;">SHOP</div>
+                <button class="sm-btn green" onclick="loadShop()">↻</button>
+            </div>
+            <div class="quest-list" id="shopList">
+                <span class="quest-empty">loading...</span>
+            </div>
+        </div>
+
     </div>
 
     <div class="footer-note">localhost:8080/graphql — Step 9 Quest</div>
@@ -688,6 +700,41 @@
         await loadPlayer();
     }
 
+    async function loadShop() {
+        const data = await graphql(`{ shopItems { id itemName attackBonus defenseBonus price } }`);
+        renderShop(data.shopItems || []);
+    }
+
+    function renderShop(items) {
+        const el = document.getElementById('shopList');
+        if (items.length === 0) {
+            el.innerHTML = '<span class="quest-empty">no items for sale</span>';
+            return;
+        }
+        el.innerHTML = items.map(si => {
+            const bonuses = [];
+            if (si.attackBonus > 0) bonuses.push(`ATK+${si.attackBonus}`);
+            if (si.defenseBonus > 0) bonuses.push(`DEF+${si.defenseBonus}`);
+            const bonusText = bonuses.length > 0 ? ` <span class="bonus">${bonuses.join(' ')}</span>` : '';
+            return `
+            <div class="quest-item">
+                <div class="quest-item-header">
+                    <span class="quest-title">${si.itemName}${bonusText}</span>
+                    <button class="sm-btn amber" onclick="buyItem(${si.id}, '${si.itemName}')">BUY ${si.price}G</button>
+                </div>
+            </div>
+        `;
+        }).join('');
+    }
+
+    async function buyItem(shopItemId, itemName) {
+        try {
+            await graphql(`mutation { buyItem(shopItemId: ${shopItemId}) { id } }`);
+            log(`🛒 ${itemName} 구매 완료!`, 'quest-log');
+            await loadPlayer();
+        } catch (e) {}
+    }
+
     async function acceptQuest(questId, title) {
         await graphql(`mutation { acceptQuest(questId: ${questId}) { id status } }`);
         log(`퀘스트 수락: ${title}`, 'quest-log');
@@ -724,6 +771,7 @@
         await loadPlayer();
         await loadQuests();
         await loadLeaderboard();
+        await loadShop();
         syncSelection();
     }
 

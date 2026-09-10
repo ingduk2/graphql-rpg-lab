@@ -22,8 +22,11 @@ public class ShopService {
     private final PlayerReader playerReader;
     private final PlayerManager playerManager;
 
-    public List<ShopItem> getShopItems() {
-        return shopItemRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<ShopItemResponse> getShopItems() {
+        return shopItemRepository.findAll().stream()
+                .map(ShopItemResponse::from)
+                .toList();
     }
 
     @Transactional

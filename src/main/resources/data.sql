@@ -15,7 +15,18 @@ VALUES
     ('슬라임 결정', 'ACCESSORY', 3, 0),   -- 슬라임 사냥 퀘스트 보상 (id: 6)
     ('고블린 귀', 'ACCESSORY', 0, 3),     -- 고블린 토벌 퀘스트 보상 (id: 7)
     ('던전 열쇠', 'ACCESSORY', 5, 5),     -- 던전 탐험 퀘스트 보상 (id: 8)
-    ('두목의 도끼', 'WEAPON', 15, 0);    -- 고블린 두목 토벌 보상 (id: 9)
+    ('두목의 도끼', 'WEAPON', 15, 0),    -- 고블린 두목 토벌 보상 (id: 9)
+    ('상점 검', 'WEAPON', 7, 0),          -- 상점 아이템 (id: 10)
+    ('상점 방패', 'ARMOR', 0, 6),          -- 상점 아이템 (id: 11)
+    ('여행자의 반지', 'ACCESSORY', 3, 3),   -- 상점 아이템 (id: 12)
+    ('강철 갑옷', 'ARMOR', 0, 10);         -- 상점 아이템 (id: 13)
+
+INSERT INTO shop_items (item_id, price)
+VALUES
+    (10, 100),
+    (11, 100),
+    (12, 120),
+    (13, 150);
 
 INSERT INTO quests (title, description, prerequisite_quest_id)
 VALUES
