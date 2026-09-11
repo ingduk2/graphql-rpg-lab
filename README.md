@@ -418,13 +418,39 @@
 
 ---
 
-### Step 17. 성능 최적화 & 마무리 (예정)
+### Step 17. 업적/칭호 시스템
+> "노력은 배신하지 않는다"
+
+- **17-1.** 도메인 모델 설계
+  - Achievement 엔티티 (title, description, 달성 조건 타입, 목표치) — Quest/QuestCondition 패턴 재사용
+  - PlayerAchievement (Player-Achievement 연결, 달성 여부/달성 시각)
+  - AchievementTest 작성
+
+- **17-2.** 서비스 레벨 반영
+  - AchievementService — killCount/level 등 이미 있는 데이터 기반으로 달성 조건 체크
+  - BattleVictoryProcessor 또는 별도 지점에서 달성 체크 트리거
+  - AchievementServiceTest 작성
+
+- **17-3.** GraphQL 스키마/응답 반영
+  - achievements 쿼리, myAchievements 쿼리 추가
+  - AchievementDataFetcher, 관련 테스트 작성
+
+- **17-4.** HTML 반영
+  - 업적 패널 추가 (달성/미달성 목록, 진행도 표시)
+  - 달성 시 로그 표시
+
+**학습 포인트**
+- Quest 체인에서 썼던 "조건-달성-보상" 패턴을 다른 도메인(업적)에 재사용하며 패턴 추상화 감각 익히기
+
+---
+
+### Step 18. 성능 최적화 & 마무리 (예정)
 > "더 빠르게, 더 안전하게"
 
-- **17-1.** Query Complexity 분석 — 악의적인 중첩 쿼리 방어
-- **17-2.** Persisted Queries 개념 이해
-- **17-3.** DataLoader 캐싱 전략 정리
-- **17-4.** 전체 아키텍처 회고
+- **18-1.** Query Complexity 분석 — 악의적인 중첩 쿼리 방어
+- **18-2.** Persisted Queries 개념 이해
+- **18-3.** DataLoader 캐싱 전략 정리
+- **18-4.** 전체 아키텍처 회고
 
 **학습 포인트**
 - GraphQL의 보안 고려사항 (Depth Limit, Complexity Limit)
