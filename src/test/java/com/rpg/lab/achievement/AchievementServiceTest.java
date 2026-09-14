@@ -5,6 +5,7 @@ import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerRepository;
 import com.rpg.lab.testsupport.IntegrationTest;
 import lombok.RequiredArgsConstructor;
+import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -28,6 +29,41 @@ class AchievementServiceTest {
     @BeforeEach
     void setUp() {
         player = playerRepository.save(PlayerFixture.create());
+    }
+
+    @Nested
+    class GetMyAchievements {
+
+        @Test
+        @DisplayName("업적 목록과 각각의 달성 여부/진행도가 담긴다")
+        void test1() {
+            Achievement achievement = achievementRepository.save(
+                    Achievement.create("첫 걸음", "레벨 1 달성", AchievementType.LEVEL, 1)
+            );
+
+            List<AchievementResponse> results = sut.getMyAchievements(player.getId());
+
+            assertThat(results)
+                    .filteredOn(it -> it.id().equals(achievement.getId()))
+                    .extracting(AchievementResponse::unlocked, AchievementResponse::currentCount)
+                    .containsExactly(Tuple.tuple(false, 1));
+        }
+
+        @Test
+        @DisplayName("달성한 업적은 unlocked 가 true 로 담긴다")
+        void test2() {
+            Achievement achievement = achievementRepository.save(
+                    Achievement.create("첫 걸음", "레벨 1 달성", AchievementType.LEVEL, 1)
+            );
+            sut.checkAndUnlockAchievements(player.getId());
+
+            List<AchievementResponse> results = sut.getMyAchievements(player.getId());
+
+            assertThat(results)
+                    .filteredOn(it -> it.id().equals(achievement.getId()))
+                    .extracting(AchievementResponse::unlocked)
+                    .containsExactly(true);
+        }
     }
 
     @Nested
