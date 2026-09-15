@@ -17,6 +17,9 @@ type Query {
 
     # Item
     shopItems: [ShopItemResponse!]!
+
+    # Achievement
+    myAchievements: [AchievementResponse!]!
 }
 
 type Mutation {
@@ -190,4 +193,19 @@ type LeaderboardEntry {
     level: Int!
     exp: Int!
     killCount: Int!
+}
+
+type AchievementResponse {
+    id: ID!
+    title: String!
+    description: String
+    type: AchievementType!
+    targetCount: Int!
+    unlocked: Boolean!
+    currentCount: Int!
+}
+
+enum AchievementType {
+    KILL_COUNT
+    LEVEL
 }
