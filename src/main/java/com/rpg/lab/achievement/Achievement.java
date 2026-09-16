@@ -23,7 +23,7 @@ public class Achievement {
     private String description;
 
     @Column(nullable = false)
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private AchievementType type;
 
     @Column(nullable = false)

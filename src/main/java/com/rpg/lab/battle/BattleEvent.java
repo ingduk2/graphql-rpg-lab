@@ -16,7 +16,8 @@ public record BattleEvent(
         boolean finished,
         int levelUps,
         DroppedItem droppedItem,
-        List<String> completedQuests
+        List<String> completedQuests,
+        List<String> unlockedAchievements
 ) {
     public static BattleEvent of(
             String battleId,
@@ -34,7 +35,8 @@ public record BattleEvent(
                 finished,
                 battleReward.levelUps(),
                 battleReward.droppedItem() != null ? DroppedItem.from(battleReward.droppedItem()) : null,
-                battleReward.completedQuests()
+                battleReward.completedQuests(),
+                battleReward.unlockedAchievements()
         );
     }
 }

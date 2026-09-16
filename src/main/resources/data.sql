@@ -59,3 +59,8 @@ VALUES
     (3, 150, 8),
     (4, 200, null),
     (5, 300, 9);  -- 고블린 두목 토벌 보상
+
+INSERT INTO achievements (title, description, type, target_count)
+VALUES
+    ('첫 걸음', '레벨 2 달성', 'LEVEL', 2),
+    ('몬스터 사냥꾼', '몬스터 10마리 처치', 'KILL_COUNT', 10);

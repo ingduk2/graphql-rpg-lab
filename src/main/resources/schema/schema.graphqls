@@ -69,6 +69,7 @@ type BattleResult {
     levelUps: Int!
     droppedItem: DroppedItem
     completedQuests: [String!]!
+    unlockedAchievements: [String!]!
     message: String!
 }
 
@@ -87,6 +88,7 @@ type BattleEvent {
     levelUps: Int!
     droppedItem: DroppedItem
     completedQuests: [String!]!
+    unlockedAchievements: [String!]!
 }
 
 type Player {

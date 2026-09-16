@@ -1,5 +1,7 @@
 package com.rpg.lab.battle;
 
+import com.rpg.lab.achievement.Achievement;
+import com.rpg.lab.achievement.AchievementService;
 import com.rpg.lab.item.Item;
 import com.rpg.lab.player.Player;
 import com.rpg.lab.quest.PlayerQuest;
@@ -17,6 +19,7 @@ public class BattleVictoryProcessor {
     private final ItemDropProcessor itemDropProcessor;
     private final QuestProgressUpdater questProgressUpdater;
     private final QuestRewardProcessor questRewardProcessor;
+    private final AchievementService achievementService;
 
     public BattleReward process(
             Player player,
@@ -45,13 +48,23 @@ public class BattleVictoryProcessor {
         // 퀘스트 완료 보상 지급
         completedQuests.forEach(quest -> questRewardProcessor.process(player, quest.getQuest().getId()));
 
+        // 업적 달성 체크
+        List<Achievement> unlockAchievements = achievementService.checkAndUnlockAchievements(player.getId());
+
         List<String> completedTitles = getCompletedTitles(completedQuests);
-        return BattleReward.of(levelUps, droppedItem, completedTitles);
+        List<String> unlockedTitles = getUnlockedTitles(unlockAchievements);
+        return BattleReward.of(levelUps, droppedItem, completedTitles, unlockedTitles);
     }
 
     private static List<String> getCompletedTitles(List<PlayerQuest> completedQuests) {
         return completedQuests.stream()
                 .map(quest -> quest.getQuest().getTitle())
+                .toList();
+    }
+
+    private List<String> getUnlockedTitles(List<Achievement> unlockAchievements) {
+        return unlockAchievements.stream()
+                .map(Achievement::getTitle)
                 .toList();
     }
 }

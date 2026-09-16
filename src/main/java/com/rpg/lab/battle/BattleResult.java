@@ -14,6 +14,7 @@ public record BattleResult(
         int levelUps,
         DroppedItem droppedItem,
         List<String> completedQuests,
+        List<String> unlockedAchievements,
         String message
 ) {
 
@@ -33,6 +34,7 @@ public record BattleResult(
                 battleReward.levelUps(),
                 battleReward.droppedItem() != null ? DroppedItem.from(battleReward.droppedItem()) : null,
                 battleReward.completedQuests(),
+                battleReward.unlockedAchievements(),
                 battle.getMessage()
         );
     }
