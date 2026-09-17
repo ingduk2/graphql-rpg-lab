@@ -1,5 +1,8 @@
 package com.rpg.lab.battle;
 
+import com.rpg.lab.achievement.Achievement;
+import com.rpg.lab.achievement.AchievementRepository;
+import com.rpg.lab.achievement.AchievementType;
 import com.rpg.lab.fixture.ItemFixture;
 import com.rpg.lab.fixture.MonsterFixture;
 import com.rpg.lab.fixture.PlayerFixture;
@@ -36,6 +39,7 @@ class BattleVictoryProcessorTest {
     private final ItemRepository itemRepository;
     private final QuestRepository questRepository;
     private final PlayerQuestRepository playerQuestRepository;
+    private final AchievementRepository achievementRepository;
 
     private Player player;
 
@@ -150,5 +154,19 @@ class BattleVictoryProcessorTest {
         sut.process(player, battle, monster.getId());
 
         assertThat(player.getKillCount()).isEqualTo(killCountBefore + 1);
+    }
+
+    @Test
+    @DisplayName("몬스터 처치로 업적 조건을 충족하면 unlockedAchievements 에 담긴다")
+    void test7() {
+        Achievement achievement = achievementRepository.save(
+                Achievement.create("사냥꾼", "몬스터 1마리 처리", AchievementType.KILL_COUNT, 1)
+        );
+        Monster monster = monsterRepository.save(MonsterFixture.createSlime());
+        Battle battle = winningBattle(monster);
+
+        BattleReward result = sut.process(player, battle, monster.getId());
+
+        assertThat(result.unlockedAchievements()).contains(achievement.getTitle());
     }
 }

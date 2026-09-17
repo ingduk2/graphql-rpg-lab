@@ -1,5 +1,8 @@
 package com.rpg.lab.battle;
 
+import com.rpg.lab.achievement.Achievement;
+import com.rpg.lab.achievement.AchievementRepository;
+import com.rpg.lab.achievement.AchievementType;
 import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.fixture.MonsterFixture;
 import com.rpg.lab.fixture.PlayerFixture;
@@ -27,6 +30,7 @@ class BattleServiceTest {
     private final PlayerRepository playerRepository;
     private final MonsterRepository monsterRepository;
     private final InventoryRepository inventoryRepository;
+    private final AchievementRepository achievementRepository;
 
     private Player player;
     private Monster monster;
@@ -83,6 +87,18 @@ class BattleServiceTest {
             BattleResult result = sut.attack(highLevelPlayer.getId(), orc.getId(), Integer.MAX_VALUE);
 
             assertThat(result.monsterDamage()).isGreaterThan(baseAttackPower);
+        }
+
+        @Test
+        @DisplayName("몬스터 처치로 업적 조건을 충족하면 결과에 담긴다")
+        void test5() {
+            Achievement achievement = achievementRepository.save(
+                    Achievement.create("사냥꾼", "몬스터 1마리 처치", AchievementType.KILL_COUNT, 1)
+            );
+
+            BattleResult result = sut.attack(player.getId(), monster.getId(), 1);
+
+            assertThat(result.unlockedAchievements()).contains(achievement.getTitle());
         }
     }
 }
