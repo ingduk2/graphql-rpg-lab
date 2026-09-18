@@ -480,6 +480,17 @@
             </div>
         </div>
 
+        <!-- 업적 패널 -->
+        <div class="quest-panel" id="achievementPanel">
+            <div class="quest-panel-header">
+                <div class="panel-label" style="margin-bottom:0;">ACHIEVEMENTS</div>
+                <button class="sm-btn green" onclick="loadAchievements()">↻</button>
+            </div>
+            <div class="quest-list" id="achievementList">
+                <span class="quest-empty">loading...</span>
+            </div>
+        </div>
+
     </div>
 
     <div class="footer-note">localhost:8080/graphql — Step 9 Quest</div>
@@ -772,6 +783,7 @@
         await loadQuests();
         await loadLeaderboard();
         await loadShop();
+        await loadAchievements();
         syncSelection();
     }
 
@@ -823,6 +835,7 @@
                     expGained levelUps
                     droppedItem { name type attackBonus defenseBonus }
                     completedQuests
+                    unlockedAchievements
                     message
                 }
             }
@@ -840,6 +853,7 @@
             if (r.levelUps > 0) log(`★ LEVEL UP! Lv.${currentPlayerLevel} → Lv.${currentPlayerLevel + r.levelUps} ★`, 'levelup');
             if (r.droppedItem) logDroppedItem(r.droppedItem);
             if (r.completedQuests?.length > 0) r.completedQuests.forEach(t => log(`★ 퀘스트 완료! ${t}`, 'quest-log'));
+            if (r.unlockedAchievements?.length > 0) r.unlockedAchievements.forEach(t => log(`🏆 업적 달성! [${t}]`, 'quest-log'));
 
             // 상태 업데이트
             const needsRefresh = r.levelUps > 0 || r.droppedItem || r.completedQuests?.length > 0;
@@ -847,6 +861,7 @@
                 await loadPlayer();
                 if (r.completedQuests?.length > 0) await loadQuests();
                 if (r.levelUps > 0) await loadLeaderboard();
+                if (r.unlockedAchievements?.length > 0) await loadAchievements();
             } else if (r.expGained > 0) {
                 setExpBar(currentPlayerExp + r.expGained, currentPlayerLevel);
             }
@@ -986,6 +1001,33 @@
                 <span class="leaderboard-rank">#${e.rank}</span>
                 <span>${e.playerName}${isMe ? ' (YOU)' : ''}</span>
                 <span>${statText}</span>
+            </div>
+        `;
+        }).join('');
+    }
+
+    async function loadAchievements() {
+        const data = await graphql(`{ myAchievements { id title description unlocked currentCount targetCount } }`);
+        renderAchievements(data.myAchievements || []);
+    }
+
+    function renderAchievements(achievements) {
+        const el = document.getElementById('achievementList');
+        if (achievements.length === 0) {
+            el.innerHTML = '<span class="quest-empty">no achievements</span>';
+            return;
+        }
+        el.innerHTML = achievements.map(a => {
+            const statusBadge = a.unlocked
+                ? '<span class="equipped-badge">DONE</span>'
+                : `<span style="color:var(--text-dim);">${a.currentCount}/${a.targetCount}</span>`;
+            return `
+            <div class="quest-item${a.unlocked ? '' : ' quest-item-locked'}">
+                <div class="quest-item-header">
+                    <span class="quest-title">${a.title}</span>
+                    ${statusBadge}
+                </div>
+                <div class="quest-desc">${a.description || ''}</div>
             </div>
         `;
         }).join('');
