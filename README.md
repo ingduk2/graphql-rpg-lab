@@ -439,8 +439,16 @@
   - 업적 패널 추가 (달성/미달성 목록, 진행도 표시)
   - 달성 시 로그 표시
 
+- **17-5.** 복합 조건 업적으로 리팩토링
+  - Achievement를 Aggregate Root로 변경 — AchievementCondition 리스트 보유
+  - Achievement.create()가 최소 1개 조건 필수, addCondition()으로 추가 조건 지원
+  - isAchieved(Map<AchievementType, Integer>)가 모든 조건 충족 시에만 true (AND)
+  - AchievementService, AchievementResponse, 기존 테스트 전반 리팩토링
+  - Quest의 Aggregate Root 리팩토링(Step 10~11) 패턴 재사용
+
 **학습 포인트**
 - Quest 체인에서 썼던 "조건-달성-보상" 패턴을 다른 도메인(업적)에 재사용하며 패턴 추상화 감각 익히기
+- Quest에서 검증한 "단순 → 복합 조건" 리팩토링 패턴을 다른 도메인에 재사용하며 일반화 감각 익히기
 
 ---
 
