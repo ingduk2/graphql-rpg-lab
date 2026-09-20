@@ -1,27 +1,33 @@
 package com.rpg.lab.achievement;
 
+import java.util.List;
+import java.util.Map;
+
 public record AchievementResponse(
         Long id,
         String title,
         String description,
-        AchievementType type,
-        int targetCount,
         boolean unlocked,
-        int currentCount
+        List<AchievementConditionResponse> conditions
 ) {
     public static AchievementResponse of(
             Achievement achievement,
-            int currentCount,
+            Map<AchievementType, Integer> currentCounts,
             boolean unlocked
     ) {
+        List<AchievementConditionResponse> conditionResponses = achievement.getConditions().stream()
+                .map(it -> AchievementConditionResponse.of(
+                        it,
+                        currentCounts.getOrDefault(it.getType(), 0)
+                ))
+                .toList();
+
         return new AchievementResponse(
                 achievement.getId(),
                 achievement.getTitle(),
                 achievement.getDescription(),
-                achievement.getType(),
-                achievement.getTargetCount(),
                 unlocked,
-                currentCount
+                conditionResponses
         );
     }
 }

@@ -5,6 +5,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Entity
@@ -22,12 +25,8 @@ public class Achievement {
 
     private String description;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private AchievementType type;
-
-    @Column(nullable = false)
-    private int targetCount;
+    @OneToMany(mappedBy = "achievement", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AchievementCondition> conditions = new ArrayList<>();
 
     public static Achievement create(
             String title,
@@ -38,12 +37,17 @@ public class Achievement {
         Achievement achievement = new Achievement();
         achievement.title = Objects.requireNonNull(title);
         achievement.description = description;
-        achievement.type = Objects.requireNonNull(type);
-        achievement.targetCount = targetCount;
+        achievement.conditions.add(AchievementCondition.create(achievement, type, targetCount));
         return achievement;
     }
 
-    public boolean isAchieved(int currentCount) {
-        return currentCount >= targetCount;
+    public Achievement addCondition(AchievementType type, int targetCount) {
+        conditions.add(AchievementCondition.create(this, type, targetCount));
+        return this;
+    }
+
+    public boolean isAchieved(Map<AchievementType, Integer> currentCounts) {
+        return conditions.stream()
+                .allMatch(it -> it.isAchieved(currentCounts.getOrDefault(it.getType(), 0)));
     }
 }

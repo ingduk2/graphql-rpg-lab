@@ -49,7 +49,7 @@ class AchievementDataFetcherTest {
 
             List<String> results = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
                     """
-                            { myAchievements { title unlocked currentCount } }
+                            { myAchievements { title unlocked conditions { type targetCount currentCount } } }
                             """,
                     "data.myAchievements[*].title",
                     Collections.emptyMap(),

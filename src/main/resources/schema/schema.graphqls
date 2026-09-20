@@ -201,9 +201,13 @@ type AchievementResponse {
     id: ID!
     title: String!
     description: String
+    unlocked: Boolean!
+    conditions: [AchievementConditionResponse!]!
+}
+
+type AchievementConditionResponse {
     type: AchievementType!
     targetCount: Int!
-    unlocked: Boolean!
     currentCount: Int!
 }
 

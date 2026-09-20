@@ -6,7 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,39 +28,38 @@ public class AchievementService {
                 .map(it -> it.getAchievement().getId())
                 .collect(Collectors.toSet());
 
-        return achievements.stream()
-                .map(it -> {
-                    int currentCount = currentCountFor(it, player);
-                    boolean unlocked = unlockedAchievementIds.contains(it.getId());
-                    return AchievementResponse.of(it, currentCount, unlocked);
-                })
-                .toList();
-    }
+        Map<AchievementType, Integer> currentCounts = currentCountFor(player);
 
-    private int currentCountFor(Achievement achievement, Player player) {
-        return switch (achievement.getType()) {
-            case KILL_COUNT -> player.getKillCount();
-            case LEVEL -> player.getLevel();
-        };
+        return achievements.stream()
+                .map(it -> AchievementResponse.of(
+                        it,
+                        currentCounts,
+                        unlockedAchievementIds.contains(it.getId())
+                ))
+                .toList();
     }
 
     @Transactional
     public List<Achievement> checkAndUnlockAchievements(Long playerId) {
         Player player = playerReader.getById(playerId);
         List<Achievement> achievements = achievementRepository.findAll();
+        Map<AchievementType, Integer> currentCounts = currentCountFor(player);
 
         return achievements.stream()
                 .filter(it -> !isAlreadyUnlocked(playerId, it.getId()))
-                .filter(it -> isAchieved(it, player))
+                .filter(it -> it.isAchieved(currentCounts))
                 .peek(it -> playerAchievementRepository.save(PlayerAchievement.create(player, it)))
                 .toList();
     }
 
-    private boolean isAlreadyUnlocked(Long playerId, Long achievementId) {
-        return playerAchievementRepository.findByPlayerIdAndAchievementId(playerId, achievementId).isPresent();
+    private Map<AchievementType, Integer> currentCountFor(Player player) {
+        EnumMap<AchievementType, Integer> counts = new EnumMap<>(AchievementType.class);
+        counts.put(AchievementType.KILL_COUNT, player.getKillCount());
+        counts.put(AchievementType.LEVEL, player.getLevel());
+        return counts;
     }
 
-    private boolean isAchieved(Achievement achievement, Player player) {
-        return achievement.isAchieved(currentCountFor(achievement, player));
+    private boolean isAlreadyUnlocked(Long playerId, Long achievementId) {
+        return playerAchievementRepository.findByPlayerIdAndAchievementId(playerId, achievementId).isPresent();
     }
 }

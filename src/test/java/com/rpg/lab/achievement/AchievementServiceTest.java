@@ -5,7 +5,6 @@ import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerRepository;
 import com.rpg.lab.testsupport.IntegrationTest;
 import lombok.RequiredArgsConstructor;
-import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -43,10 +42,15 @@ class AchievementServiceTest {
 
             List<AchievementResponse> results = sut.getMyAchievements(player.getId());
 
-            assertThat(results)
-                    .filteredOn(it -> it.id().equals(achievement.getId()))
-                    .extracting(AchievementResponse::unlocked, AchievementResponse::currentCount)
-                    .containsExactly(Tuple.tuple(false, 1));
+            AchievementResponse result = results.stream()
+                    .filter(it -> it.id().equals(achievement.getId()))
+                    .findFirst()
+                    .orElseThrow();
+
+            assertThat(result.unlocked()).isFalse();
+            assertThat(result.conditions())
+                    .extracting(AchievementConditionResponse::currentCount)
+                    .containsExactly(1);
         }
 
         @Test
