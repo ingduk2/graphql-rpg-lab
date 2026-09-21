@@ -60,7 +60,15 @@ VALUES
     (4, 200, null),
     (5, 300, 9);  -- 고블린 두목 토벌 보상
 
-INSERT INTO achievements (title, description, type, target_count)
+INSERT INTO achievements (title, description)
 VALUES
-    ('첫 걸음', '레벨 2 달성', 'LEVEL', 2),
-    ('몬스터 사냥꾼', '몬스터 10마리 처치', 'KILL_COUNT', 10);
+    ('첫 걸음', '레벨 2 달성'),          -- id: 1
+    ('몬스터 사냥꾼', '몬스터 10마리 처치'), -- id: 2
+    ('진정한 영웅', '레벨 3 + 몬스터 5마리 처치'); -- id: 3
+
+INSERT INTO achievement_conditions (achievement_id, type, target_count)
+VALUES
+    (1, 'LEVEL', 2),
+    (2, 'KILL_COUNT', 10),
+    (3, 'LEVEL', 3),
+    (3, 'KILL_COUNT', 5);

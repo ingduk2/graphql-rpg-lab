@@ -1007,7 +1007,7 @@
     }
 
     async function loadAchievements() {
-        const data = await graphql(`{ myAchievements { id title description unlocked currentCount targetCount } }`);
+        const data = await graphql(`{ myAchievements { id title description unlocked conditions { type targetCount currentCount } } }`);
         renderAchievements(data.myAchievements || []);
     }
 
@@ -1020,7 +1020,10 @@
         el.innerHTML = achievements.map(a => {
             const statusBadge = a.unlocked
                 ? '<span class="equipped-badge">DONE</span>'
-                : `<span style="color:var(--text-dim);">${a.currentCount}/${a.targetCount}</span>`;
+                : '';
+            const conditionLines = a.conditions.map(c =>
+                `<div style="font-size:13px; color:var(--green-dim);">${c.type}: ${c.currentCount}/${c.targetCount}</div>`
+            ).join('');
             return `
             <div class="quest-item${a.unlocked ? '' : ' quest-item-locked'}">
                 <div class="quest-item-header">
@@ -1028,6 +1031,7 @@
                     ${statusBadge}
                 </div>
                 <div class="quest-desc">${a.description || ''}</div>
+                ${conditionLines}
             </div>
         `;
         }).join('');

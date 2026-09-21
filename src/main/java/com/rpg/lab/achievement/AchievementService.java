@@ -20,6 +20,7 @@ public class AchievementService {
     private final PlayerAchievementRepository playerAchievementRepository;
     private final PlayerReader playerReader;
 
+    @Transactional(readOnly = true)
     public List<AchievementResponse> getMyAchievements(Long playerId) {
         Player player = playerReader.getById(playerId);
         List<Achievement> achievements = achievementRepository.findAll();
