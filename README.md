@@ -452,13 +452,44 @@
 
 ---
 
-### Step 18. 성능 최적화 & 마무리 (예정)
+### Step 18. 아이템 강화 시스템
+> "위험을 감수한 자에게 보상을"
+
+- **18-1.** 도메인 모델 설계
+  - InventoryItem에 enhanceLevel 필드 추가 (0~10)
+  - EnhanceResult 또는 유사 값 객체 (성공/실패, 이전/이후 단계)
+  - 강화 성공 확률표(EnhancementPolicy) — 단계별 확률/비용을 담는 정책 클래스
+  - 실패 시 강화 단계 하락 로직
+  - InventoryItemTest/EnhancementPolicyTest 작성
+
+- **18-2.** 서비스 레벨 반영
+  - InventoryService.enhanceItem(playerId, itemId) 또는 별도 EnhancementService
+  - 골드 확인 → 차감 → RandomProvider로 성공/실패 판정 → enhanceLevel 갱신
+  - 최대 단계(+10) 도달 시 더 이상 강화 불가 처리
+  - 관련 서비스 테스트 작성 (성공/실패/골드부족/최대단계)
+
+- **18-3.** GraphQL 스키마/응답 반영
+  - enhanceItem(itemId: ID!) 뮤테이션 추가
+  - ItemResponse 또는 InventoryResponse에 enhanceLevel, 강화 시 실제 적용된 스탯 노출
+  - 관련 DataFetcher 및 테스트 작성
+
+- **18-4.** HTML 반영
+  - 인벤토리 아이템에 강화 단계 표시(+N), ENHANCE 버튼
+  - 강화 성공/실패 로그 표시 (실패 시 단계 하락 애니메이션 느낌의 로그)
+
+**학습 포인트**
+- RandomProvider 패턴을 재사용해 확률 기반 로직을 테스트 가능하게 설계하는 감각 복습
+- 리스크/보상 밸런싱을 코드로 표현하는 방법 (확률표, 비용 스케일링)
+
+---
+
+### Step 19. 성능 최적화 & 마무리 (예정)
 > "더 빠르게, 더 안전하게"
 
-- **18-1.** Query Complexity 분석 — 악의적인 중첩 쿼리 방어
-- **18-2.** Persisted Queries 개념 이해
-- **18-3.** DataLoader 캐싱 전략 정리
-- **18-4.** 전체 아키텍처 회고
+- **19-1.** Query Complexity 분석 — 악의적인 중첩 쿼리 방어
+- **19-2.** Persisted Queries 개념 이해
+- **19-3.** DataLoader 캐싱 전략 정리
+- **19-4.** 전체 아키텍처 회고
 
 **학습 포인트**
 - GraphQL의 보안 고려사항 (Depth Limit, Complexity Limit)
