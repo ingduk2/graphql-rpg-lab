@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class InventoryItem {
 
+    private static final int MAX_ENHANCE_LEVEL = 10;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,11 +29,15 @@ public class InventoryItem {
     @Column(nullable = false)
     private boolean equipped;
 
+    @Column(nullable = false)
+    private int enhanceLevel;
+
     public static InventoryItem create(Inventory inventory, Item item) {
         InventoryItem inventoryItem = new InventoryItem();
         inventoryItem.inventory = inventory;
         inventoryItem.item = item;
         inventoryItem.equipped = false;
+        inventoryItem.enhanceLevel = 0;
         return inventoryItem;
     }
 
@@ -41,5 +47,27 @@ public class InventoryItem {
 
     void unequip() {
         this.equipped = false;
+    }
+
+    void applyEnhanceResult(boolean success) {
+        if (success) {
+            increaseEnhanceLevel();
+        } else {
+            decreaseEnhanceLevel();
+        }
+    }
+
+    boolean isMaxEnhanceLevel() {
+        return enhanceLevel >= EnhancementPolicy.MAX_ENHANCE_LEVEL;
+    }
+
+    private void increaseEnhanceLevel() {
+        this.enhanceLevel++;
+    }
+
+    private void decreaseEnhanceLevel() {
+        if (this.enhanceLevel > 0) {
+            this.enhanceLevel--;
+        }
     }
 }

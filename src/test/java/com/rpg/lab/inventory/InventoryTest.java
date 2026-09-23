@@ -1,5 +1,6 @@
 package com.rpg.lab.inventory;
 
+import com.rpg.lab.common.RandomProvider;
 import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.fixture.ItemFixture;
 import com.rpg.lab.fixture.PlayerFixture;
@@ -302,6 +303,109 @@ class InventoryTest {
 
             assertThatThrownBy(() -> inventory.sellItem(notOwnedItemId))
                     .isInstanceOf(EntityNotFoundException.class);
+        }
+    }
+
+    @Nested
+    class Enhance {
+
+        private final EnhancementPolicy alwaysSuccessPolicy = new EnhancementPolicy(
+                List.of(
+                        new EnhanceRate(0, 100),
+                        new EnhanceRate(1, 100),
+                        new EnhanceRate(2, 100),
+                        new EnhanceRate(3, 100),
+                        new EnhanceRate(4, 100),
+                        new EnhanceRate(5, 100),
+                        new EnhanceRate(6, 100),
+                        new EnhanceRate(7, 100),
+                        new EnhanceRate(8, 100),
+                        new EnhanceRate(9, 100)
+                ),
+                50
+        );
+
+        private final EnhancementPolicy alwaysFailPolicy = new EnhancementPolicy(
+                List.of(
+                        new EnhanceRate(0, 0),
+                        new EnhanceRate(1, 0),
+                        new EnhanceRate(2, 0),
+                        new EnhanceRate(3, 0),
+                        new EnhanceRate(4, 0),
+                        new EnhanceRate(5, 0),
+                        new EnhanceRate(6, 0),
+                        new EnhanceRate(7, 0),
+                        new EnhanceRate(8, 0),
+                        new EnhanceRate(9, 0)
+                ),
+                50
+        );
+
+        private final RandomProvider fixedRoll = new RandomProvider() {
+            @Override
+            public double nextDouble() {
+                return 0;
+            }
+
+            @Override
+            public int nextInt(int bound) {
+                return 0;
+            }
+        };
+
+        @Test
+        @DisplayName("강화에 성공하면 enhanceLevel 이 오른다")
+        void test1() {
+            Inventory inventory = Inventory.create(player);
+            Item item = ItemFixture.createSwordItemWithId();
+            inventory.addItem(item);
+
+            EnhanceResult result = inventory.enhanceItem(item.getId(), alwaysSuccessPolicy, fixedRoll);
+
+            assertThat(result.success()).isTrue();
+            assertThat(result.newEnhanceLevel()).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("강화에 실패하면 enhanceLevel 이 내려간다")
+        void test2() {
+            Inventory inventory = Inventory.create(player);
+            Item item = ItemFixture.createSwordItemWithId();
+            inventory.addItem(item);
+            inventory.enhanceItem(item.getId(), alwaysSuccessPolicy, fixedRoll);
+
+            EnhanceResult result = inventory.enhanceItem(item.getId(), alwaysFailPolicy, fixedRoll);
+
+            assertThat(result.success()).isFalse();
+            assertThat(result.newEnhanceLevel()).isEqualTo(0);
+        }
+
+        @Test
+        @DisplayName("최소 레벨(0) 에서 실패해도 레벨이 음수가 되지 않는다")
+        void test3() {
+            Inventory inventory = Inventory.create(player);
+            Item item = ItemFixture.createSwordItemWithId();
+            inventory.addItem(item);
+
+            EnhanceResult result = inventory.enhanceItem(item.getId(), alwaysFailPolicy, fixedRoll);
+
+            assertThat(result.success()).isFalse();
+            assertThat(result.newEnhanceLevel()).isEqualTo(0);
+        }
+
+        @Test
+        @DisplayName("이미 최대 레벨이면 IllegalStateException 이 발생한다")
+        void test4() {
+            Inventory inventory = Inventory.create(player);
+            Item item = ItemFixture.createSwordItemWithId();
+            inventory.addItem(item);
+
+            for (int i = 0; i < EnhancementPolicy.MAX_ENHANCE_LEVEL; i++) {
+                inventory.enhanceItem(item.getId(), alwaysSuccessPolicy, fixedRoll);
+            }
+
+            assertThatThrownBy(() -> inventory.enhanceItem(item.getId(), alwaysSuccessPolicy, fixedRoll))
+                    .isInstanceOf(IllegalStateException.class);
         }
     }
 }

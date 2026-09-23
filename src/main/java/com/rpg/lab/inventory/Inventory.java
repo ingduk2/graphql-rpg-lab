@@ -1,5 +1,6 @@
 package com.rpg.lab.inventory;
 
+import com.rpg.lab.common.RandomProvider;
 import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.item.Item;
 import com.rpg.lab.player.Player;
@@ -94,5 +95,23 @@ public class Inventory {
                 .filter(InventoryItem::isEquipped)
                 .mapToInt(it -> it.getItem().getDefenseBonus())
                 .sum();
+    }
+
+    public EnhanceResult enhanceItem(
+            Long itemId,
+            EnhancementPolicy policy,
+            RandomProvider randomProvider
+    ) {
+        InventoryItem target = findByItemId(itemId);
+
+        if (target.isMaxEnhanceLevel()) {
+            throw new IllegalStateException("Already at max enhance level");
+        }
+
+        int successRate = policy.successRateFor(target.getEnhanceLevel());
+        boolean success = randomProvider.nextInt(100) < successRate;
+        target.applyEnhanceResult(success);
+
+        return new EnhanceResult(success, target.getEnhanceLevel());
     }
 }

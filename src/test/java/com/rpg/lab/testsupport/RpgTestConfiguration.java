@@ -9,6 +9,16 @@ public class RpgTestConfiguration {
 
     @Bean
     public RandomProvider randomProvider() {
-        return () -> 0;
+        return new RandomProvider() {
+            @Override
+            public double nextDouble() {
+                return 0;
+            }
+
+            @Override
+            public int nextInt(int bound) {
+                return 0;
+            }
+        };
     }
 }

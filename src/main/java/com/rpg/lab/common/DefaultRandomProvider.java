@@ -11,4 +11,9 @@ public class DefaultRandomProvider implements RandomProvider {
     public double nextDouble() {
         return ThreadLocalRandom.current().nextDouble();
     }
+
+    @Override
+    public int nextInt(int bound) {
+        return ThreadLocalRandom.current().nextInt(bound);
+    }
 }
