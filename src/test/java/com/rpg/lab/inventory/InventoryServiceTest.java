@@ -1,6 +1,7 @@
 package com.rpg.lab.inventory;
 
 import com.rpg.lab.exception.EntityNotFoundException;
+import com.rpg.lab.exception.InsufficientGoldException;
 import com.rpg.lab.fixture.ItemFixture;
 import com.rpg.lab.fixture.PlayerFixture;
 import com.rpg.lab.item.Item;
@@ -15,6 +16,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -150,6 +156,59 @@ class InventoryServiceTest {
             InventoryResponse result = sut.sellItem(player.getId(), item.getId());
 
             assertThat(result.items()).isEmpty();
+        }
+    }
+
+    @Nested
+    class EnhanceItem {
+
+        @Test
+        @DisplayName("강화에 성공하면 enhanceLevel 이 오르고 골드가 차감된다")
+        void test1() {
+            Item item = ownItem();
+            player.gainGold(1000);
+            playerRepository.save(player);
+            int goldBefore = player.getGold();
+
+            EnhanceItemResponse result = sut.enhanceItem(player.getId(), item.getId());
+
+            assertThat(result.success()).isTrue();
+            assertThat(result.newEnhanceLevel()).isEqualTo(1);
+            assertThat(player.getGold()).isEqualTo(goldBefore - 50);
+        }
+
+        @Test
+        @DisplayName("골드가 부족하면 InsufficientGoldException 이 발생한다")
+        void test2() {
+            Item item = ownItem();
+
+            assertThatThrownBy(() -> sut.enhanceItem(player.getId(), item.getId()))
+                    .isInstanceOf(InsufficientGoldException.class);
+        }
+
+        @Test
+        @DisplayName("보유하지 않은 item 을 강화하려 하면 EntityNotFoundException")
+        void test3() {
+            player.gainGold(1000);
+            playerRepository.save(player);
+            Long nowOwnedItemId = 999L;
+
+            assertThatThrownBy(() -> sut.enhanceItem(player.getId(), nowOwnedItemId))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("최대 레벨에서 강화 시도하면 IllegalStateException 이 발생한다")
+        void test4() {
+            Item item = ownItem();
+            player.gainGold(100_000);
+            playerRepository.save(player);
+            for (int i = 0; i < EnhancementPolicy.MAX_ENHANCE_LEVEL; i++) {
+                sut.enhanceItem(player.getId(), item.getId());
+            }
+
+            assertThatThrownBy(() -> sut.enhanceItem(player.getId(), item.getId()))
+                    .isInstanceOf(IllegalStateException.class);
         }
     }
 

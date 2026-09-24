@@ -1,5 +1,6 @@
 package com.rpg.lab.inventory;
 
+import com.rpg.lab.common.RandomProvider;
 import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerManager;
@@ -16,6 +17,8 @@ public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final PlayerReader playerReader;
     private final PlayerManager playerManager;
+    private final EnhancementPolicy enhancementPolicy;
+    private final RandomProvider randomProvider;
 
     @Transactional
     public InventoryResponse equipItem(Long playerId, Long itemId) {
@@ -47,6 +50,22 @@ public class InventoryService {
         playerManager.save(player);
 
         return InventoryResponse.from(inventory);
+    }
+
+    @Transactional
+    public EnhanceItemResponse enhanceItem(Long playerId, Long itemId) {
+        Inventory inventory = findInventoryByPlayerId(playerId);
+        Player player = playerReader.getById(playerId);
+
+        int currentLevel = inventory.getEnhanceLevelOf(itemId);
+        int cost = enhancementPolicy.costFor(currentLevel);
+        player.spendGold(cost);
+
+        EnhanceResult enhanceResult = inventory.enhanceItem(itemId, enhancementPolicy, randomProvider);
+
+        playerManager.save(player);
+        inventoryRepository.save(inventory);
+        return EnhanceItemResponse.of(enhanceResult, inventory);
     }
 
     private @NonNull Inventory findInventoryByPlayerId(Long playerId) {

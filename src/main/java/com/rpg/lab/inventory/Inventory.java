@@ -114,4 +114,8 @@ public class Inventory {
 
         return new EnhanceResult(success, target.getEnhanceLevel());
     }
+
+    public int getEnhanceLevelOf(Long itemId) {
+        return findByItemId(itemId).getEnhanceLevel();
+    }
 }
