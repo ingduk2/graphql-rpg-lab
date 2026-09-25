@@ -31,6 +31,7 @@ type Mutation {
     unequipItem(itemId: ID!): Inventory!
     sellItem(itemId: ID!): Inventory!
     buyItem(shopItemId: ID!): Inventory!
+    enhanceItem(itemId: ID!): EnhanceItemResponse!
 
     # Quest
     acceptQuest(questId: ID!): PlayerQuest!
@@ -127,6 +128,7 @@ type Item {
     attackBonus: Int!
     defenseBonus: Int!
     equipped: Boolean!
+    enhanceLevel: Int!
 }
 
 type ShopItemResponse {
@@ -148,6 +150,12 @@ enum ItemType {
 type Inventory {
     id: ID!
     items: [Item!]!
+}
+
+type EnhanceItemResponse {
+    success: Boolean!
+    newEnhanceLevel: Int!
+    inventory: Inventory!
 }
 
 type Quest {

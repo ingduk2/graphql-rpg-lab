@@ -10,7 +10,7 @@ public record InventoryResponse(
 ) {
     public static InventoryResponse from(Inventory inventory) {
         List<ItemResponse> items = inventory.getInventoryItems().stream()
-                .map(inventoryItem -> ItemResponse.from(inventoryItem.getItem(), inventoryItem.isEquipped()))
+                .map(it -> ItemResponse.from(it.getItem(), it.isEquipped(), it.getEnhanceLevel()))
                 .toList();
 
         return new InventoryResponse(

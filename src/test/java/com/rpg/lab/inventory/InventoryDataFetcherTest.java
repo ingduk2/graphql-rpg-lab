@@ -10,6 +10,7 @@ import com.rpg.lab.item.ItemRepository;
 import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerRepository;
 import com.rpg.lab.testsupport.IntegrationTest;
+import graphql.ExecutionResult;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -116,6 +117,55 @@ class InventoryDataFetcherTest {
             );
 
             assertThat(itemIds).doesNotContain(item.getId());
+        }
+    }
+
+    @Nested
+    class EnhanceItem {
+
+        @Test
+        @DisplayName("강화하면 성공 여부와 새 강화 단계가 응답된다")
+        void test1() {
+            Item item = itemRepository.save(ItemFixture.createSwordItem());
+            inventory.addItem(item);
+            inventoryRepository.save(inventory);
+            player.gainGold(1000);
+            playerRepository.save(player);
+
+            Boolean result = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
+                    """
+                            mutation {
+                                enhanceItem(itemId: "%d") { success newEnhanceLevel }
+                            }
+                            """.formatted(item.getId()),
+                    "data.enhanceItem.success",
+                    Collections.emptyMap(),
+                    new TypeRef<>() {},
+                    headers
+            );
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        @DisplayName("골드가 부족하면 GraphQL 에러가 발생한다")
+        void test2() {
+            Item item = itemRepository.save(ItemFixture.createSwordItem());
+            inventory.addItem(item);
+            inventoryRepository.save(inventory);
+
+            ExecutionResult result = dgsQueryExecutor.execute(
+                    """
+                            mutation {
+                                enhanceItem(itemId: "%d") { success }
+                            }
+                            """.formatted(item.getId()),
+                    Collections.emptyMap(),
+                    null,
+                    headers
+            );
+
+            assertThat(result.getErrors()).isNotEmpty();
         }
     }
 
