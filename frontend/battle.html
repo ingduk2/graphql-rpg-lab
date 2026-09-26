@@ -606,13 +606,15 @@
             if (item.defenseBonus > 0) bonuses.push(`DEF+${item.defenseBonus}`);
             const bonusText = bonuses.length > 0 ? ` <span class="bonus">${bonuses.join(' ')}</span>` : '';
             const equippedBadge = item.equipped ? ' <span class="equipped-badge">E</span>' : '';
+            const enhanceBadge = item.enhanceLevel > 0 ? ` <span class="equipped-badge">+${item.enhanceLevel}</span>` : '';
             const toggleFn = item.equipped ? 'unequipItem' : 'equipItem';
             const toggleLabel = item.equipped ? 'UNEQUIP' : 'EQUIP';
             return `
             <div class="inventory-item${item.equipped ? ' equipped' : ''}">
-                ${item.name}${bonusText}${equippedBadge}
+                ${item.name}${enhanceBadge}${bonusText}${equippedBadge}
                 <button class="sm-btn ${item.equipped ? 'amber' : 'green'}" onclick="${toggleFn}(${item.id})">${toggleLabel}</button>
                 <button class="sm-btn amber" onclick="sellItem(${item.id}, '${item.name}')">SELL</button>
+                <button class="sm-btn green" onclick="enhanceItem(${item.id}, '${item.name}')">ENHANCE</button>
             </div>
         `;
         }).join('');
@@ -793,7 +795,7 @@
             player(id: ${playerId}) {
                     id name level hp maxHp exp gold
                     stats { attack defense speed }
-                    inventory { items { id name type attackBonus defenseBonus equipped } }
+                    inventory { items { id name type attackBonus defenseBonus equipped enhanceLevel } }
                 }
             }`);
             updatePlayerDisplay(data.player);
@@ -1035,6 +1037,19 @@
             </div>
         `;
         }).join('');
+    }
+
+    async function enhanceItem(itemId, itemName) {
+        try {
+            const data = await graphql(`mutation { enhanceItem(itemId: ${itemId}) { success newEnhanceLevel } }`);
+            const r = data.enhanceItem;
+            if (r.success) {
+                log(`⚒ ${itemName} 강화 성공! +${r.newEnhanceLevel}`, 'levelup');
+            } else {
+                log(`💥 ${itemName} 강화 실패... +${r.newEnhanceLevel}로 하락`, 'dead');
+            }
+            await loadPlayer();
+        } catch (e) {}
     }
 
     function init() {
