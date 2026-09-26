@@ -250,11 +250,20 @@
         .inventory-item {
             background: #0f1a0f;
             border: 1px solid var(--green-dim);
-            padding: 3px 8px;
+            padding: 6px 8px;
             font-size: 15px;
             color: var(--text);
             display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .inventory-item-header {
+            display: flex;
             align-items: center;
+            gap: 6px;
+        }
+        .inventory-item-actions {
+            display: flex;
             gap: 6px;
         }
         .inventory-item.equipped {
@@ -610,13 +619,17 @@
             const toggleFn = item.equipped ? 'unequipItem' : 'equipItem';
             const toggleLabel = item.equipped ? 'UNEQUIP' : 'EQUIP';
             return `
-            <div class="inventory-item${item.equipped ? ' equipped' : ''}">
-                ${item.name}${enhanceBadge}${bonusText}${equippedBadge}
-                <button class="sm-btn ${item.equipped ? 'amber' : 'green'}" onclick="${toggleFn}(${item.id})">${toggleLabel}</button>
-                <button class="sm-btn amber" onclick="sellItem(${item.id}, '${item.name}')">SELL</button>
-                <button class="sm-btn green" onclick="enhanceItem(${item.id}, '${item.name}')">ENHANCE</button>
-            </div>
-        `;
+                <div class="inventory-item${item.equipped ? ' equipped' : ''}">
+                    <div class="inventory-item-header">
+                        <span>${item.name}${enhanceBadge}</span>${bonusText}${equippedBadge}
+                    </div>
+                    <div class="inventory-item-actions">
+                        <button class="sm-btn ${item.equipped ? 'amber' : 'green'}" onclick="${toggleFn}(${item.id})">${toggleLabel}</button>
+                        <button class="sm-btn amber" onclick="sellItem(${item.id}, '${item.name}')">SELL</button>
+                        <button class="sm-btn green" onclick="enhanceItem(${item.id}, '${item.name}')">ENHANCE</button>
+                    </div>
+                </div>
+            `;
         }).join('');
     }
 
