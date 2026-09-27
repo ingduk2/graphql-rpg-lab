@@ -24,6 +24,10 @@ public class GlobalExceptionHandler extends DefaultDataFetcherExceptionHandler {
             return CompletableFuture.completedFuture(buildResult(e, ErrorCode.PREREQUISITE_NOT_COMPLETED, handlerParameters));
         }
 
+        if (exception instanceof InsufficientGoldException e) {
+            return CompletableFuture.completedFuture(buildResult(e, ErrorCode.INSUFFICIENT_GOLD, handlerParameters));
+        }
+
         return super.handleException(handlerParameters);
     }
 

@@ -534,6 +534,8 @@
             const errorCode = json.errors[0].extensions?.errorCode;
             const message = errorCode === 'PREREQUISITE_NOT_COMPLETED'
                 ? '선행 퀘스트를 먼저 완료해야 합니다.'
+                : errorCode === 'INSUFFICIENT_GOLD'
+                ? '골드가 부족합니다.'
                 : json.errors[0].message;
             log(message, 'dead');
             throw new Error(json.errors[0].message);

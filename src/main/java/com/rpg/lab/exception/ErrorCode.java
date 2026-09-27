@@ -6,7 +6,9 @@ public enum ErrorCode {
     NOT_FOUND,
     BAD_REQUEST,
     INTERNAL_ERROR,
-    PREREQUISITE_NOT_COMPLETED;
+    PREREQUISITE_NOT_COMPLETED,
+    INSUFFICIENT_GOLD
+    ;
 
     public Map<String, Object> toExtensions() {
         return Map.of("errorCode", this.name());
