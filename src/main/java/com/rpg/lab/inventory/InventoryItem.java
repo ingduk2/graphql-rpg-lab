@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class InventoryItem {
 
-    private static final int MAX_ENHANCE_LEVEL = 10;
+    private static final int ENHANCE_BONUS_PER_LEVEL = 2;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,6 +59,21 @@ public class InventoryItem {
 
     boolean isMaxEnhanceLevel() {
         return enhanceLevel >= EnhancementPolicy.MAX_ENHANCE_LEVEL;
+    }
+
+    int getEnhancedAttackBonus() {
+        return enhanced(item.getAttackBonus());
+    }
+
+    int getEnhancedDefenseBonus() {
+        return enhanced(item.getDefenseBonus());
+    }
+
+    private int enhanced(int base) {
+        if (base <= 0) {
+            return base;
+        }
+        return base + enhanceLevel * ENHANCE_BONUS_PER_LEVEL;
     }
 
     private void increaseEnhanceLevel() {

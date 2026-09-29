@@ -407,5 +407,40 @@ class InventoryTest {
             assertThatThrownBy(() -> inventory.enhanceItem(item.getId(), alwaysSuccessPolicy, fixedRoll))
                     .isInstanceOf(IllegalStateException.class);
         }
+
+        @Test
+        @DisplayName("강화한 장착 아이템은 강화 단계만큼 공격 보너스가 더 붙는다")
+        void test5() {
+            Inventory inventory = Inventory.create(player);
+            Item sword = ItemFixture.createSwordItemWithId(); // atk 5
+            inventory.addItem(sword);
+            inventory.equip(sword.getId());
+            inventory.enhanceItem(sword.getId(), alwaysSuccessPolicy, fixedRoll); // +1
+
+            assertThat(inventory.getAttackBonus()).isEqualTo(5 + 2);
+        }
+
+        @Test
+        @DisplayName("무기를 강화해도 방어 보너스는 오르지 않는다")
+        void test6() {
+            Inventory inventory = Inventory.create(player);
+            Item sword = ItemFixture.createSwordItemWithId(); // def 0
+            inventory.addItem(sword);
+            inventory.equip(sword.getId());
+            inventory.enhanceItem(sword.getId(), alwaysSuccessPolicy, fixedRoll);
+
+            assertThat(inventory.getDefenseBonus()).isEqualTo(0);
+        }
+
+        @Test
+        @DisplayName("장착하지 않은 아이템은 강화해도 보너스에 반영되지 않는다")
+        void test7() {
+            Inventory inventory = Inventory.create(player);
+            Item sword = ItemFixture.createSwordItemWithId();
+            inventory.addItem(sword);
+            inventory.enhanceItem(sword.getId(), alwaysSuccessPolicy, fixedRoll);
+
+            assertThat(inventory.getAttackBonus()).isEqualTo(0);
+        }
     }
 }

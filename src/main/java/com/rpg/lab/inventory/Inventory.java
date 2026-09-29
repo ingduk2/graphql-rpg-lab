@@ -86,14 +86,14 @@ public class Inventory {
     public int getAttackBonus() {
         return inventoryItems.stream()
                 .filter(InventoryItem::isEquipped)
-                .mapToInt(it -> it.getItem().getAttackBonus())
+                .mapToInt(InventoryItem::getEnhancedAttackBonus)
                 .sum();
     }
 
     public int getDefenseBonus() {
         return inventoryItems.stream()
                 .filter(InventoryItem::isEquipped)
-                .mapToInt(it -> it.getItem().getDefenseBonus())
+                .mapToInt(InventoryItem::getEnhancedDefenseBonus)
                 .sum();
     }
 
