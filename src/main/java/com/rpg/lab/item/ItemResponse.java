@@ -9,13 +9,18 @@ public record ItemResponse(
         boolean equipped,
         int enhanceLevel
 ) {
-    public static ItemResponse from(Item item, boolean equipped, int enhanceLevel) {
+    public static ItemResponse from(
+            Item item,
+            int attackBonus,
+            int defenseBonus,
+            boolean equipped,
+            int enhanceLevel) {
         return new ItemResponse(
                 item.getId(),
                 item.getName(),
                 item.getType(),
-                item.getAttackBonus(),
-                item.getDefenseBonus(),
+                attackBonus,
+                defenseBonus,
                 equipped,
                 enhanceLevel
         );
