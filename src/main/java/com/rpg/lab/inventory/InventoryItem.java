@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class InventoryItem {
 
-    private static final int ENHANCE_BONUS_PER_LEVEL = 2;
+    private static final int ENHANCE_PERCENT_PER_LEVEL = 20;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -73,7 +73,8 @@ public class InventoryItem {
         if (base <= 0) {
             return base;
         }
-        return base + enhanceLevel * ENHANCE_BONUS_PER_LEVEL;
+        int bonus = (base * enhanceLevel * ENHANCE_PERCENT_PER_LEVEL + 99) / 100;
+        return base + bonus;
     }
 
     private void increaseEnhanceLevel() {

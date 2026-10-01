@@ -417,7 +417,7 @@ class InventoryTest {
             inventory.equip(sword.getId());
             inventory.enhanceItem(sword.getId(), alwaysSuccessPolicy, fixedRoll); // +1
 
-            assertThat(inventory.getAttackBonus()).isEqualTo(5 + 2);
+            assertThat(inventory.getAttackBonus()).isEqualTo(6); // 5 + ceil(5*1*20/100) = 5+1
         }
 
         @Test
