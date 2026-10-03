@@ -3,6 +3,7 @@ package com.rpg.lab.inventory;
 import com.rpg.lab.common.RandomProvider;
 import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.item.Item;
+import com.rpg.lab.item.ItemSetType;
 import com.rpg.lab.player.Player;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -11,12 +12,18 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "inventories")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Inventory {
+
+    static final int SET_BONUS_THRESHOLD = 2;
+    static final int SET_ATTACK_BONUS = 3;
+    static final int SET_DEFENSE_BONUS = 3;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -84,17 +91,19 @@ public class Inventory {
     }
 
     public int getAttackBonus() {
-        return inventoryItems.stream()
+        int itemBonus = inventoryItems.stream()
                 .filter(InventoryItem::isEquipped)
                 .mapToInt(InventoryItem::getEnhancedAttackBonus)
                 .sum();
+        return itemBonus + activeSetCount() * SET_ATTACK_BONUS;
     }
 
     public int getDefenseBonus() {
-        return inventoryItems.stream()
+        int itemBonus = inventoryItems.stream()
                 .filter(InventoryItem::isEquipped)
                 .mapToInt(InventoryItem::getEnhancedDefenseBonus)
                 .sum();
+        return itemBonus + activeSetCount() * SET_DEFENSE_BONUS;
     }
 
     public EnhanceResult enhanceItem(
@@ -117,5 +126,26 @@ public class Inventory {
 
     public int getEnhanceLevelOf(Long itemId) {
         return findByItemId(itemId).getEnhanceLevel();
+    }
+
+    public List<ItemSetType> getActiveSets() {
+        return equippedSetCounts().entrySet().stream()
+                .filter(it -> it.getValue() >= SET_BONUS_THRESHOLD)
+                .map(Map.Entry::getKey)
+                .toList();
+    }
+
+    private Map<ItemSetType, Long> equippedSetCounts() {
+        return inventoryItems.stream()
+                .filter(InventoryItem::isEquipped)
+                .map(InventoryItem::getItem)
+                .filter(Item::belongsToSet)
+                .collect(Collectors.groupingBy(Item::getSetType, Collectors.counting()));
+    }
+
+    private int activeSetCount() {
+        return (int) equippedSetCounts().values().stream()
+                .filter(count -> count >= SET_BONUS_THRESHOLD)
+                .count();
     }
 }

@@ -30,21 +30,40 @@ public class Item {
     @Column(nullable = false)
     private int defenseBonus;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ItemSetType setType;
+
     public static Item create(
             String name,
             ItemType type,
             int attackBonus,
             int defenseBonus
     ) {
+        return create(name, type, attackBonus, defenseBonus, ItemSetType.NONE);
+    }
+
+    public static Item create(
+            String name,
+            ItemType type,
+            int attackBonus,
+            int defenseBonus,
+            ItemSetType setType
+    ) {
         Item item = new Item();
         item.name = Objects.requireNonNull(name);
         item.type = Objects.requireNonNull(type);
         item.attackBonus = attackBonus;
         item.defenseBonus = defenseBonus;
+        item.setType = Objects.requireNonNull(setType);
         return item;
     }
 
     public int sellPrice() {
         return Math.max(1, (attackBonus + defenseBonus) * 10);
+    }
+
+    public boolean belongsToSet() {
+        return setType != ItemSetType.NONE;
     }
 }

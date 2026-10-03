@@ -5,6 +5,7 @@ import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.fixture.ItemFixture;
 import com.rpg.lab.fixture.PlayerFixture;
 import com.rpg.lab.item.Item;
+import com.rpg.lab.item.ItemSetType;
 import com.rpg.lab.player.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -441,6 +442,54 @@ class InventoryTest {
             inventory.enhanceItem(sword.getId(), alwaysSuccessPolicy, fixedRoll);
 
             assertThat(inventory.getAttackBonus()).isEqualTo(0);
+        }
+    }
+
+    @Nested
+    class SetBonus {
+        @Test
+        @DisplayName("세트 아이템을 2개 미만 장착하면 세트 보너스가 없다")
+        void test1() {
+            Inventory inventory = Inventory.create(player);
+            Item goblinWeapon = ItemFixture.createGoblinSetWeaponWithId();
+            inventory.addItem(goblinWeapon);
+            inventory.equip(goblinWeapon.getId());
+
+            int attackBonus = inventory.getAttackBonus();
+
+            assertThat(attackBonus).isEqualTo(goblinWeapon.getAttackBonus());
+        }
+
+        @Test
+        @DisplayName("세트 아이템을 2개 이상 장착하면 세트 보너스가 추가된다")
+        void test2() {
+            Inventory inventory = Inventory.create(player);
+            Item goblinWeapon = ItemFixture.createGoblinSetWeaponWithId();
+            Item goblinArmor = ItemFixture.createGoblinSetArmorWithId();
+            inventory.addItem(goblinWeapon);
+            inventory.addItem(goblinArmor);
+            inventory.equip(goblinWeapon.getId());
+            inventory.equip(goblinArmor.getId());
+
+            int attackBonus = inventory.getAttackBonus();
+            int defenseBonus = inventory.getDefenseBonus();
+
+            assertThat(attackBonus).isEqualTo(goblinWeapon.getAttackBonus() + goblinArmor.getAttackBonus() + Inventory.SET_ATTACK_BONUS);
+            assertThat(defenseBonus).isEqualTo(goblinWeapon.getDefenseBonus() + goblinArmor.getDefenseBonus() + Inventory.SET_DEFENSE_BONUS);
+        }
+
+        @Test
+        @DisplayName("활성화된 세트 목록을 조회할 수 있다")
+        void test3() {
+            Inventory inventory = Inventory.create(player);
+            Item goblinWeapon = ItemFixture.createGoblinSetWeaponWithId();
+            Item goblinArmor = ItemFixture.createGoblinSetArmorWithId();
+            inventory.addItem(goblinWeapon);
+            inventory.addItem(goblinArmor);
+            inventory.equip(goblinWeapon.getId());
+            inventory.equip(goblinArmor.getId());
+
+            assertThat(inventory.getActiveSets()).containsExactly(ItemSetType.GOBLIN_SET);
         }
     }
 }
