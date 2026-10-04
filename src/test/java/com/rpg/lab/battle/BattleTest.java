@@ -6,7 +6,6 @@ import com.rpg.lab.inventory.Inventory;
 import com.rpg.lab.item.Item;
 import com.rpg.lab.item.ItemType;
 import com.rpg.lab.monster.Monster;
-import com.rpg.lab.monster.ScaledMonster;
 import com.rpg.lab.player.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -154,6 +153,23 @@ class BattleTest {
 
             assertThat(battle.getPlayerDamage()).isGreaterThanOrEqualTo(player.getAttack() + 2);
             assertThat(battle.getMonsterDamage()).isEqualTo(orc.getAttackPower() - 2);
+        }
+
+        @Test
+        @DisplayName("세트 보너스가 공격 데미지와 반격 데미지에 반영된다")
+        void test4() {
+            Item weapon = ItemFixture.createGoblinSetWeaponWithId();
+            Item armor = ItemFixture.createGoblinSetArmorWithId();
+            inventory.addItem(weapon);
+            inventory.addItem(armor);
+            inventory.equip(weapon.getId());
+            inventory.equip(armor.getId());
+
+            Battle battle = attack(orc);
+
+            assertThat(inventory.getActiveSets()).isNotEmpty();
+            assertThat(battle.getPlayerDamage()).isGreaterThanOrEqualTo(player.getAttack() + inventory.getAttackBonus());
+            assertThat(battle.getMonsterDamage()).isEqualTo(orc.getAttackPower() - inventory.getDefenseBonus());
         }
     }
 
