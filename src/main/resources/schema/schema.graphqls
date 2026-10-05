@@ -121,6 +121,12 @@ type Monster {
     baseAttackPower: Int!
 }
 
+enum ItemSetType {
+    NONE
+    GOBLIN_SET
+    DRAGON_SET
+}
+
 type Item {
     id: ID!
     name: String!
@@ -129,6 +135,7 @@ type Item {
     defenseBonus: Int!
     equipped: Boolean!
     enhanceLevel: Int!
+    setType: ItemSetType!
 }
 
 type ShopItemResponse {
@@ -150,6 +157,7 @@ enum ItemType {
 type Inventory {
     id: ID!
     items: [Item!]!
+    activeSets: [ItemSetType!]!
 }
 
 type EnhanceItemResponse {

@@ -5,21 +5,21 @@ VALUES
     ('오크', 100, 100, 20, 80),
     ('고블린 두목', 150, 150, 25, 120);  -- id: 4, 신규 보스 몬스터
 
-INSERT INTO items (name, type, attack_bonus, defense_bonus)
+INSERT INTO items (name, type, attack_bonus, defense_bonus, set_type)
 VALUES
-    ('낡은 검', 'WEAPON', 5, 0),
-    ('가죽 갑옷', 'ARMOR', 0, 5),
-    ('마법 지팡이', 'WEAPON', 10, 0),
-    ('철 방패', 'ARMOR', 0, 8),
-    ('민첩의 반지', 'ACCESSORY', 2, 2),
-    ('슬라임 결정', 'ACCESSORY', 3, 0),   -- 슬라임 사냥 퀘스트 보상 (id: 6)
-    ('고블린 귀', 'ACCESSORY', 0, 3),     -- 고블린 토벌 퀘스트 보상 (id: 7)
-    ('던전 열쇠', 'ACCESSORY', 5, 5),     -- 던전 탐험 퀘스트 보상 (id: 8)
-    ('두목의 도끼', 'WEAPON', 15, 0),    -- 고블린 두목 토벌 보상 (id: 9)
-    ('상점 검', 'WEAPON', 7, 0),          -- 상점 아이템 (id: 10)
-    ('상점 방패', 'ARMOR', 0, 6),          -- 상점 아이템 (id: 11)
-    ('여행자의 반지', 'ACCESSORY', 3, 3),   -- 상점 아이템 (id: 12)
-    ('강철 갑옷', 'ARMOR', 0, 10);         -- 상점 아이템 (id: 13)
+    ('낡은 검', 'WEAPON', 5, 0, 'NONE'),
+    ('가죽 갑옷', 'ARMOR', 0, 5, 'NONE'),
+    ('마법 지팡이', 'WEAPON', 10, 0, 'NONE'),
+    ('철 방패', 'ARMOR', 0, 8, 'NONE'),
+    ('민첩의 반지', 'ACCESSORY', 2, 2, 'NONE'),
+    ('슬라임 결정', 'ACCESSORY', 3, 0, 'NONE'),   -- 슬라임 사냥 퀘스트 보상 (id: 6)
+    ('고블린 귀', 'ACCESSORY', 0, 3, 'NONE'),     -- 고블린 토벌 퀘스트 보상 (id: 7)
+    ('던전 열쇠', 'ACCESSORY', 5, 5, 'NONE'),     -- 던전 탐험 퀘스트 보상 (id: 8)
+    ('두목의 도끼', 'WEAPON', 15, 0, 'NONE'),    -- 고블린 두목 토벌 보상 (id: 9)
+    ('상점 검', 'WEAPON', 7, 0, 'NONE'),          -- 상점 아이템 (id: 10)
+    ('상점 방패', 'ARMOR', 0, 6, 'NONE'),          -- 상점 아이템 (id: 11)
+    ('여행자의 반지', 'ACCESSORY', 3, 3, 'NONE'),   -- 상점 아이템 (id: 12)
+    ('강철 갑옷', 'ARMOR', 0, 10, 'NONE');         -- 상점 아이템 (id: 13)
 
 INSERT INTO shop_items (item_id, price)
 VALUES

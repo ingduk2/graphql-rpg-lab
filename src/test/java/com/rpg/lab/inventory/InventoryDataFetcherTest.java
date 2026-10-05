@@ -169,6 +169,56 @@ class InventoryDataFetcherTest {
         }
     }
 
+    @Nested
+    class ActiveSets {
+
+        @Test
+        @DisplayName("세트 아이템을 2개 이상 장착하면 장착 응답에 활성 세트가 담긴다")
+        void test1() {
+            Item weapon = itemRepository.save(ItemFixture.createGoblinSetWeapon());
+            Item armor = itemRepository.save(ItemFixture.createGoblinSetArmor());
+            inventory.addItem(weapon);
+            inventory.addItem(armor);
+            inventoryRepository.save(inventory);
+            inventory.equip(weapon.getId());
+            inventoryRepository.save(inventory);
+
+            List<String> activeSets = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
+                    """
+                    mutation {
+                        equipItem(itemId: "%d") { activeSets }
+                    }
+                    """.formatted(armor.getId()),
+                    "data.equipItem.activeSets",
+                    Collections.emptyMap(),
+                    new TypeRef<>() {},
+                    headers
+            );
+
+            assertThat(activeSets).containsExactly("GOBLIN_SET");
+        }
+
+        @Test
+        @DisplayName("세트 아이템이 아니면 activeSets가 비어 있다")
+        void test2() {
+            Item item = ownItem();
+
+            List<String> activeSets = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
+                    """
+                    mutation {
+                        equipItem(itemId: "%d") { activeSets }
+                    }
+                    """.formatted(item.getId()),
+                    "data.equipItem.activeSets",
+                    Collections.emptyMap(),
+                    new TypeRef<>() {},
+                    headers
+            );
+
+            assertThat(activeSets).isEmpty();
+        }
+    }
+
     private Item ownItem() {
         Item item = itemRepository.save(ItemFixture.createSwordItem());
         inventory.addItem(item);

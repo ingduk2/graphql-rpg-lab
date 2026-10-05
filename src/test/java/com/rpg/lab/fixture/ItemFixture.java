@@ -49,8 +49,16 @@ public class ItemFixture {
         return withId("고블린 단검", ItemType.WEAPON, 3, 0, ItemSetType.GOBLIN_SET);
     }
 
+    public static Item createGoblinSetWeapon() {
+        return Item.create("고블린 단검", ItemType.WEAPON, 3, 0, ItemSetType.GOBLIN_SET);
+    }
+
     public static Item createGoblinSetArmorWithId() {
         return withId("고블린 갑옷", ItemType.ARMOR, 0, 3, ItemSetType.GOBLIN_SET);
+    }
+
+    public static Item createGoblinSetArmor() {
+        return Item.create("고블린 갑옷", ItemType.ARMOR, 0, 3, ItemSetType.GOBLIN_SET);
     }
 
     private static Item withId(
