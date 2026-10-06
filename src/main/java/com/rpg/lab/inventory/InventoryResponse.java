@@ -8,7 +8,9 @@ import java.util.List;
 public record InventoryResponse(
         Long id,
         List<ItemResponse> items,
-        List<ItemSetType> activeSets
+        List<ItemSetType> activeSets,
+        int attackBonus,
+        int defenseBonus
 ) {
     public static InventoryResponse from(Inventory inventory) {
         List<ItemResponse> items = inventory.getInventoryItems().stream()
@@ -24,7 +26,9 @@ public record InventoryResponse(
         return new InventoryResponse(
                 inventory.getId(),
                 items,
-                inventory.getActiveSets()
+                inventory.getActiveSets(),
+                inventory.getAttackBonus(),
+                inventory.getDefenseBonus()
         );
     }
 }

@@ -158,6 +158,8 @@ type Inventory {
     id: ID!
     items: [Item!]!
     activeSets: [ItemSetType!]!
+    attackBonus: Int!
+    defenseBonus: Int!
 }
 
 type EnhanceItemResponse {

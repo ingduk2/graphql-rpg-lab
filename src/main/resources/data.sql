@@ -19,14 +19,18 @@ VALUES
     ('상점 검', 'WEAPON', 7, 0, 'NONE'),          -- 상점 아이템 (id: 10)
     ('상점 방패', 'ARMOR', 0, 6, 'NONE'),          -- 상점 아이템 (id: 11)
     ('여행자의 반지', 'ACCESSORY', 3, 3, 'NONE'),   -- 상점 아이템 (id: 12)
-    ('강철 갑옷', 'ARMOR', 0, 10, 'NONE');         -- 상점 아이템 (id: 13)
+    ('강철 갑옷', 'ARMOR', 0, 10, 'NONE'),         -- 상점 아이템 (id: 13)
+    ('고블린 단검', 'WEAPON', 3, 0, 'GOBLIN_SET'),   -- id: 14
+    ('고블린 갑옷', 'ARMOR', 0, 3, 'GOBLIN_SET');    -- id: 15
 
 INSERT INTO shop_items (item_id, price)
 VALUES
     (10, 100),
     (11, 100),
     (12, 120),
-    (13, 150);
+    (13, 150),
+    (14, 50),
+    (15, 50);
 
 INSERT INTO quests (title, description, prerequisite_quest_id)
 VALUES

@@ -421,6 +421,7 @@
                 <div class="bar-label"><span>EXP</span><span id="playerExpText">-/-</span></div>
                 <div class="bar"><div class="bar-fill exp" id="playerExpFill"></div></div>
                 <div class="panel-label" style="margin-top:10px;">INVENTORY</div>
+                <div id="activeSets" style="font-size:12px; color:var(--amber); margin-bottom:6px;"></div>
                 <div class="inventory-items" id="inventoryItems">
                     <span class="inventory-empty">empty</span>
                 </div>
@@ -579,8 +580,8 @@
         currentPlayerMaxHp = player.maxHp;
         const items = player.inventory?.items || [];
         const equippedItems = items.filter(i => i.equipped);
-        const atkBonus = equippedItems.reduce((sum, i) => sum + i.attackBonus, 0);
-        const defBonus = equippedItems.reduce((sum, i) => sum + i.defenseBonus, 0);
+        const atkBonus = player.inventory?.attackBonus ?? 0;
+        const defBonus = player.inventory?.defenseBonus ?? 0;
         document.getElementById('playerName').textContent = player.name;
         document.getElementById('statLv').textContent = player.level;
         document.getElementById('statAtk').textContent = atkBonus > 0 ? `${player.stats.attack}+${atkBonus}` : player.stats.attack;
@@ -620,10 +621,11 @@
             const enhanceBadge = item.enhanceLevel > 0 ? ` <span class="equipped-badge">+${item.enhanceLevel}</span>` : '';
             const toggleFn = item.equipped ? 'unequipItem' : 'equipItem';
             const toggleLabel = item.equipped ? 'UNEQUIP' : 'EQUIP';
+            const setBadge = item.setType !== 'NONE' ? ` <span class="equipped-badge">${item.setType.replace('_SET', '')}</span>` : '';
             return `
                 <div class="inventory-item${item.equipped ? ' equipped' : ''}">
                     <div class="inventory-item-header">
-                        <span>${item.name}${enhanceBadge}</span>${bonusText}${equippedBadge}
+                        <span>${item.name}${enhanceBadge}${setBadge}</span>${bonusText}${equippedBadge}
                     </div>
                     <div class="inventory-item-actions">
                         <button class="sm-btn ${item.equipped ? 'amber' : 'green'}" onclick="${toggleFn}(${item.id})">${toggleLabel}</button>
@@ -810,11 +812,12 @@
             player(id: ${playerId}) {
                     id name level hp maxHp exp gold
                     stats { attack defense speed }
-                    inventory { items { id name type attackBonus defenseBonus equipped enhanceLevel } }
+                    inventory { attackBonus defenseBonus activeSets items { id name type attackBonus defenseBonus equipped enhanceLevel setType } }
                 }
             }`);
             updatePlayerDisplay(data.player);
             updateInventoryDisplay(data.player.inventory?.items);
+            updateActiveSets(data.player.inventory?.activeSets);
         } catch (e) {
             localStorage.removeItem(PLAYER_ID_KEY);
             playerId = null;
@@ -972,8 +975,6 @@
                     if (r.playerDefeated) log('player has fallen. battle lost.', 'dead');
                     ws.close();
                     await loadPlayer();
-                    const invData = await graphql(`{ player(id: ${playerId}) { inventory { items { id name type attackBonus defenseBonus equipped } } } }`);
-                    updateInventoryDisplay(invData.player.inventory?.items);
                     await loadQuests();
                     await loadLeaderboard();
                     if (!r.playerDefeated) setButtonsDisabled(false);
@@ -1065,6 +1066,13 @@
             }
             await loadPlayer();
         } catch (e) {}
+    }
+
+    function updateActiveSets(sets) {
+        const el = document.getElementById('activeSets');
+        el.textContent = sets && sets.length > 0
+            ? `⚡ 세트 효과: ${sets.join(', ')} (ATK+3 DEF+3)`
+            : '';
     }
 
     function init() {
