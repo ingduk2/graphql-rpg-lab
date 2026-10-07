@@ -443,6 +443,23 @@ class InventoryTest {
 
             assertThat(inventory.getAttackBonus()).isEqualTo(0);
         }
+
+        @Test
+        @DisplayName("세트 아이템을 강화하면 세트 보너스도 함꼐 커진다")
+        void test8() {
+            Inventory inventory = Inventory.create(player);
+            Item weapon = ItemFixture.createGoblinSetWeaponWithId(); // ATK 3
+            Item armor = ItemFixture.createGoblinSetArmorWithId();
+            inventory.addItem(weapon);
+            inventory.addItem(armor);
+            inventory.equip(weapon.getId());
+            inventory.equip(armor.getId());
+            inventory.enhanceItem(weapon.getId(), alwaysSuccessPolicy, fixedRoll); // 단검 +1 → ATK 4
+
+            // 단검 3 → +1 강화(20% 올림) → 4
+            // 세트 보너스: 세트 아이템 ATK 합(4 + 0) × 100% = 4
+            assertThat(inventory.getAttackBonus()).isEqualTo(4 + 4);
+        }
     }
 
     @Nested
@@ -474,8 +491,8 @@ class InventoryTest {
             int attackBonus = inventory.getAttackBonus();
             int defenseBonus = inventory.getDefenseBonus();
 
-            assertThat(attackBonus).isEqualTo(goblinWeapon.getAttackBonus() + goblinArmor.getAttackBonus() + Inventory.SET_ATTACK_BONUS);
-            assertThat(defenseBonus).isEqualTo(goblinWeapon.getDefenseBonus() + goblinArmor.getDefenseBonus() + Inventory.SET_DEFENSE_BONUS);
+            assertThat(attackBonus).isEqualTo(goblinWeapon.getAttackBonus() + goblinArmor.getAttackBonus() + 3);
+            assertThat(defenseBonus).isEqualTo(goblinWeapon.getDefenseBonus() + goblinArmor.getDefenseBonus() + 3);
         }
 
         @Test

@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
 @Entity
@@ -22,8 +23,7 @@ import java.util.stream.Collectors;
 public class Inventory {
 
     static final int SET_BONUS_THRESHOLD = 2;
-    static final int SET_ATTACK_BONUS = 3;
-    static final int SET_DEFENSE_BONUS = 3;
+    static final int SET_BONUS_PERCENT = 100;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -91,19 +91,13 @@ public class Inventory {
     }
 
     public int getAttackBonus() {
-        int itemBonus = inventoryItems.stream()
-                .filter(InventoryItem::isEquipped)
-                .mapToInt(InventoryItem::getEnhancedAttackBonus)
-                .sum();
-        return itemBonus + activeSetCount() * SET_ATTACK_BONUS;
+        return equippedBonus(InventoryItem::getEnhancedAttackBonus)
+                + setBonus(InventoryItem::getEnhancedAttackBonus);
     }
 
     public int getDefenseBonus() {
-        int itemBonus = inventoryItems.stream()
-                .filter(InventoryItem::isEquipped)
-                .mapToInt(InventoryItem::getEnhancedDefenseBonus)
-                .sum();
-        return itemBonus + activeSetCount() * SET_DEFENSE_BONUS;
+        return equippedBonus(InventoryItem::getEnhancedDefenseBonus)
+                + setBonus(InventoryItem::getEnhancedDefenseBonus);
     }
 
     public EnhanceResult enhanceItem(
@@ -147,5 +141,23 @@ public class Inventory {
         return (int) equippedSetCounts().values().stream()
                 .filter(count -> count >= SET_BONUS_THRESHOLD)
                 .count();
+    }
+
+    private int equippedBonus(ToIntFunction<InventoryItem> statOf) {
+        return inventoryItems.stream()
+                .filter(InventoryItem::isEquipped)
+                .mapToInt(statOf)
+                .sum();
+    }
+
+    // 세트가 발동 중일 때, 그 세트 아이템들의 스탯 합 × N% (올림)
+    private int setBonus(ToIntFunction<InventoryItem> statOf) {
+        List<ItemSetType> activeSets = getActiveSets();
+        int base = inventoryItems.stream()
+                .filter(InventoryItem::isEquipped)
+                .filter(it -> activeSets.contains(it.getItem().getSetType()))
+                .mapToInt(statOf)
+                .sum();
+        return (base * SET_BONUS_PERCENT + 99) / 100;
     }
 }
