@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -54,7 +55,7 @@ class BattleTest {
         void test3() {
             Battle battle = attack(orc);
 
-            assertThat(battle.getMonsterDamage()).isEqualTo(orc.getAttackPower());
+            assertThat(battle.getMonsterDamage()).isEqualTo(orc.getAttackPower() - player.getDefense());
             assertThat(battle.getPlayerRemainHp()).isLessThan(player.getHp());
         }
 
@@ -113,6 +114,26 @@ class BattleTest {
             assertThat(battle.getPlayerRemainHp()).isEqualTo(0);
             assertThat(battle.getMessage()).contains("사망");
         }
+
+        @Test
+        @DisplayName("몬스터 공격력이 방어력 이하여도 최소 1 데미지는 들어온다")
+        void test10() {
+            Monster weak = Monster.create("약한 몬스터", 100, 1, 10);
+
+            Battle battle = attack(weak);
+
+            assertThat(battle.getMonsterDamage()).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("플레이어 방어력이 높을수록 반격 데미지가 줄어든다")
+        void test11() {
+            Battle low = attack(orc);
+            ReflectionTestUtils.setField(player, "defense", player.getDefense() + 3);
+            Battle high = attack(orc);
+
+            assertThat(high.getMonsterDamage()).isEqualTo(low.getMonsterDamage() - 3);
+        }
     }
 
     @Nested
@@ -139,7 +160,7 @@ class BattleTest {
 
             Battle battle = attack(orc);
 
-            assertThat(battle.getMonsterDamage()).isEqualTo(orc.getAttackPower() - 5);
+            assertThat(battle.getMonsterDamage()).isEqualTo(orc.getAttackPower() - player.getDefense() - 5);
         }
 
         @Test
@@ -152,7 +173,7 @@ class BattleTest {
             Battle battle = attack(orc);
 
             assertThat(battle.getPlayerDamage()).isGreaterThanOrEqualTo(player.getAttack() + 2);
-            assertThat(battle.getMonsterDamage()).isEqualTo(orc.getAttackPower() - 2);
+            assertThat(battle.getMonsterDamage()).isEqualTo(orc.getAttackPower() - player.getDefense() - 2);
         }
 
         @Test
@@ -169,7 +190,7 @@ class BattleTest {
 
             assertThat(inventory.getActiveSets()).isNotEmpty();
             assertThat(battle.getPlayerDamage()).isGreaterThanOrEqualTo(player.getAttack() + inventory.getAttackBonus());
-            assertThat(battle.getMonsterDamage()).isEqualTo(orc.getAttackPower() - inventory.getDefenseBonus());
+            assertThat(battle.getMonsterDamage()).isEqualTo(orc.getAttackPower() - player.getDefense() - inventory.getDefenseBonus());
         }
     }
 
@@ -182,7 +203,7 @@ class BattleTest {
             Battle battle = new Battle(player, MonsterFixture.unscaled(orc), null, orc.getHp()).attack();
 
             assertThat(battle.getPlayerDamage()).isGreaterThanOrEqualTo(player.getAttack());
-            assertThat(battle.getMonsterDamage()).isEqualTo(orc.getAttackPower());
+            assertThat(battle.getMonsterDamage()).isEqualTo(orc.getAttackPower() - player.getDefense());
         }
     }
 

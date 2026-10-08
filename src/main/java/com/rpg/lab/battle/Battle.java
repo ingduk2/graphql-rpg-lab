@@ -55,7 +55,8 @@ public class Battle {
             playerDefeated = false;
             expGained = monster.expReward();
         } else {
-            monsterDamage = Math.max(0, monster.attackPower() - defenseBonus);
+            int totalDefense = player.getDefense() + defenseBonus;
+            monsterDamage = Math.max(1, monster.attackPower() - totalDefense);
             playerRemainHp = Math.max(0, player.getHp() - monsterDamage);
             playerDefeated = playerRemainHp == 0;
             expGained = 0;
