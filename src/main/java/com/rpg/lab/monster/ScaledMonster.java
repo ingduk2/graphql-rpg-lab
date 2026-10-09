@@ -6,12 +6,17 @@ public record ScaledMonster(
         int attackPower,
         int expReward
 ) {
-    public static ScaledMonster from(Monster monster, int hp, int attackPower) {
+    public static ScaledMonster from(
+            Monster monster,
+            int hp,
+            int attackPower,
+            int expReward
+    ) {
         return new ScaledMonster(
                 monster.getName(),
                 hp,
                 attackPower,
-                monster.getExpReward()
+                expReward
         );
     }
 }

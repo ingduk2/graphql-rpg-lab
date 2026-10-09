@@ -11,7 +11,8 @@ public class MonsterScaler {
     public ScaledMonster scale(Monster monster, int playerLevel) {
         int hp = scale(monster.getMaxHp(), playerLevel);
         int attackPower = scale(monster.getAttackPower(), playerLevel);
-        return ScaledMonster.from(monster, hp, attackPower);
+        int expReward = scale(monster.getExpReward(), playerLevel);
+        return ScaledMonster.from(monster, hp, attackPower, expReward);
     }
 
     private int scale(int baseStat, int playerLevel) {

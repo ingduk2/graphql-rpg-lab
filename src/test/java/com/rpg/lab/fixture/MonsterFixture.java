@@ -18,6 +18,6 @@ public class MonsterFixture {
     }
 
     public static ScaledMonster unscaled(Monster monster) {
-        return ScaledMonster.from(monster, monster.getHp(), monster.getAttackPower());
+        return ScaledMonster.from(monster, monster.getHp(), monster.getAttackPower(), monster.getExpReward());
     }
 }

@@ -66,4 +66,28 @@ class MonsterScalerTest {
             assertThat(result.attackPower()).isEqualTo(10);
         }
     }
+
+    @Nested
+    class ScaleExpReward {
+
+        @Test
+        @DisplayName("레벨 1이면 기본 경험치 그대로다")
+        void test1() {
+            Monster monster = MonsterFixture.createSlime();
+
+            ScaledMonster result = sut.scale(monster, 1);
+
+            assertThat(result.expReward()).isEqualTo(monster.getExpReward());
+        }
+
+        @Test
+        @DisplayName("레벨당 스케일링 비율만큼 경험치가 증가한다")
+        void test2() {
+            Monster monster = MonsterFixture.createSlime(); // exp 20
+
+            ScaledMonster result = sut.scale(monster, 5);
+
+            assertThat(result.expReward()).isEqualTo(28); // 20 * 1.4
+        }
+    }
 }
