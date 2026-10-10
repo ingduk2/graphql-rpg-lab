@@ -8,6 +8,7 @@ public record PlayerResponse(
         int maxHp,
         int exp,
         int gold,
+        int expToNextLevel,
         StatsResponse stats
 ) {
     public static PlayerResponse from(Player player) {
@@ -19,6 +20,7 @@ public record PlayerResponse(
                 player.getMaxHp(),
                 player.getExp(),
                 player.getGold(),
+                player.expToNextLevel(),
                 StatsResponse.from(player)
         );
     }

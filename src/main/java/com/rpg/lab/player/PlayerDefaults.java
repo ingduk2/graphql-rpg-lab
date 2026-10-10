@@ -18,5 +18,6 @@ public class PlayerDefaults {
     public static final int LEVEL_UP_ATTACK_BONUS = 2;
     public static final int LEVEL_UP_DEFENSE_BONUS = 1;
     public static final int LEVEL_UP_SPEED_BONUS = 1;
-    public static final int EXP_PER_LEVEL = 100;
+    public static final int EXP_BASE = 100;
+    public static final int EXP_STEP = 50;
 }

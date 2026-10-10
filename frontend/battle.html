@@ -567,11 +567,12 @@
         text.textContent = `${Math.max(0, current)}/${max}`;
     }
 
-    function setExpBar(exp, level) {
-        const nextLevelExp = level * 100;
-        const pct = Math.min(100, (exp / nextLevelExp) * 100);
+    let currentExpToNext = 100;
+
+    function setExpBar(exp, expToNext) {
+        const pct = Math.min(100, (exp / expToNext) * 100);
         document.getElementById('playerExpFill').style.width = pct + '%';
-        document.getElementById('playerExpText').textContent = `${exp}/${nextLevelExp}`;
+        document.getElementById('playerExpText').textContent = `${exp}/${expToNext}`;
         currentPlayerExp = exp;
     }
 
@@ -589,7 +590,8 @@
         document.getElementById('statSpd').textContent = player.stats.speed;
         document.getElementById('statGold').textContent = player.gold;
         setHpBar('playerHpFill', 'playerHpText', player.hp, player.maxHp);
-        setExpBar(player.exp, player.level);
+        currentExpToNext = player.expToNextLevel;
+        setExpBar(player.exp, player.expToNextLevel);
     }
 
     function updateMonsterDisplay(monster) {
@@ -810,7 +812,7 @@
         try {
             const data = await graphql(`{
             player(id: ${playerId}) {
-                    id name level hp maxHp exp gold
+                    id name level hp maxHp exp gold expToNextLevel
                     stats { attack defense speed }
                     inventory { attackBonus defenseBonus activeSets items { id name type attackBonus defenseBonus equipped enhanceLevel setType } }
                 }
@@ -883,7 +885,7 @@
                 if (r.levelUps > 0) await loadLeaderboard();
                 if (r.unlockedAchievements?.length > 0) await loadAchievements();
             } else if (r.expGained > 0) {
-                setExpBar(currentPlayerExp + r.expGained, currentPlayerLevel);
+                setExpBar(currentPlayerExp + r.expGained, currentExpToNext);
             }
 
             // 전투 종료

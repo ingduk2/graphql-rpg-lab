@@ -95,8 +95,8 @@ public class Player {
         this.gold -= amount;
     }
 
-    private int expToNextLevel() {
-        return this.level * PlayerDefaults.EXP_PER_LEVEL;
+    public int expToNextLevel() {
+        return PlayerDefaults.EXP_BASE + PlayerDefaults.EXP_STEP * (this.level - 1);
     }
 
     private void levelUp() {

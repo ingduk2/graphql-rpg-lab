@@ -57,6 +57,20 @@ class PlayerTest {
             assertThat(levelUps).isEqualTo(2);
             assertThat(player.getLevel()).isEqualTo(3);
         }
+
+        @Test
+        @DisplayName("레벨이 오를수록 필요 경험치는 늘어나지만 레벨당 증가폭은 일정하다")
+        void test5() {
+            Player player = Player.create("user1");
+            int lv1 = player.expToNextLevel();
+            player.gainExp(lv1);
+            int lv2 = player.expToNextLevel();
+            player.gainExp(lv2);
+            int lv3 = player.expToNextLevel();
+
+            assertThat(lv2).isGreaterThan(lv1);
+            assertThat(lv3 - lv2).isEqualTo(lv2 - lv1);
+        }
     }
 
     @Nested
