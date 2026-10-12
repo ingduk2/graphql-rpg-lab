@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.Objects;
 
@@ -34,6 +35,10 @@ public class Item {
     @Enumerated(EnumType.STRING)
     private ItemSetType setType;
 
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private int healAmount;
+
     public static Item create(
             String name,
             ItemType type,
@@ -59,11 +64,30 @@ public class Item {
         return item;
     }
 
+    public static Item createConsumable(String name, int healAmount) {
+        if (healAmount <= 0) {
+            throw new IllegalArgumentException("healAmount must be positive: " + healAmount);
+        }
+
+        Item item = new Item();
+        item.name = Objects.requireNonNull(name);
+        item.type = ItemType.CONSUMABLE;
+        item.attackBonus = 0;
+        item.defenseBonus = 0;
+        item.setType = ItemSetType.NONE;
+        item.healAmount = healAmount;
+        return item;
+    }
+
     public int sellPrice() {
         return Math.max(1, (attackBonus + defenseBonus) * 10);
     }
 
     public boolean belongsToSet() {
         return setType != ItemSetType.NONE;
+    }
+
+    public boolean isConsumable() {
+        return type == ItemType.CONSUMABLE;
     }
 }
