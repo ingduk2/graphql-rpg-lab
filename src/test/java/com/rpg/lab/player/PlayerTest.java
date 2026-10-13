@@ -150,4 +150,52 @@ class PlayerTest {
             assertThat(player.getGold()).isEqualTo(0);
         }
     }
+
+    @Nested
+    class Heal {
+
+        @Test
+        @DisplayName("회복하면 hp 가 오르고 실제 회복량을 반환한다")
+        void test1() {
+            Player player = Player.create("user1");
+            player.syncHp(50);
+
+            int result = player.heal(30);
+
+            assertThat(player.getHp()).isEqualTo(80);
+            assertThat(result).isEqualTo(30);
+        }
+
+        @Test
+        @DisplayName("최대 hp 를 넘지 않고, 넘친 만큼은 회복량에서 빠진다")
+        void test2() {
+            Player player = Player.create("user1");
+            player.syncHp(90);
+
+            int result = player.heal(30);
+
+            assertThat(player.getHp()).isEqualTo(player.getMaxHp());
+            assertThat(result).isEqualTo(player.getMaxHp() - 90);
+        }
+
+        @Test
+        @DisplayName("이미 풀피면 회복량은 0이다")
+        void test3() {
+            Player player = Player.create("user1");
+
+            int result = player.heal(30);
+
+            assertThat(result).isEqualTo(0);
+            assertThat(player.getHp()).isEqualTo(player.getMaxHp());
+        }
+
+        @Test
+        @DisplayName("회복량이 0 이하면 IllegalArgumentException")
+        void test4() {
+            Player player = Player.create("user1");
+
+            assertThatThrownBy(() -> player.heal(0))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
+    }
 }

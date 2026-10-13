@@ -99,6 +99,16 @@ public class Player {
         return PlayerDefaults.EXP_BASE + PlayerDefaults.EXP_STEP * (this.level - 1);
     }
 
+    public int heal(int amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("heal amount must be positive: " + amount);
+        }
+
+        int before = this.hp;
+        this.hp = Math.min(this.maxHp, this.hp + amount);
+        return this.hp - before;
+    }
+
     private void levelUp() {
         this.level += 1;
         this.maxHp += PlayerDefaults.LEVEL_UP_HP_BONUS;
