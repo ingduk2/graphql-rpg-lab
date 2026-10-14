@@ -47,10 +47,6 @@ public class Inventory {
         this.inventoryItems.add(inventoryItem);
     }
 
-    public void removeItem(Long itemId) {
-        this.inventoryItems.removeIf(li -> li.getItem().getId().equals(itemId));
-    }
-
     public int sellItem(Long itemId) {
         InventoryItem target = findByItemId(itemId);
         int price = target.getItem().sellPrice();
@@ -153,12 +149,6 @@ public class Inventory {
                 .map(InventoryItem::getItem)
                 .filter(Item::belongsToSet)
                 .collect(Collectors.groupingBy(Item::getSetType, Collectors.counting()));
-    }
-
-    private int activeSetCount() {
-        return (int) equippedSetCounts().values().stream()
-                .filter(count -> count >= SET_BONUS_THRESHOLD)
-                .count();
     }
 
     private int equippedBonus(ToIntFunction<InventoryItem> statOf) {

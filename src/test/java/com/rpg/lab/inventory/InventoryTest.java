@@ -104,33 +104,6 @@ class InventoryTest {
     }
 
     @Nested
-    class RemoveItem {
-
-        @Test
-        @DisplayName("보유 중인 아이템을 제거하면 목록에서 사라진다")
-        void test1() {
-            Inventory inventory = Inventory.create(player);
-            Item item = ItemFixture.createSwordItemWithId();
-            inventory.addItem(item);
-
-            inventory.removeItem(item.getId());
-
-            assertThat(inventory.getInventoryItems()).isEmpty();
-        }
-
-        @Test
-        @DisplayName("보유하지 않은 itemId 로 제거를 시도해도 예외 없이 그냥 무시된다")
-        void test2() {
-            Inventory inventory = Inventory.create(player);
-            Long invalidItemId = 999L;
-
-            inventory.removeItem(invalidItemId);
-
-            assertThat(inventory.getInventoryItems()).isEmpty();
-        }
-    }
-
-    @Nested
     class AttackBonus {
 
         @Test
