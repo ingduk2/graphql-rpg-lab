@@ -59,7 +59,7 @@ public class Inventory {
     }
 
     public void addItemIfNotOwned(Item item) {
-        if (!hasItem(item.getId())) {
+        if (item.isConsumable() || !hasItem(item.getId())) {
             addItem(item);
         }
     }
@@ -71,6 +71,10 @@ public class Inventory {
 
     public void equip(Long itemId) {
         InventoryItem target = findByItemId(itemId);
+
+        if (target.getItem().isConsumable()) {
+            throw new IllegalArgumentException("Consumable cannot be equipped: " + itemId);
+        }
 
         inventoryItems.stream()
                 .filter(it -> it.isEquipped() && it.getItem().getType() == target.getItem().getType())
@@ -107,6 +111,10 @@ public class Inventory {
     ) {
         InventoryItem target = findByItemId(itemId);
 
+        if (target.getItem().isConsumable()) {
+            throw new IllegalArgumentException("Consumable cannot be enhanced: " + itemId);
+        }
+
         if (target.isMaxEnhanceLevel()) {
             throw new IllegalStateException("Already at max enhance level");
         }
@@ -127,6 +135,16 @@ public class Inventory {
                 .filter(it -> it.getValue() >= SET_BONUS_THRESHOLD)
                 .map(Map.Entry::getKey)
                 .toList();
+    }
+
+    public int useItem(Long itemId) {
+        InventoryItem target = findByItemId(itemId);
+        if (!target.getItem().isConsumable()) {
+            throw new IllegalArgumentException("Not a consumable item: " + itemId);
+        }
+
+        inventoryItems.remove(target);
+        return target.getItem().getHealAmount();
     }
 
     private Map<ItemSetType, Long> equippedSetCounts() {

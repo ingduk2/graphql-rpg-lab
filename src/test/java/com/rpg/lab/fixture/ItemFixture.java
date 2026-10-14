@@ -61,6 +61,16 @@ public class ItemFixture {
         return Item.create("고블린 갑옷", ItemType.ARMOR, 0, 3, ItemSetType.GOBLIN_SET);
     }
 
+    public static Item createPotionItem() {
+        return Item.createConsumable("테스트포션", 30);
+    }
+
+    public static Item createPotionItemWithId() {
+        Item item = Item.createConsumable("테스트포션", 30);
+        ReflectionTestUtils.setField(item, "id", ID_GENERATOR.getAndIncrement());
+        return item;
+    }
+
     private static Item withId(
             String name,
             ItemType type,

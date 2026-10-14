@@ -89,6 +89,18 @@ class InventoryTest {
                     .extracting(InventoryItem::getItem)
                     .containsExactly(swordItem);
         }
+
+        @Test
+        @DisplayName("소모품은 이미 보유해도 추가된다")
+        void test3() {
+            Inventory inventory = Inventory.create(player);
+            Item potion = ItemFixture.createPotionItemWithId();
+            inventory.addItem(potion);
+
+            inventory.addItemIfNotOwned(potion);
+
+            assertThat(inventory.getInventoryItems()).hasSize(2);
+        }
     }
 
     @Nested
@@ -210,7 +222,7 @@ class InventoryTest {
 
             inventory.equip(swordItem.getId());
 
-            InventoryItem equipped = inventory.getInventoryItems().get(0);
+            InventoryItem equipped = inventory.getInventoryItems().getFirst();
             assertThat(equipped.isEquipped()).isTrue();
         }
 
@@ -246,6 +258,17 @@ class InventoryTest {
             assertThatThrownBy(() -> inventory.equip(invalidItemId))
                     .isInstanceOf(EntityNotFoundException.class);
         }
+
+        @Test
+        @DisplayName("소모품을 장착하려 하면 IllegalArgumentException")
+        void test4() {
+            Inventory inventory = Inventory.create(player);
+            Item potion = ItemFixture.createPotionItemWithId();
+            inventory.addItem(potion);
+
+            assertThatThrownBy(() -> inventory.equip(potion.getId()))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
     }
 
     @Nested
@@ -261,7 +284,7 @@ class InventoryTest {
 
             inventory.unequip(swordItem.getId());
 
-            assertThat(inventory.getInventoryItems().get(0).isEquipped()).isFalse();
+            assertThat(inventory.getInventoryItems().getFirst().isEquipped()).isFalse();
         }
     }
 
@@ -460,6 +483,17 @@ class InventoryTest {
             // 세트 보너스: 세트 아이템 ATK 합(4 + 0) × 100% = 4
             assertThat(inventory.getAttackBonus()).isEqualTo(4 + 4);
         }
+
+        @Test
+        @DisplayName("소모품을 강화하려 하면 IllegalArgumentException")
+        void test9() {
+            Inventory inventory = Inventory.create(player);
+            Item potion = ItemFixture.createPotionItemWithId();
+            inventory.addItem(potion);
+
+            assertThatThrownBy(() -> inventory.enhanceItem(potion.getId(), alwaysSuccessPolicy, fixedRoll))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
     }
 
     @Nested
@@ -507,6 +541,57 @@ class InventoryTest {
             inventory.equip(goblinArmor.getId());
 
             assertThat(inventory.getActiveSets()).containsExactly(ItemSetType.GOBLIN_SET);
+        }
+    }
+
+    @Nested
+    class UseItem {
+
+        @Test
+        @DisplayName("소모품을 사용하면 회복량을 반환하고 인벤토리에서 사라진다")
+        void test1() {
+            Inventory inventory = Inventory.create(player);
+            Item potion = ItemFixture.createPotionItemWithId();
+            inventory.addItem(potion);
+
+            int healAmount = inventory.useItem(potion.getId());
+
+            assertThat(healAmount).isEqualTo(potion.getHealAmount());
+            assertThat(inventory.getInventoryItems()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("같은 포션이 여러 개면 하나만 사라진다")
+        void test2() {
+            Inventory inventory = Inventory.create(player);
+            Item potion = ItemFixture.createPotionItemWithId();
+            inventory.addItem(potion);
+            inventory.addItem(potion);
+            inventory.addItem(potion);
+
+            inventory.useItem(potion.getId());
+
+            assertThat(inventory.getInventoryItems()).hasSize(2);
+        }
+
+        @Test
+        @DisplayName("장비를 사용하려 하면 IllegalArgumentException")
+        void test3() {
+            Inventory inventory = Inventory.create(player);
+            Item sword = ItemFixture.createSwordItemWithId();
+            inventory.addItem(sword);
+
+            assertThatThrownBy(() -> inventory.useItem(sword.getId()))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
+
+        @Test
+        @DisplayName("보유하지 않은 아이템을 사용하려 하면 EntityNotFoundException")
+        void test4() {
+            Inventory inventory = Inventory.create(player);
+
+            assertThatThrownBy(() -> inventory.useItem(999L))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
     }
 }
