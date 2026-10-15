@@ -77,5 +77,33 @@ class ShopServiceTest {
             assertThatThrownBy(() -> sut.buyItem(player.getId(), invalidShopItemId))
                     .isInstanceOf(EntityNotFoundException.class);
         }
+
+        @Test
+        @DisplayName("이미 보유한 장비는 다시 구매할 수 없다")
+        void test4() {
+            player.gainGold(1000);
+            playerRepository.save(player);
+            Item item = itemRepository.save(ItemFixture.createSwordItem());
+            ShopItem shopItem = shopItemRepository.save(ShopItem.create(item, 50));
+
+            sut.buyItem(player.getId(), shopItem.getId());
+
+            assertThatThrownBy(() -> sut.buyItem(player.getId(), shopItem.getId()))
+                    .isInstanceOf(IllegalStateException.class);
+        }
+
+        @Test
+        @DisplayName("소모품은 이미 보유해도 다시 구매 할 수 있다")
+        void test5() {
+            player.gainGold(1000);
+            playerRepository.save(player);
+            Item potion = itemRepository.save(ItemFixture.createPotionItem());
+            ShopItem shopItem = shopItemRepository.save(ShopItem.create(potion, 20));
+            sut.buyItem(player.getId(), shopItem.getId());
+
+            InventoryResponse result = sut.buyItem(player.getId(), shopItem.getId());
+
+            assertThat(result.items()).hasSize(2);
+        }
     }
 }

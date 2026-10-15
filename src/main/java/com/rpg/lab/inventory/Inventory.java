@@ -60,7 +60,7 @@ public class Inventory {
         }
     }
 
-    private boolean hasItem(Long itemId) {
+    public boolean hasItem(Long itemId) {
         return inventoryItems.stream()
                 .anyMatch(it -> it.getItem().getId().equals(itemId));
     }
