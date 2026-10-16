@@ -2,6 +2,7 @@ package com.rpg.lab.shop;
 
 import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.exception.InsufficientGoldException;
+import com.rpg.lab.exception.ItemAlreadyOwnedException;
 import com.rpg.lab.fixture.ItemFixture;
 import com.rpg.lab.fixture.PlayerFixture;
 import com.rpg.lab.inventory.Inventory;
@@ -89,7 +90,7 @@ class ShopServiceTest {
             sut.buyItem(player.getId(), shopItem.getId());
 
             assertThatThrownBy(() -> sut.buyItem(player.getId(), shopItem.getId()))
-                    .isInstanceOf(IllegalStateException.class);
+                    .isInstanceOf(ItemAlreadyOwnedException.class);
         }
 
         @Test

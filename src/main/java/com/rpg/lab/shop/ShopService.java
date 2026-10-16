@@ -1,6 +1,7 @@
 package com.rpg.lab.shop;
 
 import com.rpg.lab.exception.EntityNotFoundException;
+import com.rpg.lab.exception.ItemAlreadyOwnedException;
 import com.rpg.lab.inventory.Inventory;
 import com.rpg.lab.inventory.InventoryRepository;
 import com.rpg.lab.inventory.InventoryResponse;
@@ -40,7 +41,7 @@ public class ShopService {
 
         Item item = shopItem.getItem();
         if (!item.isConsumable() && inventory.hasItem(item.getId())) {
-            throw new IllegalStateException("이미 보유한 장비입니다: " + item.getName());
+            throw new ItemAlreadyOwnedException("이미 보유한 장비입니다: " + item.getName());
         }
 
         player.spendGold(shopItem.getPrice());

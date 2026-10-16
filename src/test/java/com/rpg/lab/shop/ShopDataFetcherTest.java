@@ -112,6 +112,26 @@ class ShopDataFetcherTest {
 
             assertThat(result.getErrors()).isNotEmpty();
         }
+
+        @Test
+        @DisplayName("이미 보유한 장비를 구매하면 ITEM_ALREADY_OWNED 에러 코드가 내려온다")
+        void test3() {
+            player.gainGold(1000);
+            playerRepository.save(player);
+            Item item = itemRepository.save(ItemFixture.createSwordItem());
+            ShopItem shopItem = shopItemRepository.save(ShopItem.create(item, 50));
+
+            String mutation = """
+            mutation { buyItem(shopItemId: "%d") { id } }
+            """.formatted(shopItem.getId());
+            dgsQueryExecutor.execute(mutation, Collections.emptyMap(), null, headers);
+
+            ExecutionResult result = dgsQueryExecutor.execute(mutation, Collections.emptyMap(), null, headers);
+
+            assertThat(result.getErrors()).isNotEmpty();
+            assertThat(result.getErrors().getFirst().getExtensions())
+                    .containsEntry("errorCode", "ITEM_ALREADY_OWNED");
+        }
     }
 
 }

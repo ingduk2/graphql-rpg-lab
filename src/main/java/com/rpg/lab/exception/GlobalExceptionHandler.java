@@ -28,6 +28,10 @@ public class GlobalExceptionHandler extends DefaultDataFetcherExceptionHandler {
             return CompletableFuture.completedFuture(buildResult(e, ErrorCode.INSUFFICIENT_GOLD, handlerParameters));
         }
 
+        if (exception instanceof ItemAlreadyOwnedException e) {
+            return CompletableFuture.completedFuture(buildResult(e, ErrorCode.ITEM_ALREADY_OWNED, handlerParameters));
+        }
+
         return super.handleException(handlerParameters);
     }
 
