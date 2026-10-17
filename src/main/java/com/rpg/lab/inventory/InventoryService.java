@@ -68,6 +68,23 @@ public class InventoryService {
         return EnhanceItemResponse.of(enhanceResult, inventory);
     }
 
+    @Transactional
+    public UseItemResponse useItem(Long playerId, Long itemId) {
+        Inventory inventory = findInventoryByPlayerId(playerId);
+        Player player = playerReader.getById(playerId);
+
+        if (player.getHp() >= player.getMaxHp()) {
+            throw new IllegalStateException("이미 체력이 가득 찼습니다.");
+        }
+
+        int healAmount = inventory.useItem(itemId);
+        int healed = player.heal(healAmount);
+
+        playerManager.save(player);
+        inventoryRepository.save(inventory);
+        return UseItemResponse.of(healed, inventory);
+    }
+
     private @NonNull Inventory findInventoryByPlayerId(Long playerId) {
         return inventoryRepository.findByPlayerId(playerId)
                 .orElseThrow(() -> new EntityNotFoundException("Inventory not found, playerId: " + playerId));

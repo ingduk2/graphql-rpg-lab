@@ -16,11 +16,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -212,10 +207,79 @@ class InventoryServiceTest {
         }
     }
 
+    @Nested
+    class UseItem {
+
+        @Test
+        @DisplayName("포션을 사용하면 hp 가 회복되고 포션이 하나 사라진다")
+        void test1() {
+            Item potion = ownPotion();
+            player.syncHp(50);
+            playerRepository.save(player);
+
+            UseItemResponse result = sut.useItem(player.getId(), potion.getId());
+
+            assertThat(result.healedAmount()).isEqualTo(30);
+            assertThat(player.getHp()).isEqualTo(80);
+            assertThat(result.inventor().items()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("최대 hp 를 넘는 회복량은 잘리고 실제 회복량만 반환한다")
+        void test2() {
+            Item potion = ownPotion();
+            player.syncHp(player.getMaxHp() - 10);
+            playerRepository.save(player);
+
+            UseItemResponse result = sut.useItem(player.getId(), potion.getId());
+
+            assertThat(result.healedAmount()).isEqualTo(10);
+            assertThat(player.getHp()).isEqualTo(player.getMaxHp());
+        }
+
+        @Test
+        @DisplayName("이미 체력이 가득 차 있으면 사용할 수 없고 포션은 그대로 남는다")
+        void test3() {
+            Item potion = ownPotion();
+
+            assertThatThrownBy(() -> sut.useItem(player.getId(), potion.getId()))
+                    .isInstanceOf(IllegalStateException.class);
+            assertThat(inventory.getInventoryItems()).hasSize(1);
+        }
+
+        @Test
+        @DisplayName("장비는 사용할 수 없다")
+        void test4() {
+            Item sword = ownItem();
+            player.syncHp(50);
+            playerRepository.save(player);
+
+            assertThatThrownBy(() -> sut.useItem(player.getId(), sword.getId()))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
+
+        @Test
+        @DisplayName("보유하지 않은 아이템은 사용할 수 없다")
+        void test5() {
+            player.syncHp(50);
+            playerRepository.save(player);
+
+            assertThatThrownBy(() -> sut.useItem(player.getId(), 999L))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+    }
+
     private Item ownItem() {
         Item item = itemRepository.save(ItemFixture.createSwordItem());
         inventory.addItem(item);
         inventoryRepository.save(inventory);
         return item;
+    }
+
+    private Item ownPotion() {
+        Item potion = itemRepository.save(ItemFixture.createPotionItem());
+        inventory.addItem(potion);
+        inventoryRepository.save(inventory);
+        return potion;
     }
 }
