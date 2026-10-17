@@ -1,6 +1,7 @@
 package com.rpg.lab.inventory;
 
 import com.rpg.lab.exception.EntityNotFoundException;
+import com.rpg.lab.exception.HpAlreadyFullException;
 import com.rpg.lab.exception.InsufficientGoldException;
 import com.rpg.lab.fixture.ItemFixture;
 import com.rpg.lab.fixture.PlayerFixture;
@@ -243,7 +244,7 @@ class InventoryServiceTest {
             Item potion = ownPotion();
 
             assertThatThrownBy(() -> sut.useItem(player.getId(), potion.getId()))
-                    .isInstanceOf(IllegalStateException.class);
+                    .isInstanceOf(HpAlreadyFullException.class);
             assertThat(inventory.getInventoryItems()).hasSize(1);
         }
 

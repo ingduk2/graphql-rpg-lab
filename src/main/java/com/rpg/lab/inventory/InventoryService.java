@@ -2,6 +2,7 @@ package com.rpg.lab.inventory;
 
 import com.rpg.lab.common.RandomProvider;
 import com.rpg.lab.exception.EntityNotFoundException;
+import com.rpg.lab.exception.HpAlreadyFullException;
 import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerManager;
 import com.rpg.lab.player.PlayerReader;
@@ -74,7 +75,7 @@ public class InventoryService {
         Player player = playerReader.getById(playerId);
 
         if (player.getHp() >= player.getMaxHp()) {
-            throw new IllegalStateException("이미 체력이 가득 찼습니다.");
+            throw new HpAlreadyFullException("HP already full: " + player.getHp() + "/" + player.getMaxHp());
         }
 
         int healAmount = inventory.useItem(itemId);
