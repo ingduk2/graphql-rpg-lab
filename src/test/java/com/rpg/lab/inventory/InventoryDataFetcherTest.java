@@ -219,6 +219,55 @@ class InventoryDataFetcherTest {
         }
     }
 
+    @Nested
+    class UseItem {
+
+        @Test
+        @DisplayName("포션을 사용하면 회복량이 응답된다")
+        void test1() {
+            Item potion = itemRepository.save(ItemFixture.createPotionItem());
+            inventory.addItem(potion);
+            inventoryRepository.save(inventory);
+            player.syncHp(50);
+            playerRepository.save(player);
+
+            Integer healed = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
+                    """
+                            mutation {
+                                useItem(itemId: "%d") { healedAmount }
+                            }
+                            """.formatted(potion.getId()),
+                    "data.useItem.healedAmount",
+                    Collections.emptyMap(),
+                    new TypeRef<>() {},
+                    headers
+            );
+
+            assertThat(healed).isEqualTo(30);
+        }
+
+        @Test
+        @DisplayName("풀피에 포션을 사용하면 HP_ALREADT_FULL 에러 코드가 내려온다")
+        void test2() {
+            Item potion = itemRepository.save(ItemFixture.createPotionItem());
+            inventory.addItem(potion);
+            inventoryRepository.save(inventory);
+
+            ExecutionResult result = dgsQueryExecutor.execute(
+                    """
+                            mutation { useItem(itemId: "%d") { healedAmount } }
+                            """.formatted(potion.getId()),
+                    Collections.emptyMap(),
+                    null,
+                    headers
+            );
+
+            assertThat(result.getErrors()).isNotEmpty();
+            assertThat(result.getErrors().getFirst().getExtensions())
+                    .containsEntry("errorCode", "HP_ALREADY_FULL");
+        }
+    }
+
     private Item ownItem() {
         Item item = itemRepository.save(ItemFixture.createSwordItem());
         inventory.addItem(item);

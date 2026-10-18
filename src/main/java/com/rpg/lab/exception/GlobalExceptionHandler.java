@@ -32,6 +32,10 @@ public class GlobalExceptionHandler extends DefaultDataFetcherExceptionHandler {
             return CompletableFuture.completedFuture(buildResult(e, ErrorCode.ITEM_ALREADY_OWNED, handlerParameters));
         }
 
+        if (exception instanceof HpAlreadyFullException e) {
+            return CompletableFuture.completedFuture(buildResult(e, ErrorCode.HP_ALREADY_FULL, handlerParameters));
+        }
+
         return super.handleException(handlerParameters);
     }
 

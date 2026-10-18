@@ -8,7 +8,8 @@ public enum ErrorCode {
     INTERNAL_ERROR,
     PREREQUISITE_NOT_COMPLETED,
     INSUFFICIENT_GOLD,
-    ITEM_ALREADY_OWNED
+    ITEM_ALREADY_OWNED,
+    HP_ALREADY_FULL
     ;
 
     public Map<String, Object> toExtensions() {

@@ -8,7 +8,8 @@ public record ItemResponse(
         int defenseBonus,
         boolean equipped,
         int enhanceLevel,
-        ItemSetType setType
+        ItemSetType setType,
+        int healAmount
 ) {
     public static ItemResponse from(
             Item item,
@@ -24,7 +25,8 @@ public record ItemResponse(
                 defenseBonus,
                 equipped,
                 enhanceLevel,
-                item.getSetType()
+                item.getSetType(),
+                item.getHealAmount()
         );
     }
 }
