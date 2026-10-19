@@ -153,6 +153,7 @@ type ShopItemResponse {
     itemType: ItemType!
     attackBonus: Int!
     defenseBonus: Int!
+    healAmount: Int!
     price: Int!
 }
 

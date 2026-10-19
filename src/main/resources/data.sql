@@ -23,6 +23,11 @@ VALUES
     ('고블린 단검', 'WEAPON', 3, 0, 'GOBLIN_SET'),   -- id: 14
     ('고블린 갑옷', 'ARMOR', 0, 3, 'GOBLIN_SET');    -- id: 15
 
+INSERT INTO items (name, type, attack_bonus, defense_bonus, set_type, heal_amount)
+VALUES
+    ('체력 포션', 'CONSUMABLE', 0, 0, 'NONE', 30),    -- id: 16
+    ('큰 체력 포션', 'CONSUMABLE', 0, 0, 'NONE', 80); -- id: 17
+
 INSERT INTO shop_items (item_id, price)
 VALUES
     (10, 100),
@@ -30,7 +35,9 @@ VALUES
     (12, 120),
     (13, 150),
     (14, 50),
-    (15, 50);
+    (15, 50),
+    (16, 30),
+    (17, 70);
 
 INSERT INTO quests (title, description, prerequisite_quest_id)
 VALUES

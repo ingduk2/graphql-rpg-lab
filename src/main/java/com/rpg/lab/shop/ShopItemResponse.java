@@ -10,6 +10,7 @@ public record ShopItemResponse(
         ItemType itemType,
         int attackBonus,
         int defenseBonus,
+        int healAmount,
         int price
 ) {
     public static ShopItemResponse from(ShopItem shopItem) {
@@ -21,6 +22,7 @@ public record ShopItemResponse(
                 item.getType(),
                 item.getAttackBonus(),
                 item.getDefenseBonus(),
+                item.getHealAmount(),
                 shopItem.getPrice()
         );
     }

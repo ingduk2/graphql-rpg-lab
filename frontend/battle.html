@@ -618,7 +618,15 @@
             el.innerHTML = '<span class="inventory-empty">empty</span>';
             return;
         }
-        el.innerHTML = items.map(item => {
+
+        const equipments = items.filter(i => i.type !== 'CONSUMABLE');
+        const consumables = items.filter(i => i.type === 'CONSUMABLE');
+
+        el.innerHTML = renderEquipments(equipments) + renderConsumables(consumables);
+    }
+
+    function renderEquipments(equipments) {
+        return equipments.map(item => {
             const bonuses = [];
             if (item.attackBonus > 0) bonuses.push(`ATK+${item.attackBonus}`);
             if (item.defenseBonus > 0) bonuses.push(`DEF+${item.defenseBonus}`);
@@ -641,6 +649,37 @@
                 </div>
             `;
         }).join('');
+    }
+
+    function renderConsumables(consumables) {
+        const grouped = new Map();
+        consumables.forEach(item => {
+            const group = grouped.get(item.id);
+            if (group) group.count++;
+            else grouped.set(item.id, { item, count: 1 });
+        });
+
+        return [...grouped.values()].map(({ item, count }) => `
+        <div class="inventory-item">
+            <div class="inventory-item-header">
+                <span>${item.name}</span>
+                <span class="bonus">HP+${item.healAmount}</span>
+                <span class="equipped-badge">×${count}</span>
+            </div>
+            <div class="inventory-item-actions">
+                <button class="sm-btn green" onclick="useItem(${item.id}, '${item.name}')">USE</button>
+                <button class="sm-btn amber" onclick="sellItem(${item.id}, '${item.name}')">SELL</button>
+            </div>
+        </div>
+    `).join('');
+    }
+
+    async function useItem(itemId, itemName) {
+        try {
+            const data = await graphql(`mutation { useItem(itemId: ${itemId}) { healedAmount } }`);
+            log(`🧪 ${itemName} 사용! HP +${data.useItem.healedAmount} 회복`, 'levelup');
+            await loadPlayer();
+        } catch (e) {}
     }
 
     async function loadQuests() {
@@ -737,7 +776,7 @@
     }
 
     async function loadShop() {
-        const data = await graphql(`{ shopItems { id itemName attackBonus defenseBonus price } }`);
+        const data = await graphql(`{ shopItems { id itemName attackBonus defenseBonus healAmount price } }`);
         renderShop(data.shopItems || []);
     }
 
@@ -751,6 +790,7 @@
             const bonuses = [];
             if (si.attackBonus > 0) bonuses.push(`ATK+${si.attackBonus}`);
             if (si.defenseBonus > 0) bonuses.push(`DEF+${si.defenseBonus}`);
+            if (si.healAmount > 0) bonuses.push(`HP+${si.healAmount}`);
             const bonusText = bonuses.length > 0 ? ` <span class="bonus">${bonuses.join(' ')}</span>` : '';
             return `
             <div class="quest-item">
@@ -818,7 +858,7 @@
             player(id: ${playerId}) {
                     id name level hp maxHp exp gold expToNextLevel
                     stats { attack defense speed }
-                    inventory { attackBonus defenseBonus activeSets items { id name type attackBonus defenseBonus equipped enhanceLevel setType } }
+                    inventory { attackBonus defenseBonus activeSets items { id name type attackBonus defenseBonus equipped enhanceLevel setType healAmount } }
                 }
             }`);
             updatePlayerDisplay(data.player);
