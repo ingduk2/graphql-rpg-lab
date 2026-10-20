@@ -925,20 +925,17 @@
             const needsRefresh = r.levelUps > 0 || r.droppedItem || r.completedQuests?.length > 0;
             if (needsRefresh) {
                 await loadPlayer();
-                if (r.completedQuests?.length > 0) await loadQuests();
-                if (r.levelUps > 0) await loadLeaderboard();
-                if (r.unlockedAchievements?.length > 0) await loadAchievements();
             } else if (r.expGained > 0) {
                 setExpBar(currentPlayerExp + r.expGained, currentExpToNext);
             }
 
             // 전투 종료
             if (r.monsterDefeated) {
-                monsterDefeated = true;
-                log('monster defeated. select a new monster to continue.', 'dead');
+                log('monster defeated.', 'dead');
                 await loadQuests();
                 await loadLeaderboard();
-                setButtonsDisabled(true);
+                await loadAchievements();
+                await syncSelection();
                 return;
             }
             if (r.playerDefeated) {
@@ -1014,15 +1011,14 @@
                 setHpBar('playerHpFill', 'playerHpText', r.playerRemainHp, currentPlayerMaxHp);
                 log(`[턴 ${r.turn}] ${r.message}`, r.isCritical ? 'crit' : null);
                 if (r.finished) {
-                    if (r.monsterDefeated) {
-                        monsterDefeated = true;
-                        log('monster defeated. select a new monster to continue.', 'dead');
-                    }
+                    if (r.monsterDefeated) log('monster defeated.', 'dead');
                     if (r.playerDefeated) log('player has fallen. battle lost.', 'dead');
                     ws.close();
                     await loadPlayer();
                     await loadQuests();
                     await loadLeaderboard();
+                    await loadAchievements();
+                    if (r.monsterDefeated) await syncSelection();
                     if (!r.playerDefeated) setButtonsDisabled(false);
                 }
             }
