@@ -3,6 +3,7 @@ package com.rpg.lab.shop;
 import com.jayway.jsonpath.TypeRef;
 import com.netflix.graphql.dgs.DgsQueryExecutor;
 import com.rpg.lab.config.PlayerContextBuilder;
+import com.rpg.lab.exception.ErrorCode;
 import com.rpg.lab.fixture.ItemFixture;
 import com.rpg.lab.fixture.PlayerFixture;
 import com.rpg.lab.inventory.Inventory;
@@ -130,7 +131,8 @@ class ShopDataFetcherTest {
 
             assertThat(result.getErrors()).isNotEmpty();
             assertThat(result.getErrors().getFirst().getExtensions())
-                    .containsEntry("errorCode", "ITEM_ALREADY_OWNED");
+                    .containsEntry("errorCode", ErrorCode.ITEM_ALREADY_OWNED.name())
+                    .containsEntry("userMessage", ErrorCode.ITEM_ALREADY_OWNED.getUserMessage());
         }
     }
 

@@ -3,6 +3,7 @@ package com.rpg.lab.inventory;
 import com.jayway.jsonpath.TypeRef;
 import com.netflix.graphql.dgs.DgsQueryExecutor;
 import com.rpg.lab.config.PlayerContextBuilder;
+import com.rpg.lab.exception.ErrorCode;
 import com.rpg.lab.fixture.ItemFixture;
 import com.rpg.lab.fixture.PlayerFixture;
 import com.rpg.lab.item.Item;
@@ -65,6 +66,27 @@ class InventoryDataFetcherTest {
             );
 
             assertThat(equippedFlags).containsExactly(true);
+        }
+
+        @Test
+        @DisplayName("분류되지 않은 예외는 INTERNAL_ERROR와 고정 문구로 내려온다")
+        void test2() {   // 번호는 이 @Nested의 마지막 번호에 이어서
+            Item potion = itemRepository.save(ItemFixture.createPotionItem());
+            inventory.addItem(potion);
+            inventoryRepository.save(inventory);
+
+            ExecutionResult result = dgsQueryExecutor.execute(
+                    """
+                    mutation { equipItem(itemId: "%d") { id } }
+                    """.formatted(potion.getId()),
+                    Collections.emptyMap(), null, headers);
+
+            assertThat(result.getErrors().getFirst().getExtensions())
+                    .containsEntry("errorCode", ErrorCode.INTERNAL_ERROR.name())
+                    .containsEntry("userMessage", ErrorCode.INTERNAL_ERROR.getUserMessage());
+
+            assertThat(result.getErrors().getFirst().getMessage())
+                    .isEqualTo(ErrorCode.INTERNAL_ERROR.getUserMessage());
         }
     }
 
@@ -264,7 +286,8 @@ class InventoryDataFetcherTest {
 
             assertThat(result.getErrors()).isNotEmpty();
             assertThat(result.getErrors().getFirst().getExtensions())
-                    .containsEntry("errorCode", "HP_ALREADY_FULL");
+                    .containsEntry("errorCode", ErrorCode.HP_ALREADY_FULL.name())
+                    .containsEntry("userMessage", ErrorCode.HP_ALREADY_FULL.getUserMessage());
         }
     }
 

@@ -532,16 +532,7 @@
         });
         const json = await res.json();
         if (json.errors) {
-            const errorCode = json.errors[0].extensions?.errorCode;
-            const message = errorCode === 'PREREQUISITE_NOT_COMPLETED'
-                ? '선행 퀘스트를 먼저 완료해야 합니다.'
-                : errorCode === 'INSUFFICIENT_GOLD'
-                ? '골드가 부족합니다.'
-                : errorCode === 'ITEM_ALREADY_OWNED'
-                ? '이미 보유한 장비입니다.'
-                : errorCode === 'HP_ALREADY_FULL'
-                ? '이미 체력이 가득 찼습니다.'
-                : json.errors[0].message;
+            const message = json.errors[0].extensions?.userMessage ?? json.errors[0].message;
             log(message, 'dead');
             throw new Error(json.errors[0].message);
         }
