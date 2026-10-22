@@ -1,8 +1,6 @@
 package com.rpg.lab.inventory;
 
-import com.rpg.lab.exception.EntityNotFoundException;
-import com.rpg.lab.exception.HpAlreadyFullException;
-import com.rpg.lab.exception.InsufficientGoldException;
+import com.rpg.lab.exception.*;
 import com.rpg.lab.fixture.ItemFixture;
 import com.rpg.lab.fixture.PlayerFixture;
 import com.rpg.lab.item.Item;
@@ -194,7 +192,7 @@ class InventoryServiceTest {
         }
 
         @Test
-        @DisplayName("최대 레벨에서 강화 시도하면 IllegalStateException 이 발생한다")
+        @DisplayName("최대 레벨에서 강화 시도하면 MaxEnhanceLevelException 이 발생한다")
         void test4() {
             Item item = ownItem();
             player.gainGold(100_000);
@@ -204,7 +202,7 @@ class InventoryServiceTest {
             }
 
             assertThatThrownBy(() -> sut.enhanceItem(player.getId(), item.getId()))
-                    .isInstanceOf(IllegalStateException.class);
+                    .isInstanceOf(MaxEnhanceLevelException.class);
         }
     }
 
@@ -256,7 +254,7 @@ class InventoryServiceTest {
             playerRepository.save(player);
 
             assertThatThrownBy(() -> sut.useItem(player.getId(), sword.getId()))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(InvalidItemOperationException.class);
         }
 
         @Test

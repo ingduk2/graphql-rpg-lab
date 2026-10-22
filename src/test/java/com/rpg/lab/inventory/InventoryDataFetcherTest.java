@@ -69,8 +69,8 @@ class InventoryDataFetcherTest {
         }
 
         @Test
-        @DisplayName("분류되지 않은 예외는 INTERNAL_ERROR와 고정 문구로 내려온다")
-        void test2() {   // 번호는 이 @Nested의 마지막 번호에 이어서
+        @DisplayName("소모품을 장착하려 하면 INVALID_ITEM_OPERATION 에러 코드가 내려온다")
+        void test2() {
             Item potion = itemRepository.save(ItemFixture.createPotionItem());
             inventory.addItem(potion);
             inventoryRepository.save(inventory);
@@ -82,11 +82,8 @@ class InventoryDataFetcherTest {
                     Collections.emptyMap(), null, headers);
 
             assertThat(result.getErrors().getFirst().getExtensions())
-                    .containsEntry("errorCode", ErrorCode.INTERNAL_ERROR.name())
-                    .containsEntry("userMessage", ErrorCode.INTERNAL_ERROR.getUserMessage());
-
-            assertThat(result.getErrors().getFirst().getMessage())
-                    .isEqualTo(ErrorCode.INTERNAL_ERROR.getUserMessage());
+                    .containsEntry("errorCode", ErrorCode.INVALID_ITEM_OPERATION.name())
+                    .containsEntry("userMessage", ErrorCode.INVALID_ITEM_OPERATION.getUserMessage());
         }
     }
 
@@ -188,6 +185,27 @@ class InventoryDataFetcherTest {
             );
 
             assertThat(result.getErrors()).isNotEmpty();
+        }
+
+        @Test
+        @DisplayName("최대 강화 단계에서 강화하면 MAX_ENHANCE_LEVEL 에러 코드가 내려온다")
+        void test3() {
+            Item sword = ownItem();
+            player.gainGold(100_000);
+            playerRepository.save(player);
+            String mutation = """
+                                mutation { enhanceItem(itemId: "%d") { success } }
+                                """.formatted(sword.getId());
+
+            for (int i = 0; i < EnhancementPolicy.MAX_ENHANCE_LEVEL; i++) {
+                dgsQueryExecutor.execute(mutation, Collections.emptyMap(), null, headers);
+            }
+
+            ExecutionResult result = dgsQueryExecutor.execute(mutation, Collections.emptyMap(), null, headers);
+
+            assertThat(result.getErrors().getFirst().getExtensions())
+                    .containsEntry("errorCode", ErrorCode.MAX_ENHANCE_LEVEL.name())
+                    .containsEntry("userMessage", ErrorCode.MAX_ENHANCE_LEVEL.getUserMessage());
         }
     }
 

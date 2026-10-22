@@ -2,6 +2,8 @@ package com.rpg.lab.inventory;
 
 import com.rpg.lab.common.RandomProvider;
 import com.rpg.lab.exception.EntityNotFoundException;
+import com.rpg.lab.exception.InvalidItemOperationException;
+import com.rpg.lab.exception.MaxEnhanceLevelException;
 import com.rpg.lab.item.Item;
 import com.rpg.lab.item.ItemSetType;
 import com.rpg.lab.player.Player;
@@ -69,7 +71,7 @@ public class Inventory {
         InventoryItem target = findByItemId(itemId);
 
         if (target.getItem().isConsumable()) {
-            throw new IllegalArgumentException("Consumable cannot be equipped: " + itemId);
+            throw new InvalidItemOperationException("Consumable cannot be equipped: " + itemId);
         }
 
         inventoryItems.stream()
@@ -108,11 +110,11 @@ public class Inventory {
         InventoryItem target = findByItemId(itemId);
 
         if (target.getItem().isConsumable()) {
-            throw new IllegalArgumentException("Consumable cannot be enhanced: " + itemId);
+            throw new InvalidItemOperationException("Consumable cannot be enhanced: " + itemId);
         }
 
         if (target.isMaxEnhanceLevel()) {
-            throw new IllegalStateException("Already at max enhance level");
+            throw new MaxEnhanceLevelException("Already at max enhance level: " + itemId);
         }
 
         int successRate = policy.successRateFor(target.getEnhanceLevel());
@@ -136,7 +138,7 @@ public class Inventory {
     public int useItem(Long itemId) {
         InventoryItem target = findByItemId(itemId);
         if (!target.getItem().isConsumable()) {
-            throw new IllegalArgumentException("Not a consumable item: " + itemId);
+            throw new InvalidItemOperationException("Not a consumable item: " + itemId);
         }
 
         inventoryItems.remove(target);

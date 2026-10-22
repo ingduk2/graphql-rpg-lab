@@ -15,6 +15,8 @@ public enum ErrorCode {
     INSUFFICIENT_GOLD("골드가 부족합니다."),
     ITEM_ALREADY_OWNED("이미 보유한 장비입니다."),
     HP_ALREADY_FULL("이미 체력이 가득 찼습니다."),
+    INVALID_ITEM_OPERATION("이 아이템에는 사용할 수 없는 동작입니다."),
+    MAX_ENHANCE_LEVEL("이미 최대 강화 단계입니다."),
     ;
 
     private final String userMessage;

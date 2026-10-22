@@ -2,6 +2,8 @@ package com.rpg.lab.inventory;
 
 import com.rpg.lab.common.RandomProvider;
 import com.rpg.lab.exception.EntityNotFoundException;
+import com.rpg.lab.exception.InvalidItemOperationException;
+import com.rpg.lab.exception.MaxEnhanceLevelException;
 import com.rpg.lab.fixture.ItemFixture;
 import com.rpg.lab.fixture.PlayerFixture;
 import com.rpg.lab.item.Item;
@@ -233,14 +235,14 @@ class InventoryTest {
         }
 
         @Test
-        @DisplayName("소모품을 장착하려 하면 IllegalArgumentException")
+        @DisplayName("소모품을 장착하려 하면 InvalidItemOperationException")
         void test4() {
             Inventory inventory = Inventory.create(player);
             Item potion = ItemFixture.createPotionItemWithId();
             inventory.addItem(potion);
 
             assertThatThrownBy(() -> inventory.equip(potion.getId()))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(InvalidItemOperationException.class);
         }
     }
 
@@ -391,7 +393,7 @@ class InventoryTest {
         }
 
         @Test
-        @DisplayName("이미 최대 레벨이면 IllegalStateException 이 발생한다")
+        @DisplayName("이미 최대 레벨이면 MaxEnhanceLevelException 이 발생한다")
         void test4() {
             Inventory inventory = Inventory.create(player);
             Item item = ItemFixture.createSwordItemWithId();
@@ -402,7 +404,7 @@ class InventoryTest {
             }
 
             assertThatThrownBy(() -> inventory.enhanceItem(item.getId(), alwaysSuccessPolicy, fixedRoll))
-                    .isInstanceOf(IllegalStateException.class);
+                    .isInstanceOf(MaxEnhanceLevelException.class);
         }
 
         @Test
@@ -458,14 +460,14 @@ class InventoryTest {
         }
 
         @Test
-        @DisplayName("소모품을 강화하려 하면 IllegalArgumentException")
+        @DisplayName("소모품을 강화하려 하면 InvalidItemOperationException")
         void test9() {
             Inventory inventory = Inventory.create(player);
             Item potion = ItemFixture.createPotionItemWithId();
             inventory.addItem(potion);
 
             assertThatThrownBy(() -> inventory.enhanceItem(potion.getId(), alwaysSuccessPolicy, fixedRoll))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(InvalidItemOperationException.class);
         }
     }
 
@@ -548,14 +550,14 @@ class InventoryTest {
         }
 
         @Test
-        @DisplayName("장비를 사용하려 하면 IllegalArgumentException")
+        @DisplayName("장비를 사용하려 하면 InvalidItemOperationException")
         void test3() {
             Inventory inventory = Inventory.create(player);
             Item sword = ItemFixture.createSwordItemWithId();
             inventory.addItem(sword);
 
             assertThatThrownBy(() -> inventory.useItem(sword.getId()))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(InvalidItemOperationException.class);
         }
 
         @Test

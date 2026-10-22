@@ -39,6 +39,13 @@ public class GlobalExceptionHandler extends DefaultDataFetcherExceptionHandler {
             return CompletableFuture.completedFuture(buildResult(e, ErrorCode.HP_ALREADY_FULL, handlerParameters));
         }
 
+        if (exception instanceof InvalidItemOperationException e) {
+            return CompletableFuture.completedFuture(buildResult(e, ErrorCode.INVALID_ITEM_OPERATION, handlerParameters));
+        }
+        if (exception instanceof MaxEnhanceLevelException e) {
+            return CompletableFuture.completedFuture(buildResult(e, ErrorCode.MAX_ENHANCE_LEVEL, handlerParameters));
+        }
+
         return CompletableFuture.completedFuture(buildResult(exception, ErrorCode.INTERNAL_ERROR, handlerParameters));
     }
 
