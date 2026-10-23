@@ -28,7 +28,7 @@ public class ItemDropProcessor {
 
         Optional<Item> droppedItem = calculateDrop(drops);
 
-        droppedItem.ifPresent(item -> equipIfNotOwned(item, playerId));
+        droppedItem.ifPresent(item -> addToInventory(item, playerId));
 
         return droppedItem;
     }
@@ -40,7 +40,7 @@ public class ItemDropProcessor {
                 .findFirst();
     }
 
-    private void equipIfNotOwned(Item item, Long playerId) {
+    private void addToInventory(Item item, Long playerId) {
         Inventory inventory = inventoryRepository.findByPlayerId(playerId)
                 .orElseThrow(() -> new EntityNotFoundException("Inventory not found"));
 

@@ -516,7 +516,6 @@
     let currentMonsterHp = 0;
     let currentPlayerLevel = 1;
     let currentPlayerExp = 0;
-    let monsterDefeated = false;
     let playerId = null;
     let currentTab = 'active';
     let allQuests = [];
@@ -867,7 +866,6 @@
         const mid = document.getElementById('monsterSelect').value;
         if (!mid) return;
         const data = await graphql(`{ monster(id: ${mid}) { id name hp maxHp attackPower baseHp baseAttackPower } }`);
-        monsterDefeated = false;
         updateMonsterDisplay(data.monster);
         setButtonsDisabled(false);
     }
@@ -879,7 +877,6 @@
     }
 
     async function doAttack() {
-        if (monsterDefeated) return;
         const monsterId = document.getElementById('monsterSelect').value;
         if (!monsterId) return;
         setButtonsDisabled(true);
@@ -954,7 +951,6 @@
         try {
             const data = await graphql(`mutation { flee(monsterId: ${monsterId}) { message } }`);
             log(data.flee.message, 'sys');
-            monsterDefeated = false;
             currentMonsterHp = currentMonsterMaxHp;
             setHpBar('monsterHpFill', 'monsterHpText', currentMonsterMaxHp, currentMonsterMaxHp);
         } catch (e) {}
@@ -972,7 +968,6 @@
     }
 
     function doAutoBattle() {
-        if (monsterDefeated) return;
         const monsterId = document.getElementById('monsterSelect').value;
         if (!monsterId) return;
         setButtonsDisabled(true);
