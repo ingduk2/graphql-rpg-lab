@@ -568,6 +568,43 @@
 - **21-1.** 측정
   - Hibernate SQL 로그/통계를 켜서 주요 요청의 쿼리 수를 기록 (before)
   - 몬스터 처치, loadPlayer, 리더보드 조회
+  - battle.html에서 실제 플레이하며 스레드별 SQL 로그로 카운트. 데이터 기준: 업적 3개, 진행 중 퀘스트 3~4개
+
+  <details>
+  <summary>측정 결과 (before)</summary>
+
+  | 시나리오              | 쿼리 수   | 비고                                                   |
+    |-------------------|--------|------------------------------------------------------|
+  | 일반 공격 (처치 X)      | 4      | player, monster, inventory, player update. 최소에 가까움   |
+  | 몬스터 처치 (mutation) | 19     | 드랍 유무와 관계없이 19 (퀘스트 쪽 개수가 상태에 따라 달라짐)                |
+  | loadPlayer        | 2      | player + inventory (DataLoader 배치 `in (?)`). 문제 없음   |
+  | 리더보드              | 1      | **SQL에 limit 없음**. `limit: 10`을 받지만 전체 조회 후 메모리에서 자름 |
+  | myQuests          | 1 + 2N | 퀘스트마다 quest lazy 로딩 + progress 조회                    |
+  | myAchievements    | 2 + N  | 업적마다 conditions lazy 로딩                              |
+
+  **처치 19개 내역**
+
+  | 구간                        | 드랍 없음 | 드랍 있음 |
+    |---------------------------|-------|-------|
+  | 기본 공격                     | 4     | 4     |
+  | 드랍 판정                     | 1     | 1     |
+  | 드랍 지급 (인벤토리 재조회 + insert) | –     | 2     |
+  | 퀘스트 진행                    | 7     | 5     |
+  | 업적 체크 (1 + 2N)            | 7     | 7     |
+
+  **발견한 문제**
+
+  1. **업적 체크 N+1**: 업적마다 `player_achievements` 존재 확인과 `achievement_conditions` 조회가 따로 나감 → 업적 수에 비례 (20개면 41쿼리)
+  2. **리더보드 limit 미적용**: 플레이어 전체 로딩
+  3. **퀘스트 N+1**: myQuests에서 quest와 progress를 퀘스트마다 조회. 처치 후처리에서도 pqp 추가 select 발생 (원인 추적 필요)
+  4. **인벤토리 중복 조회**: 처치 mutation에서 fetch join으로 읽은 인벤토리를 드랍 지급 시 리포지토리 쿼리로 다시 조회 (1차 캐시 미사용)
+  5. **`quests.prerequisiteQuest`**: 지금은 전체 퀘스트가 1차 캐시에 있어서 N+1이 안 나지만, 구조상 잠재 위험
+
+  **목표**: 처치 1회당 쿼리 수가 업적/퀘스트 개수와 무관하게 일정할 것
+
+  > 참고: 처치 후 프론트가 loadQuests → loadLeaderboard → loadAchievements → syncSelection을 순차 await로 호출함 (쿼리 수가 아닌 왕복 지연 문제, Step 21 범위 밖)
+
+  </details>
 
 - **21-2.** 업적 체크 N+1 제거
   - checkAndUnlockAchievements가 업적마다 달성 여부를 조회하는 문제
@@ -576,7 +613,7 @@
 - **21-3.** 리더보드 조회 개선
   - 전체 플레이어를 읽어 메모리에서 자르는 방식에서 DB 레벨 정렬/limit으로 변경
 
-- **21-4.** 그 외 측정에서 드러난 항목 개선
+- **21-4.** 그 외 측정에서 드러난 항목 개선 (발견한 문제 3~5)
 
 - **21-5.** GraphQL 고유 주제 (쿼리 깊이/복잡도 제한, 필요 시 Persisted Queries)
 
