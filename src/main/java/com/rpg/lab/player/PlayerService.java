@@ -4,6 +4,7 @@ import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.inventory.Inventory;
 import com.rpg.lab.inventory.InventoryRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,8 @@ import java.util.stream.IntStream;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PlayerService {
+
+    private static final int MAX_LEADERBOARD_LIMIT = 100;
 
     private final PlayerRepository playerRepository;
     private final InventoryRepository inventoryRepository;
@@ -31,9 +34,11 @@ public class PlayerService {
     }
 
     public List<LeaderboardEntry> getLeaderboard(int limit, LeaderboardSortBy sortBy) {
+        Limit pageLimit = Limit.of(Math.clamp(limit, 1, MAX_LEADERBOARD_LIMIT));
+
         List<Player> players = switch (sortBy) {
-            case LEVEL -> playerRepository.findAllOrderByLevelDescExpDesc();
-            case KILL_COUNT -> playerRepository.findAllOrderByKillCountDesc();
+            case LEVEL -> playerRepository.findAllByOrderByLevelDescExpDesc(pageLimit);
+            case KILL_COUNT -> playerRepository.findAllByOrderByKillCountDesc(pageLimit);
         };
 
         return IntStream.range(0, Math.min(limit, players.size()))
