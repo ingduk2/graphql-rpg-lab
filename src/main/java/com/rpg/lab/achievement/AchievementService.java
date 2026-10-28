@@ -10,7 +10,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,34 +22,28 @@ public class AchievementService {
     @Transactional(readOnly = true)
     public List<AchievementResponse> getMyAchievements(Long playerId) {
         Player player = playerReader.getById(playerId);
-        List<Achievement> achievements = achievementRepository.findAll();
-        List<PlayerAchievement> unlockedList = playerAchievementRepository.findByPlayerId(playerId);
-        Set<Long> unlockedAchievementIds = unlockedList.stream()
-                .map(it -> it.getAchievement().getId())
-                .collect(Collectors.toSet());
-
+        List<Achievement> achievements = achievementRepository.findAllWithConditions();
+        Set<Long> unlockedIds = playerAchievementRepository.findAchievementIdsByPlayerId(playerId);
         Map<AchievementType, Integer> currentCounts = currentCountFor(player);
 
         return achievements.stream()
-                .map(it -> AchievementResponse.of(
-                        it,
-                        currentCounts,
-                        unlockedAchievementIds.contains(it.getId())
-                ))
+                .map(it -> AchievementResponse.of(it, currentCounts, unlockedIds.contains(it.getId())))
                 .toList();
     }
 
     @Transactional
     public List<Achievement> checkAndUnlockAchievements(Long playerId) {
         Player player = playerReader.getById(playerId);
-        List<Achievement> achievements = achievementRepository.findAll();
+        Set<Long> unlockedIds = playerAchievementRepository.findAchievementIdsByPlayerId(playerId);
         Map<AchievementType, Integer> currentCounts = currentCountFor(player);
 
-        return achievements.stream()
-                .filter(it -> !isAlreadyUnlocked(playerId, it.getId()))
+        List<Achievement> newlyUnlocked = achievementRepository.findAllWithConditions().stream()
+                .filter(it -> !unlockedIds.contains(it.getId()))
                 .filter(it -> it.isAchieved(currentCounts))
-                .peek(it -> playerAchievementRepository.save(PlayerAchievement.create(player, it)))
                 .toList();
+
+        newlyUnlocked.forEach(it -> playerAchievementRepository.save(PlayerAchievement.create(player, it)));
+        return newlyUnlocked;
     }
 
     private Map<AchievementType, Integer> currentCountFor(Player player) {
@@ -58,9 +51,5 @@ public class AchievementService {
         counts.put(AchievementType.KILL_COUNT, player.getKillCount());
         counts.put(AchievementType.LEVEL, player.getLevel());
         return counts;
-    }
-
-    private boolean isAlreadyUnlocked(Long playerId, Long achievementId) {
-        return playerAchievementRepository.findByPlayerIdAndAchievementId(playerId, achievementId).isPresent();
     }
 }
