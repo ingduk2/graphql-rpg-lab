@@ -4,7 +4,11 @@ import com.rpg.lab.fixture.PlayerFixture;
 import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerRepository;
 import com.rpg.lab.testsupport.IntegrationTest;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.SessionFactory;
+import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -22,6 +26,9 @@ class AchievementServiceTest {
     private final AchievementRepository achievementRepository;
     private final PlayerAchievementRepository playerAchievementRepository;
     private final PlayerRepository playerRepository;
+
+    private final EntityManager em;
+    private final EntityManagerFactory emf;
 
     private Player player;
 
@@ -129,6 +136,55 @@ class AchievementServiceTest {
 
             assertThat(result).isEmpty();
             assertThat(playerAchievementRepository.findByPlayerId(player.getId())).hasSize(1);
+        }
+    }
+
+    @Nested
+    class QueryCount {
+
+        @Test
+        @DisplayName("업적 체크 쿼리 수는 업적 개수와 무관하다")
+        void test1() {
+            saveUnreachableAchievements(1);
+            long withOne = countQueries(() -> sut.checkAndUnlockAchievements(player.getId()));
+
+            saveUnreachableAchievements(19);
+            long withTwenty = countQueries(() -> sut.checkAndUnlockAchievements(player.getId()));
+
+            assertThat(withTwenty).isEqualTo(withOne);
+        }
+
+        @Test
+        @DisplayName("내 업적 조회 쿼리 수는 업적 개수와 무관하다")
+        void test2() {
+            saveUnreachableAchievements(1);
+            long withOne = countQueries(() -> sut.getMyAchievements(player.getId()));
+
+            saveUnreachableAchievements(19);
+            long withTwenty = countQueries(() -> sut.getMyAchievements(player.getId()));
+
+            assertThat(withTwenty).isEqualTo(withOne);
+        }
+
+        private void saveUnreachableAchievements(int count) {
+            for (int i = 0; i < count; i++) {
+                Achievement achievement = Achievement.create("업적" + i, "도달 불가", AchievementType.KILL_COUNT, 10_000)
+                        .addCondition(AchievementType.LEVEL, 999);
+
+                achievementRepository.save(achievement);
+            }
+        }
+
+        private long countQueries(Runnable action) {
+            em.flush();
+            em.clear();
+
+            Statistics stats = emf.unwrap(SessionFactory.class).getStatistics();
+            stats.setStatisticsEnabled(true);
+            stats.clear();
+
+            action.run();
+            return stats.getPrepareStatementCount();
         }
     }
 }
