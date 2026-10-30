@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -63,13 +65,24 @@ public class QuestService {
 
     @Transactional(readOnly = true)
     public List<PlayerQuestResponse> getMyQuests(Long playerId) {
-        List<PlayerQuest> playerQuests = playerQuestRepository.findByPlayerId(playerId);
+        List<PlayerQuest> playerQuests = playerQuestRepository.findAllWithQuestByPlayerId(playerId);
+        if (playerQuests.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> playerQuestIds = playerQuests.stream()
+                .map(PlayerQuest::getId)
+                .toList();
+
+        Map<Long, List<PlayerQuestProgress>> progressByPlayerQuestId = playerQuestProgressRepository
+                .findProgressByPlayerQuestIdIn(playerQuestIds).stream()
+                .collect(Collectors.groupingBy(p -> p.getPlayerQuest().getId()));
 
         return playerQuests.stream()
-                .map(quest -> {
-                    List<PlayerQuestProgress> progressList = playerQuestProgressRepository.findProgressByPlayerQuestId(quest.getId());
-                    return PlayerQuestResponse.from(quest, progressList);
-                })
+                .map(pq -> PlayerQuestResponse.from(
+                        pq,
+                        progressByPlayerQuestId.getOrDefault(pq.getId(), List.of())
+                ))
                 .toList();
     }
 

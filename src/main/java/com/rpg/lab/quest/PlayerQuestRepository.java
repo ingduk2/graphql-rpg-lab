@@ -20,5 +20,10 @@ public interface PlayerQuestRepository extends Repository<PlayerQuest, Long> {
             """)
     List<PlayerQuest> findByPlayerIdAndStatus(@Param("playerId") Long playerId, @Param("status") QuestStatus status);
 
-    List<PlayerQuest> findByPlayerId(Long playerId);
+    @Query("""
+            SELECT pq FROM PlayerQuest pq
+            JOIN FETCH pq.quest
+            WHERE pq.player.id = :playerId
+            """)
+    List<PlayerQuest> findAllWithQuestByPlayerId(@Param("playerId") Long playerId);
 }

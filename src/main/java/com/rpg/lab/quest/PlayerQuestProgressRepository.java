@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface PlayerQuestProgressRepository extends Repository<PlayerQuestProgress, Long> {
@@ -16,4 +17,11 @@ public interface PlayerQuestProgressRepository extends Repository<PlayerQuestPro
             WHERE p.playerQuest.id = :playerQuestId
             """)
     List<PlayerQuestProgress> findProgressByPlayerQuestId(@Param("playerQuestId") Long playerQuestId);
+
+    @Query("""
+            SELECT p FROM PlayerQuestProgress p
+            JOIN FETCH p.questCondition
+            WHERE p.playerQuest.id IN :playerQuestIds
+            """)
+    List<PlayerQuestProgress> findProgressByPlayerQuestIdIn(@Param("playerQuestIds") Collection<Long> playerQuestIds);
 }
