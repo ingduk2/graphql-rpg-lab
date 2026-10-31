@@ -10,6 +10,7 @@ import com.rpg.lab.monster.MonsterRepository;
 import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerRepository;
 import com.rpg.lab.testsupport.IntegrationTest;
+import com.rpg.lab.testsupport.QueryCounter;
 import lombok.RequiredArgsConstructor;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +34,8 @@ class QuestServiceTest {
     private final PlayerQuestRepository playerQuestRepository;
 
     private final MonsterRepository monsterRepository;
+
+    private final QueryCounter queryCounter;
 
     @Nested
     class GetQuest {
@@ -235,6 +238,38 @@ class QuestServiceTest {
             List<PlayerQuestResponse> myQuests = sut.getMyQuests(player.getId());
 
             assertThat(myQuests).isEmpty();
+        }
+    }
+
+    @Nested
+    class QueryCount {
+
+        private Player player;
+        private Monster slime;
+
+        @BeforeEach
+        void setUp() {
+            player = playerRepository.save(PlayerFixture.create());
+            slime = monsterRepository.save(MonsterFixture.createSlime());
+        }
+
+        @Test
+        @DisplayName("내 퀘스트 조회 쿼리 수는 수락한 퀘스트 개수와 무관하다")
+        void test1() {
+            acceptNewQuests(1);
+            long withOne = queryCounter.count(() -> sut.getMyQuests(player.getId()));
+
+            acceptNewQuests(9);
+            long withTen = queryCounter.count(() -> sut.getMyQuests(player.getId()));
+
+            assertThat(withTen).isEqualTo(withOne);
+        }
+
+        private void acceptNewQuests(int count) {
+            for (int i = 0; i < count; i++) {
+                Quest quest = questRepository.save(QuestFixture.createComposite(slime.getId()));
+                sut.acceptQuest(player.getId(), quest.getId());
+            }
         }
     }
 }
