@@ -4,11 +4,8 @@ import com.rpg.lab.fixture.PlayerFixture;
 import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerRepository;
 import com.rpg.lab.testsupport.IntegrationTest;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
+import com.rpg.lab.testsupport.QueryCounter;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.SessionFactory;
-import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,8 +24,7 @@ class AchievementServiceTest {
     private final PlayerAchievementRepository playerAchievementRepository;
     private final PlayerRepository playerRepository;
 
-    private final EntityManager em;
-    private final EntityManagerFactory emf;
+    private final QueryCounter queryCounter;
 
     private Player player;
 
@@ -146,10 +142,10 @@ class AchievementServiceTest {
         @DisplayName("업적 체크 쿼리 수는 업적 개수와 무관하다")
         void test1() {
             saveUnreachableAchievements(1);
-            long withOne = countQueries(() -> sut.checkAndUnlockAchievements(player.getId()));
+            long withOne = queryCounter.count(() -> sut.checkAndUnlockAchievements(player.getId()));
 
             saveUnreachableAchievements(19);
-            long withTwenty = countQueries(() -> sut.checkAndUnlockAchievements(player.getId()));
+            long withTwenty = queryCounter.count(() -> sut.checkAndUnlockAchievements(player.getId()));
 
             assertThat(withTwenty).isEqualTo(withOne);
         }
@@ -158,10 +154,10 @@ class AchievementServiceTest {
         @DisplayName("내 업적 조회 쿼리 수는 업적 개수와 무관하다")
         void test2() {
             saveUnreachableAchievements(1);
-            long withOne = countQueries(() -> sut.getMyAchievements(player.getId()));
+            long withOne = queryCounter.count(() -> sut.getMyAchievements(player.getId()));
 
             saveUnreachableAchievements(19);
-            long withTwenty = countQueries(() -> sut.getMyAchievements(player.getId()));
+            long withTwenty = queryCounter.count(() -> sut.getMyAchievements(player.getId()));
 
             assertThat(withTwenty).isEqualTo(withOne);
         }
@@ -173,18 +169,6 @@ class AchievementServiceTest {
 
                 achievementRepository.save(achievement);
             }
-        }
-
-        private long countQueries(Runnable action) {
-            em.flush();
-            em.clear();
-
-            Statistics stats = emf.unwrap(SessionFactory.class).getStatistics();
-            stats.setStatisticsEnabled(true);
-            stats.clear();
-
-            action.run();
-            return stats.getPrepareStatementCount();
         }
     }
 }
