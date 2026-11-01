@@ -620,6 +620,13 @@
   - limit 범위 1~100으로 제한 (음수/과도한 값 방어)
 
 - **21-4.** 그 외 측정에서 드러난 항목 개선 (발견한 문제 3~5)
+  - [x] myQuests N+1: 1 + 2N → 2
+    - PlayerQuest 조회 시 quest fetch join (ManyToOne)
+    - progress: 퀘스트별 조회 → IN 쿼리 일괄 조회 후 메모리 그룹핑 (OneToMany)
+    - 회귀 테스트: 수락 퀘스트 1개 vs 10개(조건 2개짜리) 쿼리 수 동일 검증
+  - [ ] 처치 시 퀘스트 진행 갱신의 pqp 추가 select
+  - [ ] 처치 시 인벤토리 중복 조회
+  - [ ] `quests.prerequisiteQuest` 잠재 N+1
 
 - **21-5.** GraphQL 고유 주제 (쿼리 깊이/복잡도 제한, 필요 시 Persisted Queries)
 
@@ -628,7 +635,8 @@
 **학습 포인트**
 - 성능은 추측이 아니라 측정으로 접근한다
 - N+1은 한 번 고쳐도 새 코드에서 다시 만들어질 수 있다
-
+- LAZY가 문제가 아니라 반복문 안에서 LAZY를 건드리는 게 문제다. 기본은 LAZY, 필요한 쿼리에서만 fetch join
+- OneToMany는 fetch join(1쿼리, 페이징 불가) vs IN 쿼리 + 그룹핑(2쿼리, 페이징 가능) 중 상황에 맞게 고른다
 ---
 
 ### Step 22. 소모품 수량 방식
