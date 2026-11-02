@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.rpg.lab.quest.QuestStatus.IN_PROGRESS;
 import static com.rpg.lab.quest.QuestType.KILL_MONSTER;
@@ -24,25 +26,45 @@ public class QuestProgressUpdater {
             Long monsterId,
             int levelUps
     ) {
-        List<PlayerQuest> completedQuests = new ArrayList<>(update(playerId, KILL_MONSTER, monsterId));
+        List<PlayerQuest> inProgressQuests = playerQuestRepository.findByPlayerIdAndStatus(playerId, IN_PROGRESS);
+        if (inProgressQuests.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, List<PlayerQuestProgress>> progressByPlayerQuestId = loadProgress(inProgressQuests);
+
+        List<PlayerQuest> completedQuests = update(inProgressQuests, progressByPlayerQuestId, KILL_MONSTER, monsterId);
+
         if (levelUps > 0) {
-            completedQuests.addAll(update(playerId, LEVEL_UP, null));
+            completedQuests.addAll(update(inProgressQuests, progressByPlayerQuestId, LEVEL_UP, null));
         }
 
         return completedQuests;
     }
 
+    private Map<Long, List<PlayerQuestProgress>> loadProgress(List<PlayerQuest> playerQuests) {
+        List<Long> playerQuestIds = playerQuests.stream()
+                .map(PlayerQuest::getId)
+                .toList();
+
+        return playerQuestProgressRepository.findProgressByPlayerQuestIdIn(playerQuestIds).stream()
+                .collect(Collectors.groupingBy(p -> p.getPlayerQuest().getId()));
+    }
+
     private List<PlayerQuest> update(
-            Long playerId,
+            List<PlayerQuest> playerQuests,
+            Map<Long, List<PlayerQuestProgress>> progressByPlayerQuestId,
             QuestType questType,
             Long monsterId
     ) {
         List<PlayerQuest> completedQuests = new ArrayList<>();
 
-        List<PlayerQuest> inProgressQuests = playerQuestRepository.findByPlayerIdAndStatus(playerId, IN_PROGRESS);
+        for (PlayerQuest playerQuest : playerQuests) {
+            if (playerQuest.getStatus() != IN_PROGRESS) {
+                continue;
+            }
 
-        for (PlayerQuest playerQuest : inProgressQuests) {
-            List<PlayerQuestProgress> progressList = playerQuestProgressRepository.findProgressByPlayerQuestId(playerQuest.getId());
+            List<PlayerQuestProgress> progressList = progressByPlayerQuestId.getOrDefault(playerQuest.getId(), List.of());
 
             progressList.stream()
                     .filter(p -> p.getQuestCondition().getType() == questType)
@@ -50,15 +72,11 @@ public class QuestProgressUpdater {
                         Long targetMonsterId = p.getQuestCondition().getTargetMonsterId();
                         return targetMonsterId == null || targetMonsterId.equals(monsterId);
                     })
-                    .forEach(p -> {
-                        p.increment();
-                        playerQuestProgressRepository.save(p);
-                    });
+                    .forEach(PlayerQuestProgress::increment);
 
             boolean allCompleted = progressList.stream().allMatch(PlayerQuestProgress::isCompleted);
             if (allCompleted && !progressList.isEmpty()) {
                 playerQuest.complete();
-                playerQuestRepository.save(playerQuest);
                 completedQuests.add(playerQuest);
             }
         }
