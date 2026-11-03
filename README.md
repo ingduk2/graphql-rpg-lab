@@ -624,8 +624,12 @@
     - PlayerQuest 조회 시 quest fetch join (ManyToOne)
     - progress: 퀘스트별 조회 → IN 쿼리 일괄 조회 후 메모리 그룹핑 (OneToMany)
     - 회귀 테스트: 수락 퀘스트 1개 vs 10개(조건 2개짜리) 쿼리 수 동일 검증
-  - [ ] 처치 시 퀘스트 진행 갱신의 pqp 추가 select
-  - [ ] 처치 시 인벤토리 중복 조회
+  - [x] 처치 시 퀘스트 진행 갱신: select (1 + N) × 단계 수(처치 1, 레벨업 시 2) → 2
+    - progress IN 쿼리 일괄 조회, KILL_MONSTER/LEVEL_UP 단계에서 재사용
+    - 불필요한 save 제거 (dirty checking), update가 커밋 시점에 모여서 나감
+    - 회귀 테스트: 진행 중 퀘스트 1개 vs 10개, 두 단계(처치+레벨업) 모두 실행 시 쿼리 수 동일 검증
+  - [ ] 처치 시 인벤토리 중복 조회 (드랍 지급, 퀘스트 보상 지급 둘 다)
+  - [ ] 퀘스트 보상 조회: 완료 퀘스트마다 1번 (동시 완료 시 N+1, 우선순위 낮음)
   - [ ] `quests.prerequisiteQuest` 잠재 N+1
 
 - **21-5.** GraphQL 고유 주제 (쿼리 깊이/복잡도 제한, 필요 시 Persisted Queries)
