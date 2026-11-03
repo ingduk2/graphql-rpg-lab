@@ -8,6 +8,7 @@ import com.rpg.lab.monster.MonsterRepository;
 import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerRepository;
 import com.rpg.lab.testsupport.IntegrationTest;
+import com.rpg.lab.testsupport.QueryCounter;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +29,8 @@ class QuestProgressUpdaterTest {
     private final MonsterRepository monsterRepository;
     private final QuestRepository questRepository;
 
+    private final QueryCounter queryCounter;
+
     private Player player;
     private Monster monster;
 
@@ -46,7 +49,7 @@ class QuestProgressUpdaterTest {
         @BeforeEach
         void setUp() {
             Quest quest = questRepository.save(QuestFixture.createKillMonster(monster.getId(), 3));
-            questCondition = quest.getConditions().get(0);
+            questCondition = quest.getConditions().getFirst();
             playerQuest = playerQuestRepository.save(PlayerQuest.start(player, quest));
         }
 
@@ -70,7 +73,7 @@ class QuestProgressUpdaterTest {
             List<PlayerQuest> completed = questProgressUpdater.updateOnBattleVictory(player.getId(), monster.getId(), 0);
 
             assertThat(completed).hasSize(1);
-            assertThat(completed.get(0).getStatus()).isEqualTo(QuestStatus.COMPLETED);
+            assertThat(completed.getFirst().getStatus()).isEqualTo(QuestStatus.COMPLETED);
 
             PlayerQuestProgress progress = findProgress(playerQuest.getId(), questCondition.getId());
             assertThat(progress.getCurrentCount()).isEqualTo(killGoal);
@@ -100,7 +103,7 @@ class QuestProgressUpdaterTest {
         @BeforeEach
         void setUp() {
             Quest quest = questRepository.save(QuestFixture.createLevelUp(3));
-            questCondition = quest.getConditions().get(0);
+            questCondition = quest.getConditions().getFirst();
             playerQuest = playerQuestRepository.save(PlayerQuest.start(player, quest));
         }
 
@@ -121,6 +124,37 @@ class QuestProgressUpdaterTest {
 
             PlayerQuestProgress progress = findProgress(playerQuest.getId(), questCondition.getId());
             assertThat(progress.getCurrentCount()).isEqualTo(0);
+        }
+    }
+
+    @Nested
+    class QueryCount {
+        private Monster otherMonster;
+
+        @BeforeEach
+        void setUp() {
+            otherMonster = monsterRepository.save(MonsterFixture.createOrc());
+        }
+
+        @Test
+        @DisplayName("퀘스트 진행 갱신 쿼리 수는 진행 중 퀘스트 개수와 무관하다")
+        void test1() {
+            startNewQuests(1);
+            long withOne = queryCounter.count(() ->
+                    questProgressUpdater.updateOnBattleVictory(player.getId(), otherMonster.getId(), 1));
+
+            startNewQuests(9);
+            long withTen = queryCounter.count(() ->
+                    questProgressUpdater.updateOnBattleVictory(player.getId(), otherMonster.getId(), 1));
+
+            assertThat(withTen).isEqualTo(withOne);
+        }
+
+        private void startNewQuests(int count) {
+            for (int i = 0; i < count; i++) {
+                Quest quest = questRepository.save(QuestFixture.createKillMonster(monster.getId(), 100));
+                playerQuestRepository.save(PlayerQuest.start(player, quest));
+            }
         }
     }
 
