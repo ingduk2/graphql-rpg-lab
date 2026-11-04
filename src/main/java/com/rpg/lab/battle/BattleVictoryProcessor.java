@@ -23,6 +23,7 @@ public class BattleVictoryProcessor {
 
     public BattleReward process(
             Player player,
+            Long inventoryId,
             Battle battle,
             Long monsterId
     ) {
@@ -40,13 +41,13 @@ public class BattleVictoryProcessor {
         int levelUps = player.gainExp(battle.getExpGained());
 
         // 전투 아이템 드롭
-        Item droppedItem = itemDropProcessor.process(monsterId, player.getId()).orElse(null);
+        Item droppedItem = itemDropProcessor.process(monsterId, inventoryId).orElse(null);
 
         // 퀘스트 진행도 업데이트
         List<PlayerQuest> completedQuests = questProgressUpdater.updateOnBattleVictory(player.getId(), monsterId, levelUps);
 
         // 퀘스트 완료 보상 지급
-        completedQuests.forEach(quest -> questRewardProcessor.process(player, quest.getQuest().getId()));
+        completedQuests.forEach(quest -> questRewardProcessor.process(player, inventoryId, quest.getQuest().getId()));
 
         // 업적 달성 체크
         List<Achievement> unlockAchievements = achievementService.checkAndUnlockAchievements(player.getId());

@@ -38,7 +38,7 @@ public class BattleService {
 
         Battle battle = new Battle(player, scaledMonster, inventory, currentMonsterHp).attack();
 
-        BattleReward battleReward = battleVictoryProcessor.process(player, battle, monsterId);
+        BattleReward battleReward = battleVictoryProcessor.process(player, inventory.getId(), battle, monsterId);
 
         return BattleResult.from(battle, battleReward);
     }
@@ -73,7 +73,7 @@ public class BattleService {
                     Battle battle = new Battle(player, scaledMonster, inventory, monsterHp[0]).attack();
                     monsterHp[0] = battle.getMonsterRemainHp();
 
-                    BattleReward battleReward = battleVictoryProcessor.process(player, battle, monsterId);
+                    BattleReward battleReward = battleVictoryProcessor.process(player, inventory.getId(), battle, monsterId);
 
                     boolean finished = battle.isMonsterDefeated() || battle.isPlayerDefeated();
 

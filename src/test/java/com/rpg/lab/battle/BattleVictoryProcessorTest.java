@@ -42,11 +42,12 @@ class BattleVictoryProcessorTest {
     private final AchievementRepository achievementRepository;
 
     private Player player;
+    private Inventory inventory;
 
     @BeforeEach
     void setUp() {
         player = playerRepository.save(PlayerFixture.create());
-        inventoryRepository.save(Inventory.create(player));
+        inventory = inventoryRepository.save(Inventory.create(player));
     }
 
     private Battle winningBattle(Monster monster) {
@@ -63,7 +64,7 @@ class BattleVictoryProcessorTest {
         Monster monster = monsterRepository.save(MonsterFixture.createOrc());
         Battle battle = new Battle(player, MonsterFixture.unscaled(monster), getInventory(), Integer.MAX_VALUE).attack();
 
-        BattleReward result = sut.process(player, battle, monster.getId());
+        BattleReward result = sut.process(player, inventory.getId(), battle, monster.getId());
 
         assertThat(result.levelUps()).isEqualTo(0);
         assertThat(result.droppedItem()).isNull();
@@ -78,7 +79,7 @@ class BattleVictoryProcessorTest {
         int expBefore = player.getExp();
         Battle battle = winningBattle(monster);
 
-        BattleReward result = sut.process(player, battle, monster.getId());
+        BattleReward result = sut.process(player, inventory.getId(), battle, monster.getId());
 
         assertThat(result.levelUps()).isEqualTo(0);
         assertThat(result.droppedItem()).isNull();
@@ -94,7 +95,7 @@ class BattleVictoryProcessorTest {
         monsterDropRepository.save(MonsterDrop.create(monster, item, 1.0));
         Battle battle = winningBattle(monster);
 
-        BattleReward result = sut.process(player, battle, monster.getId());
+        BattleReward result = sut.process(player, inventory.getId(), battle, monster.getId());
 
         assertThat(result.droppedItem()).isEqualTo(item);
         List<InventoryItem> inventoryItems = getInventory().getInventoryItems();
@@ -116,7 +117,7 @@ class BattleVictoryProcessorTest {
         int expBefore = player.getExp();
         Battle battle = winningBattle(monster);
 
-        BattleReward result = sut.process(player, battle, monster.getId());
+        BattleReward result = sut.process(player, inventory.getId(), battle, monster.getId());
 
         assertThat(result.completedQuests()).contains(quest.getTitle());
 
@@ -138,7 +139,7 @@ class BattleVictoryProcessorTest {
 
         Battle battle = winningBattle(monster);
 
-        BattleReward result = sut.process(player, battle, monster.getId());
+        BattleReward result = sut.process(player, inventory.getId(), battle, monster.getId());
 
         assertThat(result.levelUps()).isGreaterThan(0);
         assertThat(result.completedQuests()).contains(levelUpQuest.getTitle());
@@ -151,7 +152,7 @@ class BattleVictoryProcessorTest {
         int killCountBefore = player.getKillCount();
         Battle battle = winningBattle(monster);
 
-        sut.process(player, battle, monster.getId());
+        BattleReward result = sut.process(player, inventory.getId(), battle, monster.getId());
 
         assertThat(player.getKillCount()).isEqualTo(killCountBefore + 1);
     }
@@ -165,7 +166,7 @@ class BattleVictoryProcessorTest {
         Monster monster = monsterRepository.save(MonsterFixture.createSlime());
         Battle battle = winningBattle(monster);
 
-        BattleReward result = sut.process(player, battle, monster.getId());
+        BattleReward result = sut.process(player, inventory.getId(), battle, monster.getId());
 
         assertThat(result.unlockedAchievements()).contains(achievement.getTitle());
     }

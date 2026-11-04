@@ -44,11 +44,11 @@ class QuestRewardProcessorTest {
     @Test
     @DisplayName("보상이 exp 만 있는 퀘스트 완료 시 -> Player 의 exp 가 오르는 지 확인")
     void test1() {
-        inventoryRepository.save(Inventory.create(player));
+        Inventory inventory = inventoryRepository.save(Inventory.create(player));
         QuestReward questReward = questRewardRepository.save(QuestReward.create(quest, 50, null));
         int expBefore = player.getExp();
 
-        sut.process(player, quest.getId());
+        sut.process(player, inventory.getId(), quest.getId());
 
         assertThat(player.getExp()).isEqualTo(expBefore + questReward.getRewardExp());
         List<InventoryItem> inventoryItems = getInventory().getInventoryItems();
@@ -58,11 +58,11 @@ class QuestRewardProcessorTest {
     @Test
     @DisplayName("보상에 아이템이 포함된 퀘스트 완료 시 -> 인벤토리에 해당 아이템이 추가 되는지 확인")
     void test2() {
-        inventoryRepository.save(Inventory.create(player));
+        Inventory inventory = inventoryRepository.save(Inventory.create(player));
         Item item = itemRepository.save(ItemFixture.createSwordItem());
         questRewardRepository.save(QuestReward.create(quest, 0, item));
 
-        sut.process(player, quest.getId());
+        sut.process(player, inventory.getId(), quest.getId());
 
         List<InventoryItem> inventoryItems = getInventory().getInventoryItems();
         assertThat(inventoryItems)
@@ -73,14 +73,14 @@ class QuestRewardProcessorTest {
     @Test
     @DisplayName("보상 항목이 여러 개 (exp + item 여러 줄)인 퀘스트 완료 시 -> 모든 보상이 다 적용되는지 확")
     void test3() {
-        inventoryRepository.save(Inventory.create(player));
+        Inventory inventory = inventoryRepository.save(Inventory.create(player));
         Item item1 = itemRepository.save(ItemFixture.createSwordItem());
         Item item2 = itemRepository.save(ItemFixture.createShieldItem());
         questRewardRepository.save(QuestReward.create(quest, 30, item1));
         questRewardRepository.save(QuestReward.create(quest, 20, item2));
         int expBefore = player.getExp();
 
-        sut.process(player, quest.getId());
+        sut.process(player, inventory.getId(), quest.getId());
 
         assertThat(player.getExp()).isEqualTo(expBefore + 50);
         List<InventoryItem> inventoryItems = getInventory().getInventoryItems();
@@ -95,11 +95,11 @@ class QuestRewardProcessorTest {
         Inventory playerInventory = Inventory.create(player);
         Item item = itemRepository.save(ItemFixture.createSwordItem());
         playerInventory.addItem(item);
-        inventoryRepository.save(playerInventory);
+        Inventory inventory = inventoryRepository.save(playerInventory);
         questRewardRepository.save(QuestReward.create(quest, 0, item));
         int expBefore = player.getExp();
 
-        sut.process(player, quest.getId());
+        sut.process(player, inventory.getId(), quest.getId());
 
         assertThat(player.getExp()).isEqualTo(expBefore);
         List<InventoryItem> inventoryItems = getInventory().getInventoryItems();
@@ -111,10 +111,10 @@ class QuestRewardProcessorTest {
     @Test
     @DisplayName("해당 questId에 보상이 아예 없는 경우 → 아무 예외 없이 그냥 넘어가는지 (exp 변화 없음)")
     void test5() {
-        inventoryRepository.save(Inventory.create(player));
+        Inventory inventory = inventoryRepository.save(Inventory.create(player));
         int expBefore = player.getExp();
 
-        sut.process(player, quest.getId());
+        sut.process(player, inventory.getId(), quest.getId());
 
         assertThat(player.getExp()).isEqualTo(expBefore);
         List<InventoryItem> inventoryItems = getInventory().getInventoryItems();
@@ -122,13 +122,14 @@ class QuestRewardProcessorTest {
     }
 
     @Test
-    @DisplayName("player가 인벤토리를 안 가진 상태여도 exp는 정상 지급되고 예외 없이 넘어간다")
+    @DisplayName("존재하지 않는 inventoryId 여도 exp는 정상 지급되고 예외 없이 넘어간다")
     void test6() {
+        Long notExistInventoryId = 999L;
         Item item = itemRepository.save(ItemFixture.createSwordItem());
         QuestReward questReward = questRewardRepository.save(QuestReward.create(quest, 50, item));
         int expBefore = player.getExp();
 
-        sut.process(player, quest.getId());
+        sut.process(player, notExistInventoryId, quest.getId());
 
         assertThat(player.getExp()).isEqualTo(expBefore + questReward.getRewardExp());
         assertThat(inventoryRepository.findByPlayerId(player.getId())).isEmpty();

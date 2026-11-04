@@ -23,12 +23,12 @@ public class ItemDropProcessor {
     private final RandomProvider randomProvider;
 
     @Transactional
-    public Optional<Item> process(Long monsterId, Long playerId) {
+    public Optional<Item> process(Long monsterId, Long inventoryId) {
         List<MonsterDrop> drops = monsterDropRepository.findAllWithItemByMonsterId(monsterId);
 
         Optional<Item> droppedItem = calculateDrop(drops);
 
-        droppedItem.ifPresent(item -> addToInventory(item, playerId));
+        droppedItem.ifPresent(item -> addToInventory(item, inventoryId));
 
         return droppedItem;
     }
@@ -40,8 +40,8 @@ public class ItemDropProcessor {
                 .findFirst();
     }
 
-    private void addToInventory(Item item, Long playerId) {
-        Inventory inventory = inventoryRepository.findByPlayerId(playerId)
+    private void addToInventory(Item item, Long inventoryId) {
+        Inventory inventory = inventoryRepository.findById(inventoryId)
                 .orElseThrow(() -> new EntityNotFoundException("Inventory not found"));
 
         inventory.addItemIfNotOwned(item);

@@ -55,7 +55,7 @@ class ItemDropProcessorTest {
         Item item = itemRepository.save(ItemFixture.createShieldItem());
         monsterDropRepository.save(MonsterDrop.create(monster, item, 1.0));
 
-        Optional<Item> result = sut.process(monster.getId(), player.getId());
+        Optional<Item> result = sut.process(monster.getId(), inventory.getId());
 
         assertThat(result).contains(item);
     }
@@ -67,7 +67,7 @@ class ItemDropProcessorTest {
         Item item = itemRepository.save(ItemFixture.createShieldItem());
         monsterDropRepository.save(MonsterDrop.create(monster, item, 0.0));
 
-        Optional<Item> result = sut.process(monster.getId(), player.getId());
+        Optional<Item> result = sut.process(monster.getId(), inventory.getId());
 
         assertThat(result).isEmpty();
     }
@@ -79,7 +79,7 @@ class ItemDropProcessorTest {
         Item item = itemRepository.save(ItemFixture.createShieldItem());
         monsterDropRepository.save(MonsterDrop.create(monster, item, 1.0));
 
-        Optional<Item> result = sut.process(monster.getId(), player.getId());
+        Optional<Item> result = sut.process(monster.getId(), inventory.getId());
 
         assertThat(result).contains(item);
         List<InventoryItem> inventoryItems = getInventory().getInventoryItems();
@@ -97,7 +97,7 @@ class ItemDropProcessorTest {
         inventoryRepository.save(inventory);
         monsterDropRepository.save(MonsterDrop.create(monster, item, 1.0));
 
-        Optional<Item> result = sut.process(monster.getId(), player.getId());
+        Optional<Item> result = sut.process(monster.getId(), inventory.getId());
 
         assertThat(result).contains(item);
         List<InventoryItem> inventoryItems = getInventory().getInventoryItems();
@@ -113,7 +113,7 @@ class ItemDropProcessorTest {
         monsterDropRepository.save(MonsterDrop.create(monster, nonDropItem, 0.0));
         monsterDropRepository.save(MonsterDrop.create(monster, dropItem, 1.0));
 
-        Optional<Item> result = sut.process(monster.getId(), player.getId());
+        Optional<Item> result = sut.process(monster.getId(), inventory.getId());
 
         assertThat(result).contains(dropItem);
         List<InventoryItem> inventoryItems = getInventory().getInventoryItems();
@@ -127,20 +127,20 @@ class ItemDropProcessorTest {
     void test6() {
         Monster monster = monsterRepository.save(MonsterFixture.createSlime());
 
-        Optional<Item> result = sut.process(monster.getId(), player.getId());
+        Optional<Item> result = sut.process(monster.getId(), inventory.getId());
 
         assertThat(result).isEmpty();
     }
 
     @Test
-    @DisplayName("인벤토리가 없는 player에게 드랍 발생 시 EntityNotFoundException이 발생한다")
+    @DisplayName("존재하지 않는 inventoryId 로 드랍 발생 시 EntityNotFoundException이 발생한다")
     void test7() {
-        Player noInventoryPlayer = playerRepository.save(PlayerFixture.create());
+        Long notExistInventoryId = 999L;
         Monster monster = monsterRepository.save(MonsterFixture.createSlime());
         Item item = itemRepository.save(ItemFixture.createShieldItem());
         monsterDropRepository.save(MonsterDrop.create(monster, item, 1.0));
 
-        assertThatThrownBy(() -> sut.process(monster.getId(), noInventoryPlayer.getId()))
+        assertThatThrownBy(() -> sut.process(monster.getId(), notExistInventoryId))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
