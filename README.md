@@ -628,9 +628,15 @@
     - progress IN 쿼리 일괄 조회, KILL_MONSTER/LEVEL_UP 단계에서 재사용
     - 불필요한 save 제거 (dirty checking), update가 커밋 시점에 모여서 나감
     - 회귀 테스트: 진행 중 퀘스트 1개 vs 10개, 두 단계(처치+레벨업) 모두 실행 시 쿼리 수 동일 검증
-  - [ ] 처치 시 인벤토리 중복 조회 (드랍 지급, 퀘스트 보상 지급 둘 다)
+  - [x] 처치 시 인벤토리 중복 조회 (드랍 지급, 퀘스트 보상 지급 둘 다)
+    - findByPlayerId(JPQL, 항상 SQL 실행) → findById(PK, 1차 캐시 확인)로 변경. attack 흐름에서 SQL 0
+    - 퀘스트 보상 아이템마다 인벤토리 조회 → 한 번만 조회
+    - 엔티티 대신 inventoryId 전달: streamBattle은 트랜잭션 밖에서 돌아서, 준영속 엔티티를 여러 트랜잭션에서 merge하면 중복 insert 위험
+    - 검증: attack(드랍/보상)·AUTO(드랍) 세 경로 로그 확인, Processor 테스트를 inventoryId 기준으로 수정
   - [ ] 퀘스트 보상 조회: 완료 퀘스트마다 1번 (동시 완료 시 N+1, 우선순위 낮음)
   - [ ] `quests.prerequisiteQuest` 잠재 N+1
+  - [ ] (메모) streamBattle: Flux.create 람다가 트랜잭션 종료 후 실행됨 → 엔티티가 준영속 상태로 처리됨
+    - 로그 근거: AUTO 처치 시 업적 체크에서 player 재조회, 종료 시 merge용 select 후 update
 
 - **21-5.** GraphQL 고유 주제 (쿼리 깊이/복잡도 제한, 필요 시 Persisted Queries)
 
@@ -641,6 +647,8 @@
 - N+1은 한 번 고쳐도 새 코드에서 다시 만들어질 수 있다
 - LAZY가 문제가 아니라 반복문 안에서 LAZY를 건드리는 게 문제다. 기본은 LAZY, 필요한 쿼리에서만 fetch join
 - OneToMany는 fetch join(1쿼리, 페이징 불가) vs IN 쿼리 + 그룹핑(2쿼리, 페이징 가능) 중 상황에 맞게 고른다
+- 1차 캐시는 PK 조회(findById)만 건너뛴다. 조건 조회(JPQL)는 캐시에 있어도 SQL이 나간다
+- 같은 타입(Long) 파라미터는 순서나 의미가 바뀌어도 컴파일러가 못 잡는다 (playerId → inventoryId 변경 시 테스트가 조용히 잘못된 값을 넘김)
 ---
 
 ### Step 22. 소모품 수량 방식
