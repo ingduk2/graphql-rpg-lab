@@ -634,7 +634,11 @@
     - 엔티티 대신 inventoryId 전달: streamBattle은 트랜잭션 밖에서 돌아서, 준영속 엔티티를 여러 트랜잭션에서 merge하면 중복 insert 위험
     - 검증: attack(드랍/보상)·AUTO(드랍) 세 경로 로그 확인, Processor 테스트를 inventoryId 기준으로 수정
   - [ ] 퀘스트 보상 조회: 완료 퀘스트마다 1번 (동시 완료 시 N+1, 우선순위 낮음)
-  - [ ] `quests.prerequisiteQuest` 잠재 N+1
+  - [x] `quests.prerequisiteQuest` 잠재 N+1
+    - 실제 위험은 N+1보다 LazyInitializationException: 매핑이 세션 밖(DataFetcher)에서 일어나고 있었음
+    - QuestResponse 매핑을 서비스 트랜잭션 안으로 이동
+    - hibernate.default_batch_fetch_size: 100 전역 설정 (부분 조회 시 lazy 로딩을 IN 쿼리로 묶음)
+    - 회귀 테스트: 선행 퀘스트 체인 1 vs 10에서 목록 조회 쿼리 수 동일 검증
   - [ ] (메모) streamBattle: Flux.create 람다가 트랜잭션 종료 후 실행됨 → 엔티티가 준영속 상태로 처리됨
     - 로그 근거: AUTO 처치 시 업적 체크에서 player 재조회, 종료 시 merge용 select 후 update
 
@@ -649,6 +653,7 @@
 - OneToMany는 fetch join(1쿼리, 페이징 불가) vs IN 쿼리 + 그룹핑(2쿼리, 페이징 가능) 중 상황에 맞게 고른다
 - 1차 캐시는 PK 조회(findById)만 건너뛴다. 조건 조회(JPQL)는 캐시에 있어도 SQL이 나간다
 - 같은 타입(Long) 파라미터는 순서나 의미가 바뀌어도 컴파일러가 못 잡는다 (playerId → inventoryId 변경 시 테스트가 조용히 잘못된 값을 넘김)
+- N+1 해결은 fetch join / IN 쿼리 + 그룹핑 / batch fetch 세 가지. batch fetch는 설정 한 줄로 전역 적용되지만 lazy 로딩만 묶고, 반복문 안의 리포지토리 직접 호출은 못 묶는다
 ---
 
 ### Step 22. 소모품 수량 방식
