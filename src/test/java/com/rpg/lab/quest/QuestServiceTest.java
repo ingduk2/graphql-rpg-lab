@@ -56,7 +56,7 @@ class QuestServiceTest {
         @Test
         @DisplayName("전체 퀘스트 목록을 조회한다")
         void test1() {
-            List<Quest> quests = sut.getQuests();
+            List<QuestResponse> quests = sut.getQuests();
 
             assertThat(quests)
                     .hasSize(3);
@@ -265,10 +265,29 @@ class QuestServiceTest {
             assertThat(withTen).isEqualTo(withOne);
         }
 
+        @Test
+        @DisplayName("퀘스트 목록 조회 쿼리 수는 선행 퀘스트 체인 길이와 무관하다")
+        void test2() {
+            saveQuestChain(1);
+            long withOne = queryCounter.count(sut::getQuests);
+
+            saveQuestChain(9);
+            long withTen = queryCounter.count(sut::getQuests);
+
+            assertThat(withTen).isEqualTo(withOne);
+        }
+
         private void acceptNewQuests(int count) {
             for (int i = 0; i < count; i++) {
                 Quest quest = questRepository.save(QuestFixture.createComposite(slime.getId()));
                 sut.acceptQuest(player.getId(), quest.getId());
+            }
+        }
+
+        private void saveQuestChain(int length) {
+            Quest prev = questRepository.save(QuestFixture.createKillMonster(slime.getId(), 1));
+            for (int i = 0; i < length; i++) {
+                prev = questRepository.save(QuestFixture.createWithPrerequisite(prev, slime.getId(), 1));
             }
         }
     }

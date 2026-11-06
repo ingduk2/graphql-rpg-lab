@@ -20,8 +20,11 @@ public class QuestService {
     private final PlayerQuestRepository playerQuestRepository;
     private final PlayerQuestProgressRepository playerQuestProgressRepository;
 
-    public List<Quest> getQuests() {
-        return questRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<QuestResponse> getQuests() {
+        return questRepository.findAll().stream()
+                .map(QuestResponse::from)
+                .toList();
     }
 
     public Quest getQuest(Long id) {

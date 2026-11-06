@@ -15,9 +15,7 @@ public class QuestDataFetcher {
 
     @DgsQuery
     public List<QuestResponse> quests() {
-        return questService.getQuests().stream()
-                .map(QuestResponse::from)
-                .toList();
+        return questService.getQuests();
     }
 
     @DgsQuery
