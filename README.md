@@ -643,6 +643,9 @@
     - 로그 근거: AUTO 처치 시 업적 체크에서 player 재조회, 종료 시 merge용 select 후 update
 
 - **21-5.** GraphQL 고유 주제 (쿼리 깊이/복잡도 제한, 필요 시 Persisted Queries)
+  - 21-5-1. 측정: battle.html 쿼리 기준 최대 깊이 4, 최대 복잡도 27 (둘 다 loadPlayer)
+    - 기준: 깊이는 루트 필드 1부터 리프까지, 복잡도는 필드당 1점 합계 (리스트 곱셈 없음)
+    - 제한값 후보: 깊이 6, 복잡도 50 (Step 22~23 스키마 변경 여유분 포함)
 
 - **21-6.** 마무리: 쿼리 수 before/after 정리, "GraphQL을 왜 쓰는가"에 대한 회고
 
