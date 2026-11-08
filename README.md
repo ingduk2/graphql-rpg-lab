@@ -646,6 +646,10 @@
   - 21-5-1. 측정: battle.html 쿼리 기준 최대 깊이 4, 최대 복잡도 27 (둘 다 loadPlayer)
     - 기준: 깊이는 루트 필드 1부터 리프까지, 복잡도는 필드당 1점 합계 (리스트 곱셈 없음)
     - 제한값 후보: 깊이 6, 복잡도 50 (Step 22~23 스키마 변경 여유분 포함)
+  - 21-5-2. 깊이 제한: 최대 6
+    - 경계값 확인: 제한 3에서 loadPlayer 쿼리 거절(`4 > 3`) → 측정표의 깊이 4 일치
+    - 기본 구현은 introspection 쿼리(ofType 중첩)까지 막아서 GraphiQL이 "Error fetching schema"
+    - introspection 전용 쿼리만 제외하는 Instrumentation으로 해결 (혼합 쿼리 우회는 allMatch로 차단)
 
 - **21-6.** 마무리: 쿼리 수 before/after 정리, "GraphQL을 왜 쓰는가"에 대한 회고
 
