@@ -650,6 +650,11 @@
     - 경계값 확인: 제한 3에서 loadPlayer 쿼리 거절(`4 > 3`) → 측정표의 깊이 4 일치
     - 기본 구현은 introspection 쿼리(ofType 중첩)까지 막아서 GraphiQL이 "Error fetching schema"
     - introspection 전용 쿼리만 제외하는 Instrumentation으로 해결 (혼합 쿼리 우회는 allMatch로 차단)
+  - 21-5-3. 복잡도 제한: 최대 50
+    - 문제: alias로 같은 필드를 반복하면 깊이 2로도 요청 1개당 DB 쿼리 N번 (alias 5개 → 리더보드 쿼리 5번 확인)
+    - 경계값 확인: alias 5개 쿼리 복잡도 25, 제한 24에서 거절 (필드당 1점, 리프 포함)
+    - 깊이 제한과 같은 introspection 문제 → 판별 로직을 IntrospectionQueries로 공통화
+    - 한계: 기본 계산은 인자를 안 봐서 `leaderboard(limit: 10)`과 `limit: 100`이 같은 점수. 필요하면 FieldComplexityCalculator로 인자 기반 가중치 가능
 
 - **21-6.** 마무리: 쿼리 수 before/after 정리, "GraphQL을 왜 쓰는가"에 대한 회고
 
