@@ -17,7 +17,8 @@ public enum ErrorCode {
     HP_ALREADY_FULL("이미 체력이 가득 찼습니다."),
     INVALID_ITEM_OPERATION("이 아이템에는 사용할 수 없는 동작입니다."),
     MAX_ENHANCE_LEVEL("이미 최대 강화 단계입니다."),
-    ;
+    QUERY_TOO_DEEP("요청이 너무 깊게 중첩되어 있습니다."),
+    QUERY_TOO_COMPLEX("요청이 너무 복잡합니다.");
 
     private final String userMessage;
 
