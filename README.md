@@ -655,6 +655,10 @@
     - 경계값 확인: alias 5개 쿼리 복잡도 25, 제한 24에서 거절 (필드당 1점, 리프 포함)
     - 깊이 제한과 같은 introspection 문제 → 판별 로직을 IntrospectionQueries로 공통화
     - 한계: 기본 계산은 인자를 안 봐서 `leaderboard(limit: 10)`과 `limit: 100`이 같은 점수. 필요하면 FieldComplexityCalculator로 인자 기반 가중치 가능
+  - 21-5-4. 에러 메시지: 제한 초과 시 ErrorCode 형식(errorCode, userMessage)으로 응답
+    - 깊이/복잡도 검사는 실행 전 단계라 DataFetcherExceptionHandler(GlobalExceptionHandler)를 거치지 않음
+    - Instrumentation의 mkAbortException을 오버라이드해서 에러 모양을 직접 구성
+    - errorType(ExecutionAborted)을 빼먹으면 DGS가 UNAVAILABLE/SERVICE_ERROR(서버 장애)로 분류함 → 명시 필요
 
 - **21-6.** 마무리: 쿼리 수 before/after 정리, "GraphQL을 왜 쓰는가"에 대한 회고
 
@@ -666,6 +670,7 @@
 - 1차 캐시는 PK 조회(findById)만 건너뛴다. 조건 조회(JPQL)는 캐시에 있어도 SQL이 나간다
 - 같은 타입(Long) 파라미터는 순서나 의미가 바뀌어도 컴파일러가 못 잡는다 (playerId → inventoryId 변경 시 테스트가 조용히 잘못된 값을 넘김)
 - N+1 해결은 fetch join / IN 쿼리 + 그룹핑 / batch fetch 세 가지. batch fetch는 설정 한 줄로 전역 적용되지만 lazy 로딩만 묶고, 반복문 안의 리포지토리 직접 호출은 못 묶는다
+- GraphQL은 클라이언트가 응답 모양을 정하므로, 실행 전에 쿼리 깊이/복잡도를 제한해야 한다. 깊이 제한만으로는 alias 넓이 공격을 못 막는다
 ---
 
 ### Step 22. 소모품 수량 방식
