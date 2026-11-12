@@ -659,8 +659,13 @@
     - 깊이/복잡도 검사는 실행 전 단계라 DataFetcherExceptionHandler(GlobalExceptionHandler)를 거치지 않음
     - Instrumentation의 mkAbortException을 오버라이드해서 에러 모양을 직접 구성
     - errorType(ExecutionAborted)을 빼먹으면 DGS가 UNAVAILABLE/SERVICE_ERROR(서버 장애)로 분류함 → 명시 필요
+  - 21-5-5. Persisted Queries: 개념 정리만 (구현 안 함)
+    - APQ: 해시로 요청 크기를 줄이는 성능 목적, 공격 방어 효과 없음
+    - Allowlist: 등록된 쿼리만 허용하는 보안 목적, 임의 쿼리 자체를 차단
+    - 자사 클라이언트 전용 API면 Allowlist, 공개 API면 깊이/복잡도 제한이 주 방어선
+    - 미구현 이유: 쿼리가 짧아 APQ 이득이 없고, GraphiQL로 자유롭게 실험해야 해서 Allowlist는 부적합
 
-- **21-6.** 마무리: 쿼리 수 before/after 정리, "GraphQL을 왜 쓰는가"에 대한 회고
+- **21-6.** 마무리: 쿼리 수 before/after 정리, "GraphQL을 왜 쓰는가"에 대한 회고ㅡ
 
 **학습 포인트**
 - 성능은 추측이 아니라 측정으로 접근한다
