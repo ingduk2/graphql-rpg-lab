@@ -1,5 +1,6 @@
 package com.rpg.lab.inventory;
 
+import com.rpg.lab.exception.InvalidItemOperationException;
 import com.rpg.lab.item.Item;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -32,12 +33,16 @@ public class InventoryItem {
     @Column(nullable = false)
     private int enhanceLevel;
 
+    @Column(nullable = false)
+    private int quantity;
+
     public static InventoryItem create(Inventory inventory, Item item) {
         InventoryItem inventoryItem = new InventoryItem();
         inventoryItem.inventory = inventory;
         inventoryItem.item = item;
         inventoryItem.equipped = false;
         inventoryItem.enhanceLevel = 0;
+        inventoryItem.quantity = 1;
         return inventoryItem;
     }
 
@@ -67,6 +72,18 @@ public class InventoryItem {
 
     int getEnhancedDefenseBonus() {
         return enhanced(item.getDefenseBonus());
+    }
+
+    void increaseQuantity() {
+        if (!item.isConsumable()) {
+            throw new InvalidItemOperationException("Equipment cannot be stacked: " + item.getId());
+        }
+        this.quantity++;
+    }
+
+    boolean decreaseQuantity() {
+        this.quantity--;
+        return this.quantity <= 0;
     }
 
     private int enhanced(int base) {

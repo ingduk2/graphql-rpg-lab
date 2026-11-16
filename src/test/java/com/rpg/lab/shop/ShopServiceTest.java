@@ -6,6 +6,7 @@ import com.rpg.lab.exception.ItemAlreadyOwnedException;
 import com.rpg.lab.fixture.ItemFixture;
 import com.rpg.lab.fixture.PlayerFixture;
 import com.rpg.lab.inventory.Inventory;
+import com.rpg.lab.inventory.InventoryItem;
 import com.rpg.lab.inventory.InventoryRepository;
 import com.rpg.lab.inventory.InventoryResponse;
 import com.rpg.lab.item.Item;
@@ -94,7 +95,7 @@ class ShopServiceTest {
         }
 
         @Test
-        @DisplayName("소모품은 이미 보유해도 다시 구매 할 수 있다")
+        @DisplayName("소모품은 이미 보유해도 다시 구매할 수 있고, 수량이 쌓인다")
         void test5() {
             player.gainGold(1000);
             playerRepository.save(player);
@@ -104,7 +105,11 @@ class ShopServiceTest {
 
             InventoryResponse result = sut.buyItem(player.getId(), shopItem.getId());
 
-            assertThat(result.items()).hasSize(2);
+            assertThat(result.items()).hasSize(1);
+            InventoryItem potionItem = inventoryRepository.findWithItemsByPlayerId(player.getId())
+                    .orElseThrow()
+                    .getInventoryItems().getFirst();
+            assertThat(potionItem.getQuantity()).isEqualTo(2);
         }
     }
 }

@@ -44,7 +44,7 @@ class InventoryTest {
         }
 
         @Test
-        @DisplayName("같은 아이템을 여러 번 addItem 하면 중복으로 다 쌓인다")
+        @DisplayName("장비는 여러 번 addItem 하면 행이 따로 쌓인다")
         void test2() {
             Inventory inventory = Inventory.create(player);
             Item item = ItemFixture.createSwordItemWithId();
@@ -56,6 +56,32 @@ class InventoryTest {
                     .hasSize(2)
                     .extracting(InventoryItem::getItem)
                     .containsExactly(item, item);
+        }
+
+        @Test
+        @DisplayName("소모품을 처음 추가하면 수량 1인 행이 생긴다")
+        void test3() {
+            Inventory inventory = Inventory.create(player);
+            Item potion = ItemFixture.createPotionItemWithId();
+
+            inventory.addItem(potion);
+
+            assertThat(inventory.getInventoryItems()).hasSize(1);
+            assertThat(inventory.getInventoryItems().getFirst().getQuantity()).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("같은 소모품을 여러 번 추가하면 행은 하나, 수량이 쌓인다")
+        void test4() {
+            Inventory inventory = Inventory.create(player);
+            Item potion =ItemFixture.createPotionItemWithId();
+
+            inventory.addItem(potion);
+            inventory.addItem(potion);
+            inventory.addItem(potion);
+
+            assertThat(inventory.getInventoryItems()).hasSize(1);
+            assertThat(inventory.getInventoryItems().getFirst().getQuantity()).isEqualTo(3);
         }
     }
 
@@ -93,7 +119,7 @@ class InventoryTest {
         }
 
         @Test
-        @DisplayName("소모품은 이미 보유해도 추가된다")
+        @DisplayName("소모품은 이미 보유해도 추가되고, 같은 행의 수량이 늘어난다")
         void test3() {
             Inventory inventory = Inventory.create(player);
             Item potion = ItemFixture.createPotionItemWithId();
@@ -101,7 +127,8 @@ class InventoryTest {
 
             inventory.addItemIfNotOwned(potion);
 
-            assertThat(inventory.getInventoryItems()).hasSize(2);
+            assertThat(inventory.getInventoryItems()).hasSize(1);
+            assertThat(inventory.getInventoryItems().getFirst().getQuantity()).isEqualTo(2);
         }
     }
 
@@ -302,6 +329,33 @@ class InventoryTest {
 
             assertThatThrownBy(() -> inventory.sellItem(notOwnedItemId))
                     .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("소모품을 판매하면 수량만 1 줄어든다")
+        void test4() {
+            Inventory inventory = Inventory.create(player);
+            Item potion =ItemFixture.createPotionItemWithId();
+            inventory.addItem(potion);
+            inventory.addItem(potion);
+
+            int price = inventory.sellItem(potion.getId());
+
+            assertThat(price).isEqualTo(potion.sellPrice());
+            assertThat(inventory.getInventoryItems()).hasSize(1);
+            assertThat(inventory.getInventoryItems().getFirst().getQuantity()).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("마지막 소모품을 판매하면 행이 사라진다")
+        void test5() {
+            Inventory inventory = Inventory.create(player);
+            Item potion = ItemFixture.createPotionItemWithId();
+            inventory.addItem(potion);
+
+            inventory.sellItem(potion.getId());
+
+            assertThat(inventory.getInventoryItems()).isEmpty();
         }
     }
 
@@ -536,7 +590,7 @@ class InventoryTest {
         }
 
         @Test
-        @DisplayName("같은 포션이 여러 개면 하나만 사라진다")
+        @DisplayName("같은 포션이 여러 개면 수량만 1 줄어든다")
         void test2() {
             Inventory inventory = Inventory.create(player);
             Item potion = ItemFixture.createPotionItemWithId();
@@ -546,7 +600,8 @@ class InventoryTest {
 
             inventory.useItem(potion.getId());
 
-            assertThat(inventory.getInventoryItems()).hasSize(2);
+            assertThat(inventory.getInventoryItems()).hasSize(1);
+            assertThat(inventory.getInventoryItems().getFirst().getQuantity()).isEqualTo(2);
         }
 
         @Test

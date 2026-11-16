@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
@@ -45,14 +46,20 @@ public class Inventory {
     }
 
     public void addItem(Item item) {
-        InventoryItem inventoryItem = InventoryItem.create(this, item);
-        this.inventoryItems.add(inventoryItem);
+        if (item.isConsumable()) {
+            findOptionalByItemId(item.getId()).ifPresentOrElse(
+                    InventoryItem::increaseQuantity,
+                    () -> inventoryItems.add(InventoryItem.create(this, item))
+            );
+            return;
+        }
+        inventoryItems.add(InventoryItem.create(this, item));
     }
 
     public int sellItem(Long itemId) {
         InventoryItem target = findByItemId(itemId);
         int price = target.getItem().sellPrice();
-        inventoryItems.remove(target);
+        removeOne(target);
         return price;
     }
 
@@ -86,9 +93,7 @@ public class Inventory {
     }
 
     private InventoryItem findByItemId(Long itemId) {
-        return inventoryItems.stream()
-                .filter(it -> it.getItem().getId().equals(itemId))
-                .findFirst()
+        return findOptionalByItemId(itemId)
                 .orElseThrow(() -> new EntityNotFoundException("Item not owned: " + itemId));
     }
 
@@ -141,7 +146,7 @@ public class Inventory {
             throw new InvalidItemOperationException("Not a consumable item: " + itemId);
         }
 
-        inventoryItems.remove(target);
+        removeOne(target);
         return target.getItem().getHealAmount();
     }
 
@@ -169,5 +174,17 @@ public class Inventory {
                 .mapToInt(statOf)
                 .sum();
         return (base * SET_BONUS_PERCENT + 99) / 100;
+    }
+
+    private Optional<InventoryItem> findOptionalByItemId(Long itemId) {
+        return inventoryItems.stream()
+                .filter(it -> it.getItem().getId().equals(itemId))
+                .findFirst();
+    }
+
+    private void removeOne(InventoryItem target) {
+        if (target.decreaseQuantity()) {
+            inventoryItems.remove(target);
+        }
     }
 }
