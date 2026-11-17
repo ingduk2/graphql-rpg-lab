@@ -139,6 +139,7 @@ type Item {
     enhanceLevel: Int!
     setType: ItemSetType!
     healAmount: Int!
+    quantity: Int!
 }
 
 type UseItemResponse {

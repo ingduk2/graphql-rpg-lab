@@ -6,7 +6,6 @@ import com.rpg.lab.exception.ItemAlreadyOwnedException;
 import com.rpg.lab.fixture.ItemFixture;
 import com.rpg.lab.fixture.PlayerFixture;
 import com.rpg.lab.inventory.Inventory;
-import com.rpg.lab.inventory.InventoryItem;
 import com.rpg.lab.inventory.InventoryRepository;
 import com.rpg.lab.inventory.InventoryResponse;
 import com.rpg.lab.item.Item;
@@ -106,10 +105,7 @@ class ShopServiceTest {
             InventoryResponse result = sut.buyItem(player.getId(), shopItem.getId());
 
             assertThat(result.items()).hasSize(1);
-            InventoryItem potionItem = inventoryRepository.findWithItemsByPlayerId(player.getId())
-                    .orElseThrow()
-                    .getInventoryItems().getFirst();
-            assertThat(potionItem.getQuantity()).isEqualTo(2);
+            assertThat(result.items().getFirst().quantity()).isEqualTo(2);
         }
     }
 }

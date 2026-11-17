@@ -19,7 +19,8 @@ public record InventoryResponse(
                         it.getEnhancedAttackBonus(),
                         it.getEnhancedDefenseBonus(),
                         it.isEquipped(),
-                        it.getEnhanceLevel())
+                        it.getEnhanceLevel(),
+                        it.getQuantity())
                 )
                 .toList();
 
