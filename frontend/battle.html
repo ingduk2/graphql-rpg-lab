@@ -503,7 +503,7 @@
 
     </div>
 
-    <div class="footer-note">localhost:8080/graphql — Step 9 Quest</div>
+    <div class="footer-note">localhost:8080/graphql — Step 22 Consumable Quantity</div>
 </div>
 
 <script>
@@ -642,19 +642,12 @@
     }
 
     function renderConsumables(consumables) {
-        const grouped = new Map();
-        consumables.forEach(item => {
-            const group = grouped.get(item.id);
-            if (group) group.count++;
-            else grouped.set(item.id, { item, count: 1 });
-        });
-
-        return [...grouped.values()].map(({ item, count }) => `
+        return consumables.map(item => `
         <div class="inventory-item">
             <div class="inventory-item-header">
                 <span>${item.name}</span>
                 <span class="bonus">HP+${item.healAmount}</span>
-                <span class="equipped-badge">×${count}</span>
+                <span class="equipped-badge">×${item.quantity}</span>
             </div>
             <div class="inventory-item-actions">
                 <button class="sm-btn green" onclick="useItem(${item.id}, '${item.name}')">USE</button>
@@ -848,7 +841,7 @@
             player(id: ${playerId}) {
                     id name level hp maxHp exp gold expToNextLevel
                     stats { attack defense speed }
-                    inventory { attackBonus defenseBonus activeSets items { id name type attackBonus defenseBonus equipped enhanceLevel setType healAmount } }
+                    inventory { attackBonus defenseBonus activeSets items { id name type attackBonus defenseBonus equipped enhanceLevel setType healAmount quantity } }
                 }
             }`);
             updatePlayerDisplay(data.player);
