@@ -719,16 +719,21 @@
   - 상점 구매 테스트를 수량 기준으로 수정(22-1 커밋에 포함). 드랍/보상은 현재 데이터에 소모품이 없어 경로만 확인
 
 - **22-3.** GraphQL
-  - 인벤토리 아이템 응답에 quantity 필드 추가
+  - 스키마 Item 타입에 quantity 추가, ItemResponse/InventoryResponse로 InventoryItem 수량 전달
+  - ItemResponse.from(InventoryItem) 대신 파라미터 추가: item 패키지가 inventory 패키지를 의존하지 않도록
 
 - **22-4.** HTML
-  - renderConsumables()의 프론트 그룹핑 제거, 서버가 준 quantity로 표시
+  - loadPlayer 쿼리에 quantity 추가, renderConsumables의 프론트 그룹핑(Map으로 item.id별 개수 세기) 제거
+  - 수량 계산 책임이 프론트에서 서버로 이동
 
 - **22-5.** 마무리
-  - 처치/사용/판매 흐름 동작 확인, README 결과 기록
+  - 확인: 포션 구매 시 한 칸에 수량 증가, 사용/판매 시 수량 감소, 마지막 1개 판매 시 칸 삭제
+  - 장비 판매는 quantity 1 → 0 → 행 삭제로 기존 동작과 동일
+  - 남은 과제(Step 23): GraphQL Item.id가 인벤토리 행이 아닌 아이템 ID라서, 같은 장비가 여러 개면 어느 것인지 구분 불가
 
 **학습 포인트**
 - 같은 엔티티라도 "개별로 구분할 필요가 있는가"에 따라 행 vs 수량으로 모델링이 달라진다
+- 운영 환경이었다면 기존 행들을 수량으로 합치는 데이터 마이그레이션이 필요했다 (H2 create-drop이라 생략)
 
 ---
 
