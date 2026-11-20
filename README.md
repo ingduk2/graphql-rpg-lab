@@ -740,6 +740,26 @@
 ### Step 23. 장비 개별 관리
 > 같은 장비를 여러 개 가져도 각각 따로 장착, 강화, 판매할 수 있게 한다.
 
+- **23-1.** 도메인
+  - Inventory의 장착/해제/강화/판매/사용을 itemId가 아닌 inventoryItemId 기준으로 변경
+  - 장비 중복 보유 허용 (드랍/보상/구매 시 이미 있어도 새 행 추가)
+  - 같은 장비 두 개 중 하나만 강화/장착되는지 도메인 테스트
+
+- **23-2.** 서비스
+  - 서비스 메서드 파라미터를 inventoryItemId로 변경
+  - 상점 ItemAlreadyOwnedException 정리
+  - 소유권 검증: 다른 플레이어의 inventoryItemId로 조작할 수 없어야 함
+
+- **23-3.** GraphQL
+  - Item 타입에 inventoryItemId 노출, mutation 인자 변경
+
+- **23-4.** HTML
+  - 버튼이 inventoryItemId를 보내도록 변경
+
+- **23-5.** 마무리
+
+**학습 포인트**
+- 행 단위 식별이 필요하면 아이템 ID가 아니라 행 ID로 지정해야 한다
 ---
 
 ### Step 24. GraphQL다운 사용
