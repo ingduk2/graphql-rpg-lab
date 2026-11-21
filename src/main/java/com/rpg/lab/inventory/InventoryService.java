@@ -22,29 +22,29 @@ public class InventoryService {
     private final RandomProvider randomProvider;
 
     @Transactional
-    public InventoryResponse equipItem(Long playerId, Long itemId) {
+    public InventoryResponse equipItem(Long playerId, Long inventoryItemId) {
         Inventory inventory = findInventoryByPlayerId(playerId);
 
-        inventory.equip(itemId);
+        inventory.equip(inventoryItemId);
         inventoryRepository.save(inventory);
         return InventoryResponse.from(inventory);
     }
 
     @Transactional
-    public InventoryResponse unequipItem(Long playerId, Long itemId) {
+    public InventoryResponse unequipItem(Long playerId, Long inventoryItemId) {
         Inventory inventory = findInventoryByPlayerId(playerId);
 
-        inventory.unequip(itemId);
+        inventory.unequip(inventoryItemId);
         inventoryRepository.save(inventory);
         return InventoryResponse.from(inventory);
     }
 
     @Transactional
-    public InventoryResponse sellItem(Long playerId, Long itemId) {
+    public InventoryResponse sellItem(Long playerId, Long inventoryItemId) {
         Inventory inventory = findInventoryByPlayerId(playerId);
         Player player = playerReader.getById(playerId);
 
-        int price = inventory.sellItem(itemId);
+        int price = inventory.sellItem(inventoryItemId);
         player.gainGold(price);
 
         inventoryRepository.save(inventory);
@@ -54,15 +54,15 @@ public class InventoryService {
     }
 
     @Transactional
-    public EnhanceItemResponse enhanceItem(Long playerId, Long itemId) {
+    public EnhanceItemResponse enhanceItem(Long playerId, Long inventoryItemId) {
         Inventory inventory = findInventoryByPlayerId(playerId);
         Player player = playerReader.getById(playerId);
 
-        int currentLevel = inventory.getEnhanceLevelOf(itemId);
+        int currentLevel = inventory.getEnhanceLevelOf(inventoryItemId);
         int cost = enhancementPolicy.costFor(currentLevel);
         player.spendGold(cost);
 
-        EnhanceResult enhanceResult = inventory.enhanceItem(itemId, enhancementPolicy, randomProvider);
+        EnhanceResult enhanceResult = inventory.enhanceItem(inventoryItemId, enhancementPolicy, randomProvider);
 
         playerManager.save(player);
         inventoryRepository.save(inventory);
@@ -70,7 +70,7 @@ public class InventoryService {
     }
 
     @Transactional
-    public UseItemResponse useItem(Long playerId, Long itemId) {
+    public UseItemResponse useItem(Long playerId, Long inventoryItemId) {
         Inventory inventory = findInventoryByPlayerId(playerId);
         Player player = playerReader.getById(playerId);
 
@@ -78,7 +78,7 @@ public class InventoryService {
             throw new HpAlreadyFullException("HP already full: " + player.getHp() + "/" + player.getMaxHp());
         }
 
-        int healAmount = inventory.useItem(itemId);
+        int healAmount = inventory.useItem(inventoryItemId);
         int healed = player.heal(healAmount);
 
         playerManager.save(player);

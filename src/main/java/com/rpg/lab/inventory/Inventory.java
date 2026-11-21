@@ -45,19 +45,22 @@ public class Inventory {
         return inventory;
     }
 
-    public void addItem(Item item) {
+    public InventoryItem addItem(Item item) {
         if (item.isConsumable()) {
-            findOptionalByItemId(item.getId()).ifPresentOrElse(
-                    InventoryItem::increaseQuantity,
-                    () -> inventoryItems.add(InventoryItem.create(this, item))
-            );
-            return;
+            Optional<InventoryItem> owned = findOptionalByItemId(item.getId());
+            if (owned.isPresent()) {
+                owned.get().increaseQuantity();
+                return owned.get();
+            }
         }
-        inventoryItems.add(InventoryItem.create(this, item));
+
+        InventoryItem created = InventoryItem.create(this, item);
+        inventoryItems.add(created);
+        return created;
     }
 
-    public int sellItem(Long itemId) {
-        InventoryItem target = findByItemId(itemId);
+    public int sellItem(Long inventoryItemId) {
+        InventoryItem target = getInventoryItem(inventoryItemId);
         int price = target.getItem().sellPrice();
         removeOne(target);
         return price;
@@ -74,27 +77,34 @@ public class Inventory {
                 .anyMatch(it -> it.getItem().getId().equals(itemId));
     }
 
-    public void equip(Long itemId) {
-        InventoryItem target = findByItemId(itemId);
+    public void equip(Long inventoryItemId) {
+        InventoryItem target = getInventoryItem(inventoryItemId);
 
         if (target.getItem().isConsumable()) {
-            throw new InvalidItemOperationException("Consumable cannot be equipped: " + itemId);
+            throw new InvalidItemOperationException("Consumable cannot be equipped: " + inventoryItemId);
         }
 
         inventoryItems.stream()
-                .filter(it -> it.isEquipped() && it.getItem().getType() == target.getItem().getType())
+                .filter(it ->
+                        it != target &&
+                        it.isEquipped() &&
+                        it.getItem().getType() == target.getItem().getType()
+                )
                 .forEach(InventoryItem::unequip);
 
         target.equip();
     }
 
-    public void unequip(Long itemId) {
-        findByItemId(itemId).unequip();
+    public void unequip(Long inventoryItemId) {
+        getInventoryItem(inventoryItemId).unequip();
     }
 
-    private InventoryItem findByItemId(Long itemId) {
-        return findOptionalByItemId(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("Item not owned: " + itemId));
+
+    private InventoryItem getInventoryItem(Long inventoryItemId) {
+        return inventoryItems.stream()
+                .filter(it -> inventoryItemId.equals(it.getId()))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Inventory item not owned: " + inventoryItemId));
     }
 
     public int getAttackBonus() {
@@ -108,18 +118,18 @@ public class Inventory {
     }
 
     public EnhanceResult enhanceItem(
-            Long itemId,
+            Long inventoryItemId,
             EnhancementPolicy policy,
             RandomProvider randomProvider
     ) {
-        InventoryItem target = findByItemId(itemId);
+        InventoryItem target = getInventoryItem(inventoryItemId);
 
         if (target.getItem().isConsumable()) {
-            throw new InvalidItemOperationException("Consumable cannot be enhanced: " + itemId);
+            throw new InvalidItemOperationException("Consumable cannot be enhanced: " + inventoryItemId);
         }
 
         if (target.isMaxEnhanceLevel()) {
-            throw new MaxEnhanceLevelException("Already at max enhance level: " + itemId);
+            throw new MaxEnhanceLevelException("Already at max enhance level: " + inventoryItemId);
         }
 
         int successRate = policy.successRateFor(target.getEnhanceLevel());
@@ -129,8 +139,8 @@ public class Inventory {
         return new EnhanceResult(success, target.getEnhanceLevel());
     }
 
-    public int getEnhanceLevelOf(Long itemId) {
-        return findByItemId(itemId).getEnhanceLevel();
+    public int getEnhanceLevelOf(Long inventoryItemId) {
+        return getInventoryItem(inventoryItemId).getEnhanceLevel();
     }
 
     public List<ItemSetType> getActiveSets() {
@@ -140,10 +150,10 @@ public class Inventory {
                 .toList();
     }
 
-    public int useItem(Long itemId) {
-        InventoryItem target = findByItemId(itemId);
+    public int useItem(Long inventoryItemId) {
+        InventoryItem target = getInventoryItem(inventoryItemId);
         if (!target.getItem().isConsumable()) {
-            throw new InvalidItemOperationException("Not a consumable item: " + itemId);
+            throw new InvalidItemOperationException("Not a consumable item: " + inventoryItemId);
         }
 
         removeOne(target);

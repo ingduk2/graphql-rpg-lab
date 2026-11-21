@@ -1,8 +1,10 @@
 package com.rpg.lab.battle;
 
+import com.rpg.lab.fixture.InventoryFixture;
 import com.rpg.lab.fixture.ItemFixture;
 import com.rpg.lab.fixture.MonsterFixture;
 import com.rpg.lab.inventory.Inventory;
+import com.rpg.lab.inventory.InventoryItem;
 import com.rpg.lab.item.Item;
 import com.rpg.lab.item.ItemType;
 import com.rpg.lab.monster.Monster;
@@ -143,8 +145,7 @@ class BattleTest {
         @DisplayName("공격 아이템 보너스가 데미지에 반영된다")
         void test1() {
             Item item = ItemFixture.createCustomItemWithId("테스트 검", ItemType.WEAPON, 10, 0);
-            inventory.addItem(item);
-            inventory.equip(item.getId());
+            equip(item);
 
             Battle battle = attack(orc);
 
@@ -155,8 +156,7 @@ class BattleTest {
         @DisplayName("방어 아이템 보너스가 몬스터 반격 데미지에 반영된다")
         void test2() {
             Item item = ItemFixture.createCustomItemWithId("테스트 갑옷", ItemType.ARMOR, 0, 5);
-            inventory.addItem(item);
-            inventory.equip(item.getId());
+            equip(item);
 
             Battle battle = attack(orc);
 
@@ -167,8 +167,7 @@ class BattleTest {
         @DisplayName("액세서리 보너스가 공격과 방어 둘 다 반영한다")
         void test3() {
             Item item = ItemFixture.createCustomItemWithId("테스트 반지", ItemType.ACCESSORY, 2, 2);
-            inventory.addItem(item);
-            inventory.equip(item.getId());
+            equip(item);
 
             Battle battle = attack(orc);
 
@@ -181,10 +180,8 @@ class BattleTest {
         void test4() {
             Item weapon = ItemFixture.createGoblinSetWeaponWithId();
             Item armor = ItemFixture.createGoblinSetArmorWithId();
-            inventory.addItem(weapon);
-            inventory.addItem(armor);
-            inventory.equip(weapon.getId());
-            inventory.equip(armor.getId());
+            equip(weapon);
+            equip(armor);
 
             Battle battle = attack(orc);
 
@@ -231,5 +228,11 @@ class BattleTest {
 
     private Battle flee(Monster monster) {
         return new Battle(player, MonsterFixture.unscaled(monster), inventory, monster.getHp()).flee();
+    }
+
+    private void equip(Item item) {
+        InventoryItem row = inventory.addItem(item);
+        InventoryFixture.assignIds(inventory);
+        inventory.equip(row.getId());
     }
 }

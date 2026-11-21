@@ -4,6 +4,7 @@ import com.rpg.lab.common.RandomProvider;
 import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.exception.InvalidItemOperationException;
 import com.rpg.lab.exception.MaxEnhanceLevelException;
+import com.rpg.lab.fixture.InventoryFixture;
 import com.rpg.lab.fixture.ItemFixture;
 import com.rpg.lab.fixture.PlayerFixture;
 import com.rpg.lab.item.Item;
@@ -74,7 +75,7 @@ class InventoryTest {
         @DisplayName("같은 소모품을 여러 번 추가하면 행은 하나, 수량이 쌓인다")
         void test4() {
             Inventory inventory = Inventory.create(player);
-            Item potion =ItemFixture.createPotionItemWithId();
+            Item potion = ItemFixture.createPotionItemWithId();
 
             inventory.addItem(potion);
             inventory.addItem(potion);
@@ -82,6 +83,19 @@ class InventoryTest {
 
             assertThat(inventory.getInventoryItems()).hasSize(1);
             assertThat(inventory.getInventoryItems().getFirst().getQuantity()).isEqualTo(3);
+        }
+
+        @Test
+        @DisplayName("addItem 은 생성되거나 수량이 늘어난 행을 반환한다")
+        void test5() {
+            Inventory inventory = Inventory.create(player);
+            Item potion = ItemFixture.createPotionItemWithId();
+
+            InventoryItem first = inventory.addItem(potion);
+            InventoryItem second = inventory.addItem(potion);
+
+            assertThat(second).isSameAs(first);
+            assertThat(second.getQuantity()).isEqualTo(2);
         }
     }
 
@@ -161,10 +175,11 @@ class InventoryTest {
             Inventory inventory = Inventory.create(player);
             Item swordItem = ItemFixture.createSwordItemWithId();
             Item ringItem = ItemFixture.createRingItemWithId();
-            inventory.addItem(swordItem);
-            inventory.addItem(ringItem);
-            inventory.equip(swordItem.getId());
-            inventory.equip(ringItem.getId());
+            InventoryItem sword = inventory.addItem(swordItem);
+            InventoryItem ring = inventory.addItem(ringItem);
+            InventoryFixture.assignIds(inventory);
+            inventory.equip(sword.getId());
+            inventory.equip(ring.getId());
 
             int attackBonus = inventory.getAttackBonus();
 
@@ -201,10 +216,11 @@ class InventoryTest {
             Inventory inventory = Inventory.create(player);
             Item shieldItem = ItemFixture.createShieldItemWithId();
             Item ringItem = ItemFixture.createRingItemWithId();
-            inventory.addItem(shieldItem);
-            inventory.addItem(ringItem);
-            inventory.equip(shieldItem.getId());
-            inventory.equip(ringItem.getId());
+            InventoryItem shield = inventory.addItem(shieldItem);
+            InventoryItem ring = inventory.addItem(ringItem);
+            InventoryFixture.assignIds(inventory);
+            inventory.equip(shield.getId());
+            inventory.equip(ring.getId());
 
             int defenseBonus = inventory.getDefenseBonus();
 
@@ -219,36 +235,27 @@ class InventoryTest {
         @DisplayName("아이템을 장착하면 equipped 가 true 가 된다")
         void test1() {
             Inventory inventory = Inventory.create(player);
-            Item swordItem = ItemFixture.createSwordItemWithId();
-            inventory.addItem(swordItem);
+            InventoryItem sword = inventory.addItem(ItemFixture.createSwordItemWithId());
+            InventoryFixture.assignIds(inventory);
 
-            inventory.equip(swordItem.getId());
+            inventory.equip(sword.getId());
 
-            InventoryItem equipped = inventory.getInventoryItems().getFirst();
-            assertThat(equipped.isEquipped()).isTrue();
+            assertThat(sword.isEquipped()).isTrue();
         }
 
         @Test
         @DisplayName("같은 타입의 다른 아이템을 장착하면 기존 장착 아이템은 해제된다")
         void test2() {
             Inventory inventory = Inventory.create(player);
-            Item swordItem = ItemFixture.createSwordItemWithId();
-            Item axeItem = ItemFixture.createAxeItemWithId();
-            inventory.addItem(swordItem);
-            inventory.addItem(axeItem);
+            InventoryItem sword = inventory.addItem(ItemFixture.createSwordItemWithId());
+            InventoryItem axe = inventory.addItem(ItemFixture.createAxeItemWithId());
+            InventoryFixture.assignIds(inventory);
 
-            inventory.equip(swordItem.getId());
-            inventory.equip(axeItem.getId());
+            inventory.equip(sword.getId());
+            inventory.equip(axe.getId());
 
-            List<InventoryItem> items = inventory.getInventoryItems();
-            assertThat(items)
-                    .filteredOn(it -> it.getItem().equals(swordItem))
-                    .extracting(InventoryItem::isEquipped)
-                    .containsExactly(false);
-            assertThat(items)
-                    .filteredOn(it -> it.getItem().equals(axeItem))
-                    .extracting(InventoryItem::isEquipped)
-                    .containsExactly(true);
+            assertThat(sword.isEquipped()).isFalse();
+            assertThat(axe.isEquipped()).isTrue();
         }
 
         @Test
@@ -265,11 +272,54 @@ class InventoryTest {
         @DisplayName("소모품을 장착하려 하면 InvalidItemOperationException")
         void test4() {
             Inventory inventory = Inventory.create(player);
-            Item potion = ItemFixture.createPotionItemWithId();
-            inventory.addItem(potion);
+            InventoryItem potion = inventory.addItem(ItemFixture.createPotionItemWithId());
+            InventoryFixture.assignIds(inventory);
 
             assertThatThrownBy(() -> inventory.equip(potion.getId()))
                     .isInstanceOf(InvalidItemOperationException.class);
+        }
+
+        @Test
+        @DisplayName("같은 장비가 두 개면 각각 따로 장착할 수 있다")
+        void test5() {
+            Inventory inventory = Inventory.create(player);
+            Item swordItem = ItemFixture.createSwordItemWithId();
+            InventoryItem sword1 = inventory.addItem(swordItem);
+            InventoryItem sword2 = inventory.addItem(swordItem);
+            InventoryFixture.assignIds(inventory);
+
+            inventory.equip(sword2.getId());
+
+            assertThat(sword1.isEquipped()).isFalse();
+            assertThat(sword2.isEquipped()).isTrue();
+        }
+
+        @Test
+        @DisplayName("같은 장비 중 하나를 장착한 상태에서 다른 하나를 장착하면 기존 것은 해제된다")
+        void test6() {
+            Inventory inventory = Inventory.create(player);
+            Item swordItem = ItemFixture.createSwordItemWithId();
+            InventoryItem sword1 = inventory.addItem(swordItem);
+            InventoryItem sword2 = inventory.addItem(swordItem);
+            InventoryFixture.assignIds(inventory);
+            inventory.equip(sword1.getId());
+
+            inventory.equip(sword2.getId());
+
+            assertThat(sword1.isEquipped()).isFalse();
+            assertThat(sword2.isEquipped()).isTrue();
+        }
+
+        @Test
+        @DisplayName("다른 인벤토리의 행 ID로는 장착할 수 없다")
+        void test7() {
+            Inventory mine = Inventory.create(player);
+            Inventory others = Inventory.create(PlayerFixture.create());
+            InventoryItem othersSword = others.addItem(ItemFixture.createSwordItemWithId());
+            InventoryFixture.assignIds(others);
+
+            assertThatThrownBy(() -> mine.equip(othersSword.getId()))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
     }
 
@@ -280,13 +330,13 @@ class InventoryTest {
         @DisplayName("장착 아이템을 해제하면 equipped 가 false 가 된다")
         void test1() {
             Inventory inventory = Inventory.create(player);
-            Item swordItem = ItemFixture.createSwordItemWithId();
-            inventory.addItem(swordItem);
-            inventory.equip(swordItem.getId());
+            InventoryItem sword = inventory.addItem(ItemFixture.createSwordItemWithId());
+            InventoryFixture.assignIds(inventory);
+            inventory.equip(sword.getId());
 
-            inventory.unequip(swordItem.getId());
+            inventory.unequip(sword.getId());
 
-            assertThat(inventory.getInventoryItems().getFirst().isEquipped()).isFalse();
+            assertThat(sword.isEquipped()).isFalse();
         }
     }
 
@@ -298,25 +348,24 @@ class InventoryTest {
         void test1() {
             Inventory inventory = Inventory.create(player);
             Item item = ItemFixture.createSwordItemWithId();
-            inventory.addItem(item);
+            InventoryItem sword = inventory.addItem(item);
+            InventoryFixture.assignIds(inventory);
 
-            int price = inventory.sellItem(item.getId());
+            int price = inventory.sellItem(sword.getId());
 
             assertThat(price).isEqualTo(item.sellPrice());
-            assertThat(inventory.getInventoryItems())
-                    .extracting(InventoryItem::getItem)
-                    .doesNotContain(item);
+            assertThat(inventory.getInventoryItems()).doesNotContain(sword);
         }
 
         @Test
         @DisplayName("장착 중인 아이템도 판매할 수 있다")
         void test2() {
             Inventory inventory = Inventory.create(player);
-            Item item = ItemFixture.createAxeItemWithId();
-            inventory.addItem(item);
-            inventory.equip(item.getId());
+            InventoryItem axe = inventory.addItem(ItemFixture.createAxeItemWithId());
+            InventoryFixture.assignIds(inventory);
+            inventory.equip(axe.getId());
 
-            inventory.sellItem(item.getId());
+            inventory.sellItem(axe.getId());
 
             assertThat(inventory.getInventoryItems()).isEmpty();
         }
@@ -335,27 +384,44 @@ class InventoryTest {
         @DisplayName("소모품을 판매하면 수량만 1 줄어든다")
         void test4() {
             Inventory inventory = Inventory.create(player);
-            Item potion =ItemFixture.createPotionItemWithId();
-            inventory.addItem(potion);
-            inventory.addItem(potion);
+            Item potionItem = ItemFixture.createPotionItemWithId();
+            inventory.addItem(potionItem);
+            InventoryItem potion = inventory.addItem(potionItem);
+            InventoryFixture.assignIds(inventory);
 
             int price = inventory.sellItem(potion.getId());
 
-            assertThat(price).isEqualTo(potion.sellPrice());
+            assertThat(price).isEqualTo(potionItem.sellPrice());
             assertThat(inventory.getInventoryItems()).hasSize(1);
-            assertThat(inventory.getInventoryItems().getFirst().getQuantity()).isEqualTo(1);
+            assertThat(potion.getQuantity()).isEqualTo(1);
         }
 
         @Test
         @DisplayName("마지막 소모품을 판매하면 행이 사라진다")
         void test5() {
             Inventory inventory = Inventory.create(player);
-            Item potion = ItemFixture.createPotionItemWithId();
-            inventory.addItem(potion);
+            InventoryItem potion = inventory.addItem(ItemFixture.createPotionItemWithId());
+            InventoryFixture.assignIds(inventory);
 
             inventory.sellItem(potion.getId());
 
             assertThat(inventory.getInventoryItems()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("같은 장비가 두 개면 지정한 것만 판매된다")
+        void test6() {
+            Inventory inventory = Inventory.create(player);
+            Item swordItem = ItemFixture.createSwordItemWithId();
+            InventoryItem sword1 = inventory.addItem(swordItem);
+            InventoryItem sword2 = inventory.addItem(swordItem);
+            InventoryFixture.assignIds(inventory);
+            inventory.equip(sword1.getId());
+
+            inventory.sellItem(sword2.getId());
+
+            assertThat(inventory.getInventoryItems()).containsExactly(sword1);
+            assertThat(sword1.isEquipped()).isTrue();
         }
     }
 
@@ -410,10 +476,10 @@ class InventoryTest {
         @DisplayName("강화에 성공하면 enhanceLevel 이 오른다")
         void test1() {
             Inventory inventory = Inventory.create(player);
-            Item item = ItemFixture.createSwordItemWithId();
-            inventory.addItem(item);
+            InventoryItem sword = inventory.addItem(ItemFixture.createSwordItemWithId());
+            InventoryFixture.assignIds(inventory);
 
-            EnhanceResult result = inventory.enhanceItem(item.getId(), alwaysSuccessPolicy, fixedRoll);
+            EnhanceResult result = inventory.enhanceItem(sword.getId(), alwaysSuccessPolicy, fixedRoll);
 
             assertThat(result.success()).isTrue();
             assertThat(result.newEnhanceLevel()).isEqualTo(1);
@@ -423,11 +489,11 @@ class InventoryTest {
         @DisplayName("강화에 실패하면 enhanceLevel 이 내려간다")
         void test2() {
             Inventory inventory = Inventory.create(player);
-            Item item = ItemFixture.createSwordItemWithId();
-            inventory.addItem(item);
-            inventory.enhanceItem(item.getId(), alwaysSuccessPolicy, fixedRoll);
+            InventoryItem sword = inventory.addItem(ItemFixture.createSwordItemWithId());
+            InventoryFixture.assignIds(inventory);
+            inventory.enhanceItem(sword.getId(), alwaysSuccessPolicy, fixedRoll);
 
-            EnhanceResult result = inventory.enhanceItem(item.getId(), alwaysFailPolicy, fixedRoll);
+            EnhanceResult result = inventory.enhanceItem(sword.getId(), alwaysFailPolicy, fixedRoll);
 
             assertThat(result.success()).isFalse();
             assertThat(result.newEnhanceLevel()).isEqualTo(0);
@@ -437,10 +503,10 @@ class InventoryTest {
         @DisplayName("최소 레벨(0) 에서 실패해도 레벨이 음수가 되지 않는다")
         void test3() {
             Inventory inventory = Inventory.create(player);
-            Item item = ItemFixture.createSwordItemWithId();
-            inventory.addItem(item);
+            InventoryItem sword = inventory.addItem(ItemFixture.createSwordItemWithId());
+            InventoryFixture.assignIds(inventory);
 
-            EnhanceResult result = inventory.enhanceItem(item.getId(), alwaysFailPolicy, fixedRoll);
+            EnhanceResult result = inventory.enhanceItem(sword.getId(), alwaysFailPolicy, fixedRoll);
 
             assertThat(result.success()).isFalse();
             assertThat(result.newEnhanceLevel()).isEqualTo(0);
@@ -450,14 +516,14 @@ class InventoryTest {
         @DisplayName("이미 최대 레벨이면 MaxEnhanceLevelException 이 발생한다")
         void test4() {
             Inventory inventory = Inventory.create(player);
-            Item item = ItemFixture.createSwordItemWithId();
-            inventory.addItem(item);
+            InventoryItem sword = inventory.addItem(ItemFixture.createSwordItemWithId());
+            InventoryFixture.assignIds(inventory);
 
             for (int i = 0; i < EnhancementPolicy.MAX_ENHANCE_LEVEL; i++) {
-                inventory.enhanceItem(item.getId(), alwaysSuccessPolicy, fixedRoll);
+                inventory.enhanceItem(sword.getId(), alwaysSuccessPolicy, fixedRoll);
             }
 
-            assertThatThrownBy(() -> inventory.enhanceItem(item.getId(), alwaysSuccessPolicy, fixedRoll))
+            assertThatThrownBy(() -> inventory.enhanceItem(sword.getId(), alwaysSuccessPolicy, fixedRoll))
                     .isInstanceOf(MaxEnhanceLevelException.class);
         }
 
@@ -465,8 +531,8 @@ class InventoryTest {
         @DisplayName("강화한 장착 아이템은 강화 단계만큼 공격 보너스가 더 붙는다")
         void test5() {
             Inventory inventory = Inventory.create(player);
-            Item sword = ItemFixture.createSwordItemWithId(); // atk 5
-            inventory.addItem(sword);
+            InventoryItem sword = inventory.addItem(ItemFixture.createSwordItemWithId()); // atk 5
+            InventoryFixture.assignIds(inventory);
             inventory.equip(sword.getId());
             inventory.enhanceItem(sword.getId(), alwaysSuccessPolicy, fixedRoll); // +1
 
@@ -477,8 +543,8 @@ class InventoryTest {
         @DisplayName("무기를 강화해도 방어 보너스는 오르지 않는다")
         void test6() {
             Inventory inventory = Inventory.create(player);
-            Item sword = ItemFixture.createSwordItemWithId(); // def 0
-            inventory.addItem(sword);
+            InventoryItem sword = inventory.addItem(ItemFixture.createSwordItemWithId()); // def 0
+            InventoryFixture.assignIds(inventory);
             inventory.equip(sword.getId());
             inventory.enhanceItem(sword.getId(), alwaysSuccessPolicy, fixedRoll);
 
@@ -489,21 +555,20 @@ class InventoryTest {
         @DisplayName("장착하지 않은 아이템은 강화해도 보너스에 반영되지 않는다")
         void test7() {
             Inventory inventory = Inventory.create(player);
-            Item sword = ItemFixture.createSwordItemWithId();
-            inventory.addItem(sword);
+            InventoryItem sword = inventory.addItem(ItemFixture.createSwordItemWithId());
+            InventoryFixture.assignIds(inventory);
             inventory.enhanceItem(sword.getId(), alwaysSuccessPolicy, fixedRoll);
 
             assertThat(inventory.getAttackBonus()).isEqualTo(0);
         }
 
         @Test
-        @DisplayName("세트 아이템을 강화하면 세트 보너스도 함꼐 커진다")
+        @DisplayName("세트 아이템을 강화하면 세트 보너스도 함께 커진다")
         void test8() {
             Inventory inventory = Inventory.create(player);
-            Item weapon = ItemFixture.createGoblinSetWeaponWithId(); // ATK 3
-            Item armor = ItemFixture.createGoblinSetArmorWithId();
-            inventory.addItem(weapon);
-            inventory.addItem(armor);
+            InventoryItem weapon = inventory.addItem(ItemFixture.createGoblinSetWeaponWithId()); // ATK 3
+            InventoryItem armor = inventory.addItem(ItemFixture.createGoblinSetArmorWithId());
+            InventoryFixture.assignIds(inventory);
             inventory.equip(weapon.getId());
             inventory.equip(armor.getId());
             inventory.enhanceItem(weapon.getId(), alwaysSuccessPolicy, fixedRoll); // 단검 +1 → ATK 4
@@ -517,11 +582,26 @@ class InventoryTest {
         @DisplayName("소모품을 강화하려 하면 InvalidItemOperationException")
         void test9() {
             Inventory inventory = Inventory.create(player);
-            Item potion = ItemFixture.createPotionItemWithId();
-            inventory.addItem(potion);
+            InventoryItem potion = inventory.addItem(ItemFixture.createPotionItemWithId());
+            InventoryFixture.assignIds(inventory);
 
             assertThatThrownBy(() -> inventory.enhanceItem(potion.getId(), alwaysSuccessPolicy, fixedRoll))
                     .isInstanceOf(InvalidItemOperationException.class);
+        }
+
+        @Test
+        @DisplayName("같은 장비가 두 개면 지정한 것만 강화된다")
+        void test10() {
+            Inventory inventory = Inventory.create(player);
+            Item swordItem = ItemFixture.createSwordItemWithId();
+            InventoryItem sword1 = inventory.addItem(swordItem);
+            InventoryItem sword2 = inventory.addItem(swordItem);
+            InventoryFixture.assignIds(inventory);
+
+            inventory.enhanceItem(sword2.getId(), alwaysSuccessPolicy, fixedRoll);
+
+            assertThat(sword1.getEnhanceLevel()).isEqualTo(0);
+            assertThat(sword2.getEnhanceLevel()).isEqualTo(1);
         }
     }
 
@@ -531,41 +611,42 @@ class InventoryTest {
         @DisplayName("세트 아이템을 2개 미만 장착하면 세트 보너스가 없다")
         void test1() {
             Inventory inventory = Inventory.create(player);
-            Item goblinWeapon = ItemFixture.createGoblinSetWeaponWithId();
-            inventory.addItem(goblinWeapon);
+            Item goblinWeaponItem = ItemFixture.createGoblinSetWeaponWithId();
+            InventoryItem goblinWeapon = inventory.addItem(goblinWeaponItem);
+            InventoryFixture.assignIds(inventory);
             inventory.equip(goblinWeapon.getId());
 
             int attackBonus = inventory.getAttackBonus();
 
-            assertThat(attackBonus).isEqualTo(goblinWeapon.getAttackBonus());
+            assertThat(attackBonus).isEqualTo(goblinWeaponItem.getAttackBonus());
         }
 
         @Test
         @DisplayName("세트 아이템을 2개 이상 장착하면 세트 보너스가 추가된다")
         void test2() {
             Inventory inventory = Inventory.create(player);
-            Item goblinWeapon = ItemFixture.createGoblinSetWeaponWithId();
-            Item goblinArmor = ItemFixture.createGoblinSetArmorWithId();
-            inventory.addItem(goblinWeapon);
-            inventory.addItem(goblinArmor);
+            Item goblinWeaponItem = ItemFixture.createGoblinSetWeaponWithId();
+            Item goblinArmorItem = ItemFixture.createGoblinSetArmorWithId();
+            InventoryItem goblinWeapon = inventory.addItem(goblinWeaponItem);
+            InventoryItem goblinArmor = inventory.addItem(goblinArmorItem);
+            InventoryFixture.assignIds(inventory);
             inventory.equip(goblinWeapon.getId());
             inventory.equip(goblinArmor.getId());
 
             int attackBonus = inventory.getAttackBonus();
             int defenseBonus = inventory.getDefenseBonus();
 
-            assertThat(attackBonus).isEqualTo(goblinWeapon.getAttackBonus() + goblinArmor.getAttackBonus() + 3);
-            assertThat(defenseBonus).isEqualTo(goblinWeapon.getDefenseBonus() + goblinArmor.getDefenseBonus() + 3);
+            assertThat(attackBonus).isEqualTo(goblinWeaponItem.getAttackBonus() + goblinArmorItem.getAttackBonus() + 3);
+            assertThat(defenseBonus).isEqualTo(goblinWeaponItem.getDefenseBonus() + goblinArmorItem.getDefenseBonus() + 3);
         }
 
         @Test
         @DisplayName("활성화된 세트 목록을 조회할 수 있다")
         void test3() {
             Inventory inventory = Inventory.create(player);
-            Item goblinWeapon = ItemFixture.createGoblinSetWeaponWithId();
-            Item goblinArmor = ItemFixture.createGoblinSetArmorWithId();
-            inventory.addItem(goblinWeapon);
-            inventory.addItem(goblinArmor);
+            InventoryItem goblinWeapon = inventory.addItem(ItemFixture.createGoblinSetWeaponWithId());
+            InventoryItem goblinArmor = inventory.addItem(ItemFixture.createGoblinSetArmorWithId());
+            InventoryFixture.assignIds(inventory);
             inventory.equip(goblinWeapon.getId());
             inventory.equip(goblinArmor.getId());
 
@@ -580,12 +661,13 @@ class InventoryTest {
         @DisplayName("소모품을 사용하면 회복량을 반환하고 인벤토리에서 사라진다")
         void test1() {
             Inventory inventory = Inventory.create(player);
-            Item potion = ItemFixture.createPotionItemWithId();
-            inventory.addItem(potion);
+            Item potionItem = ItemFixture.createPotionItemWithId();
+            InventoryItem potion = inventory.addItem(potionItem);
+            InventoryFixture.assignIds(inventory);
 
             int healAmount = inventory.useItem(potion.getId());
 
-            assertThat(healAmount).isEqualTo(potion.getHealAmount());
+            assertThat(healAmount).isEqualTo(potionItem.getHealAmount());
             assertThat(inventory.getInventoryItems()).isEmpty();
         }
 
@@ -593,23 +675,24 @@ class InventoryTest {
         @DisplayName("같은 포션이 여러 개면 수량만 1 줄어든다")
         void test2() {
             Inventory inventory = Inventory.create(player);
-            Item potion = ItemFixture.createPotionItemWithId();
-            inventory.addItem(potion);
-            inventory.addItem(potion);
-            inventory.addItem(potion);
+            Item potionItem = ItemFixture.createPotionItemWithId();
+            inventory.addItem(potionItem);
+            inventory.addItem(potionItem);
+            InventoryItem potion = inventory.addItem(potionItem);
+            InventoryFixture.assignIds(inventory);
 
             inventory.useItem(potion.getId());
 
             assertThat(inventory.getInventoryItems()).hasSize(1);
-            assertThat(inventory.getInventoryItems().getFirst().getQuantity()).isEqualTo(2);
+            assertThat(potion.getQuantity()).isEqualTo(2);
         }
 
         @Test
         @DisplayName("장비를 사용하려 하면 InvalidItemOperationException")
         void test3() {
             Inventory inventory = Inventory.create(player);
-            Item sword = ItemFixture.createSwordItemWithId();
-            inventory.addItem(sword);
+            InventoryItem sword = inventory.addItem(ItemFixture.createSwordItemWithId());
+            InventoryFixture.assignIds(inventory);
 
             assertThatThrownBy(() -> inventory.useItem(sword.getId()))
                     .isInstanceOf(InvalidItemOperationException.class);
