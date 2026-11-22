@@ -276,7 +276,7 @@ class InventoryServiceTest {
 
             assertThat(result.healedAmount()).isEqualTo(30);
             assertThat(player.getHp()).isEqualTo(80);
-            assertThat(result.inventor().items()).isEmpty();
+            assertThat(result.inventory().items()).isEmpty();
         }
 
         @Test

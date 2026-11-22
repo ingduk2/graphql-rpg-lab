@@ -295,6 +295,30 @@ class InventoryDataFetcherTest {
                     .containsEntry("errorCode", ErrorCode.HP_ALREADY_FULL.name())
                     .containsEntry("userMessage", ErrorCode.HP_ALREADY_FULL.getUserMessage());
         }
+
+        @Test
+        @DisplayName("포션을 사용하면 응답의 inventory 에 줄어든 수량이 담긴다")
+        void test3() {
+            Item potionItem = itemRepository.save(ItemFixture.createPotionItem());
+            inventory.addItem(potionItem);
+            InventoryItem potion = own(potionItem);   // 두 번째 addItem → 수량 2
+            player.syncHp(50);
+            playerRepository.save(player);
+
+            List<Integer> quantities = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
+                    """
+                            mutation {
+                                useItem(itemId: "%d") { inventory { items { quantity } } }
+                            }
+                            """.formatted(potion.getId()),
+                    "data.useItem.inventory.items[*].quantity",
+                    Collections.emptyMap(),
+                    new TypeRef<>() {},
+                    headers
+            );
+
+            assertThat(quantities).containsExactly(1);
+        }
     }
 
     /**
