@@ -1,11 +1,9 @@
 package com.rpg.lab.shop;
 
 import com.rpg.lab.exception.EntityNotFoundException;
-import com.rpg.lab.exception.ItemAlreadyOwnedException;
 import com.rpg.lab.inventory.Inventory;
 import com.rpg.lab.inventory.InventoryRepository;
 import com.rpg.lab.inventory.InventoryResponse;
-import com.rpg.lab.item.Item;
 import com.rpg.lab.player.Player;
 import com.rpg.lab.player.PlayerManager;
 import com.rpg.lab.player.PlayerReader;
@@ -37,12 +35,7 @@ public class ShopService {
                 .orElseThrow(() -> new EntityNotFoundException("ShopItem not found: " + shopItemId));
         Player player = playerReader.getById(playerId);
         Inventory inventory = inventoryRepository.findByPlayerId(playerId)
-                .orElseThrow(() -> new EntityNotFoundException("Inventory not found, playerId: " + player));
-
-        Item item = shopItem.getItem();
-        if (!item.isConsumable() && inventory.hasItem(item.getId())) {
-            throw new ItemAlreadyOwnedException("이미 보유한 장비입니다: " + item.getName());
-        }
+                .orElseThrow(() -> new EntityNotFoundException("Inventory not found, playerId: " + playerId));
 
         player.spendGold(shopItem.getPrice());
         inventory.addItem(shopItem.getItem());

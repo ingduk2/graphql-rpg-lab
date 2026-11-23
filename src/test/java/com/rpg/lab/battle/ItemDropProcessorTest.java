@@ -89,7 +89,7 @@ class ItemDropProcessorTest {
     }
 
     @Test
-    @DisplayName("이미 보유 중인 아이템이 드랍될 때 인벤토리에 중복 추가되지 않는다")
+    @DisplayName("이미 보유 중인 장비가 드랍되면 인벤토리에 행이 따로 추가된다")
     void test4() {
         Monster monster = monsterRepository.save(MonsterFixture.createSlime());
         Item item = itemRepository.save(ItemFixture.createShieldItem());
@@ -101,7 +101,10 @@ class ItemDropProcessorTest {
 
         assertThat(result).contains(item);
         List<InventoryItem> inventoryItems = getInventory().getInventoryItems();
-        assertThat(inventoryItems).hasSize(1);
+        assertThat(inventoryItems)
+                .hasSize(2)
+                .extracting(InventoryItem::getItem)
+                .containsExactly(item, item);
     }
 
     @Test
@@ -145,6 +148,7 @@ class ItemDropProcessorTest {
     }
 
     private Inventory getInventory() {
-        return inventoryRepository.findByPlayerId(player.getId()).get();
+        return inventoryRepository.findByPlayerId(player.getId())
+                .orElseThrow(() -> new AssertionError("테스트 셋업 오류: 인벤토리 없음"));
     }
 }

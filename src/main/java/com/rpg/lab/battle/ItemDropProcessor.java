@@ -44,7 +44,7 @@ public class ItemDropProcessor {
         Inventory inventory = inventoryRepository.findById(inventoryId)
                 .orElseThrow(() -> new EntityNotFoundException("Inventory not found"));
 
-        inventory.addItemIfNotOwned(item);
+        inventory.addItem(item);
         inventoryRepository.save(inventory);
     }
 }

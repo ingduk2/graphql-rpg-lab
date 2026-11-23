@@ -100,53 +100,6 @@ class InventoryTest {
     }
 
     @Nested
-    class AddItemIfNotOwned {
-
-        @Test
-        @DisplayName("보유하지 않은 아이템이면 추가된다")
-        void test1() {
-            Inventory inventory = Inventory.create(player);
-            Item swordItem = ItemFixture.createSwordItemWithId();
-            inventory.addItem(swordItem);
-            Item shieldItem = ItemFixture.createShieldItemWithId();
-
-            inventory.addItemIfNotOwned(shieldItem);
-
-            assertThat(inventory.getInventoryItems())
-                    .extracting(InventoryItem::getItem)
-                    .containsExactlyInAnyOrder(swordItem, shieldItem);
-        }
-
-        @Test
-        @DisplayName("이미 보유한 아이템이면 추가되지 않는다 (개수 그대로)")
-        void test2() {
-            Inventory inventory = Inventory.create(player);
-            Item swordItem = ItemFixture.createSwordItemWithId();
-            inventory.addItem(swordItem);
-
-            inventory.addItemIfNotOwned(swordItem);
-
-            assertThat(inventory.getInventoryItems())
-                    .hasSize(1)
-                    .extracting(InventoryItem::getItem)
-                    .containsExactly(swordItem);
-        }
-
-        @Test
-        @DisplayName("소모품은 이미 보유해도 추가되고, 같은 행의 수량이 늘어난다")
-        void test3() {
-            Inventory inventory = Inventory.create(player);
-            Item potion = ItemFixture.createPotionItemWithId();
-            inventory.addItem(potion);
-
-            inventory.addItemIfNotOwned(potion);
-
-            assertThat(inventory.getInventoryItems()).hasSize(1);
-            assertThat(inventory.getInventoryItems().getFirst().getQuantity()).isEqualTo(2);
-        }
-    }
-
-    @Nested
     class AttackBonus {
 
         @Test

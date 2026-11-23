@@ -34,7 +34,7 @@ public class QuestRewardProcessor {
 
         inventoryRepository.findById(inventoryId)
                 .ifPresent(inventory -> {
-                    rewardItems.forEach(inventory::addItemIfNotOwned);
+                    rewardItems.forEach(inventory::addItem);
                     inventoryRepository.save(inventory);
                 });
     }

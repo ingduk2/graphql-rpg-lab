@@ -2,7 +2,6 @@ package com.rpg.lab.shop;
 
 import com.rpg.lab.exception.EntityNotFoundException;
 import com.rpg.lab.exception.InsufficientGoldException;
-import com.rpg.lab.exception.ItemAlreadyOwnedException;
 import com.rpg.lab.fixture.ItemFixture;
 import com.rpg.lab.fixture.PlayerFixture;
 import com.rpg.lab.inventory.Inventory;
@@ -80,7 +79,7 @@ class ShopServiceTest {
         }
 
         @Test
-        @DisplayName("이미 보유한 장비는 다시 구매할 수 없다")
+        @DisplayName("이미 보유한 장비도 다시 구매할 수 있고, 행이 따로 생긴다")
         void test4() {
             player.gainGold(1000);
             playerRepository.save(player);
@@ -89,8 +88,10 @@ class ShopServiceTest {
 
             sut.buyItem(player.getId(), shopItem.getId());
 
-            assertThatThrownBy(() -> sut.buyItem(player.getId(), shopItem.getId()))
-                    .isInstanceOf(ItemAlreadyOwnedException.class);
+            InventoryResponse result = sut.buyItem(player.getId(), shopItem.getId());
+
+            assertThat(result.items()).hasSize(2);
+
         }
 
         @Test

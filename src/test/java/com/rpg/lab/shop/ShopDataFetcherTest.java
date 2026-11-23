@@ -3,7 +3,6 @@ package com.rpg.lab.shop;
 import com.jayway.jsonpath.TypeRef;
 import com.netflix.graphql.dgs.DgsQueryExecutor;
 import com.rpg.lab.config.PlayerContextBuilder;
-import com.rpg.lab.exception.ErrorCode;
 import com.rpg.lab.fixture.ItemFixture;
 import com.rpg.lab.fixture.PlayerFixture;
 import com.rpg.lab.inventory.Inventory;
@@ -115,7 +114,7 @@ class ShopDataFetcherTest {
         }
 
         @Test
-        @DisplayName("이미 보유한 장비를 구매하면 ITEM_ALREADY_OWNED 에러 코드가 내려온다")
+        @DisplayName("이미 보유한 장비도 다시 구매할 수 있고, 인벤토리에 행이 따로 생긴다")
         void test3() {
             player.gainGold(1000);
             playerRepository.save(player);
@@ -123,16 +122,19 @@ class ShopDataFetcherTest {
             ShopItem shopItem = shopItemRepository.save(ShopItem.create(item, 50));
 
             String mutation = """
-            mutation { buyItem(shopItemId: "%d") { id } }
+                mutation { buyItem(shopItemId: "%d") { items { id } } }
             """.formatted(shopItem.getId());
             dgsQueryExecutor.execute(mutation, Collections.emptyMap(), null, headers);
 
-            ExecutionResult result = dgsQueryExecutor.execute(mutation, Collections.emptyMap(), null, headers);
+            List<Long> itemIds = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
+                    mutation,
+                    "data.buyItem.items[*].id",
+                    Collections.emptyMap(),
+                    new TypeRef<>() {},
+                    headers
+            );
 
-            assertThat(result.getErrors()).isNotEmpty();
-            assertThat(result.getErrors().getFirst().getExtensions())
-                    .containsEntry("errorCode", ErrorCode.ITEM_ALREADY_OWNED.name())
-                    .containsEntry("userMessage", ErrorCode.ITEM_ALREADY_OWNED.getUserMessage());
+            assertThat(itemIds).hasSize(2);
         }
     }
 

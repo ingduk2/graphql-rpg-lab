@@ -66,17 +66,6 @@ public class Inventory {
         return price;
     }
 
-    public void addItemIfNotOwned(Item item) {
-        if (item.isConsumable() || !hasItem(item.getId())) {
-            addItem(item);
-        }
-    }
-
-    public boolean hasItem(Long itemId) {
-        return inventoryItems.stream()
-                .anyMatch(it -> it.getItem().getId().equals(itemId));
-    }
-
     public void equip(Long inventoryItemId) {
         InventoryItem target = getInventoryItem(inventoryItemId);
 

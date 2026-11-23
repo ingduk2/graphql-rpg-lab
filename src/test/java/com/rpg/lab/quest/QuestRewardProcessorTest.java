@@ -90,7 +90,7 @@ class QuestRewardProcessorTest {
     }
 
     @Test
-    @DisplayName("이미 보유 중인 아이템이 보상으로 또 나올 때 → 인벤토리에 중복 추가 안 되는지 (개수/목록 그대로인지)")
+    @DisplayName("이미 보유 중인 아이템이 보상으로 또 나올 때 → 인벤토리에 행이 따로 추가된다")
     void test4() {
         Inventory playerInventory = Inventory.create(player);
         Item item = itemRepository.save(ItemFixture.createSwordItem());
@@ -103,9 +103,9 @@ class QuestRewardProcessorTest {
 
         assertThat(player.getExp()).isEqualTo(expBefore);
         List<InventoryItem> inventoryItems = getInventory().getInventoryItems();
-        assertThat(inventoryItems).hasSize(1)
+        assertThat(inventoryItems).hasSize(2)
                 .extracting(InventoryItem::getItem)
-                .contains(item);
+                .containsExactly(item, item);
     }
 
     @Test
@@ -136,6 +136,7 @@ class QuestRewardProcessorTest {
     }
 
     private Inventory getInventory() {
-        return inventoryRepository.findByPlayerId(player.getId()).get();
+        return inventoryRepository.findByPlayerId(player.getId())
+                .orElseThrow(() -> new AssertionError("테스트 셋업 오류: 인벤토리 없음"));
     }
 }
