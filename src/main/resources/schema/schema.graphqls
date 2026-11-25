@@ -27,12 +27,12 @@ type Mutation {
     createPlayer(input: CreatePlayerInput!): Player!
 
     # Item
-    equipItem(itemId: ID!): Inventory!
-    unequipItem(itemId: ID!): Inventory!
-    sellItem(itemId: ID!): Inventory!
+    equipItem(inventoryItemId: ID!): Inventory!
+    unequipItem(inventoryItemId: ID!): Inventory!
+    sellItem(inventoryItemId: ID!): Inventory!
     buyItem(shopItemId: ID!): Inventory!
-    enhanceItem(itemId: ID!): EnhanceItemResponse!
-    useItem(itemId: ID!): UseItemResponse!
+    enhanceItem(inventoryItemId: ID!): EnhanceItemResponse!
+    useItem(inventoryItemId: ID!): UseItemResponse!
 
     # Quest
     acceptQuest(questId: ID!): PlayerQuest!
@@ -131,6 +131,7 @@ enum ItemSetType {
 
 type Item {
     id: ID!
+    inventoryItemId: ID!
     name: String!
     type: ItemType!
     attackBonus: Int!

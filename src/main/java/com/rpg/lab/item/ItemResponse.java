@@ -2,6 +2,7 @@ package com.rpg.lab.item;
 
 public record ItemResponse(
         Long id,
+        Long inventoryItemId,
         String name,
         ItemType type,
         int attackBonus,
@@ -14,6 +15,7 @@ public record ItemResponse(
 ) {
     public static ItemResponse from(
             Item item,
+            Long inventoryItemId,
             int attackBonus,
             int defenseBonus,
             boolean equipped,
@@ -22,6 +24,7 @@ public record ItemResponse(
     ) {
         return new ItemResponse(
                 item.getId(),
+                inventoryItemId,
                 item.getName(),
                 item.getType(),
                 attackBonus,

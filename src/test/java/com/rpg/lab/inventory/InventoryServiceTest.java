@@ -50,9 +50,8 @@ class InventoryServiceTest {
 
             InventoryResponse result = sut.equipItem(player.getId(), sword.getId());
 
-            // TODO(23-3): ItemResponse 에 inventoryItemId 가 생기면 행 ID 로 필터링
             assertThat(result.items())
-                    .filteredOn(i -> i.id().equals(sword.getItem().getId()))
+                    .filteredOn(i -> i.inventoryItemId().equals(sword.getId()))
                     .extracting(
                             ItemResponse::name,
                             ItemResponse::equipped

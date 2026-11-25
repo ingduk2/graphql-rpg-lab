@@ -45,9 +45,6 @@ class InventoryDataFetcherTest {
         headers.add(PlayerContextBuilder.X_PLAYER_ID, String.valueOf(player.getId()));
     }
 
-    // 23-2 시점: mutation 인자 이름은 아직 itemId 지만, 값은 인벤토리 행 ID 를 넘긴다.
-    // 응답의 items[].id 는 아직 아이템 ID 라서 JsonPath 필터는 아이템 ID 로 건다. (23-3 에서 정리)
-
     @Nested
     class EquipItem {
 
@@ -59,10 +56,10 @@ class InventoryDataFetcherTest {
             List<Boolean> equippedFlags = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
                     """
                             mutation {
-                                equipItem(itemId: "%d") { items { id equipped } }
+                                equipItem(inventoryItemId: "%d") { items { inventoryItemId equipped } }
                             }
                             """.formatted(sword.getId()),
-                    "data.equipItem.items[?(@.id=='%d')].equipped".formatted(sword.getItem().getId()),
+                    "data.equipItem.items[?(@.inventoryItemId=='%d')].equipped".formatted(sword.getId()),
                     Collections.emptyMap(),
                     new TypeRef<>() {},
                     headers
@@ -78,13 +75,43 @@ class InventoryDataFetcherTest {
 
             ExecutionResult result = dgsQueryExecutor.execute(
                     """
-                    mutation { equipItem(itemId: "%d") { id } }
+                    mutation { equipItem(inventoryItemId: "%d") { id } }
                     """.formatted(potion.getId()),
                     Collections.emptyMap(), null, headers);
 
             assertThat(result.getErrors().getFirst().getExtensions())
                     .containsEntry("errorCode", ErrorCode.INVALID_ITEM_OPERATION.name())
                     .containsEntry("userMessage", ErrorCode.INVALID_ITEM_OPERATION.getUserMessage());
+        }
+
+        @Test
+        @DisplayName("같은 장비가 두 개면 지정한 행만 장착된 것으로 응답된다")
+        void test3() {
+            Item swordItem = itemRepository.save(ItemFixture.createSwordItem());
+            inventory.addItem(swordItem);
+            inventory.addItem(swordItem);
+            inventoryRepository.save(inventory);
+            List<InventoryItem> swords = inventoryRepository.findWithItemsByPlayerId(player.getId())
+                    .orElseThrow()
+                    .getInventoryItems();
+            InventoryItem sword1 =swords.get(0);
+            InventoryItem sword2 =swords.get(1);
+
+            String query = """
+                    mutation {
+                        equipItem(inventoryItemId: "%d") { items { inventoryItemId equipped } }
+                    }
+            """.formatted(sword2.getId());
+
+            List<Boolean> sword1Equipped = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
+                    query,
+                    "data.equipItem.items[?(@.inventoryItemId=='%d')].equipped".formatted(sword1.getId()),
+                    Collections.emptyMap(),
+                    new TypeRef<>() {},
+                    headers
+            );
+
+            assertThat(sword1Equipped).containsExactly(false);
         }
     }
 
@@ -101,10 +128,10 @@ class InventoryDataFetcherTest {
             List<Boolean> equippedFlags = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
                     """
                             mutation {
-                                unequipItem(itemId: "%d") { items { id equipped } }
+                                unequipItem(inventoryItemId: "%d") { items { inventoryItemId equipped } }
                             }
                             """.formatted(sword.getId()),
-                    "data.unequipItem.items[?(@.id=='%d')].equipped".formatted(sword.getItem().getId()),
+                    "data.unequipItem.items[?(@.inventoryItemId=='%d')].equipped".formatted(sword.getId()),
                     Collections.emptyMap(),
                     new TypeRef<>() {},
                     headers
@@ -122,19 +149,19 @@ class InventoryDataFetcherTest {
         void test1() {
             InventoryItem sword = ownItem();
 
-            List<Long> itemIds = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
+            List<Long> inventoryItemIds = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
                     """
                             mutation {
-                                sellItem(itemId: "%d") { items { id } }
+                                sellItem(inventoryItemId: "%d") { items { inventoryItemId } }
                             }
                             """.formatted(sword.getId()),
-                    "data.sellItem.items[*].id",
+                    "data.sellItem.items[*].inventoryItemId",
                     Collections.emptyMap(),
                     new TypeRef<>() {},
                     headers
             );
 
-            assertThat(itemIds).doesNotContain(sword.getItem().getId());
+            assertThat(inventoryItemIds).doesNotContain(sword.getId());
         }
     }
 
@@ -151,7 +178,7 @@ class InventoryDataFetcherTest {
             Boolean result = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
                     """
                             mutation {
-                                enhanceItem(itemId: "%d") { success newEnhanceLevel }
+                                enhanceItem(inventoryItemId: "%d") { success newEnhanceLevel }
                             }
                             """.formatted(sword.getId()),
                     "data.enhanceItem.success",
@@ -171,7 +198,7 @@ class InventoryDataFetcherTest {
             ExecutionResult result = dgsQueryExecutor.execute(
                     """
                             mutation {
-                                enhanceItem(itemId: "%d") { success }
+                                enhanceItem(inventoryItemId: "%d") { success }
                             }
                             """.formatted(sword.getId()),
                     Collections.emptyMap(),
@@ -189,7 +216,7 @@ class InventoryDataFetcherTest {
             player.gainGold(100_000);
             playerRepository.save(player);
             String mutation = """
-                                mutation { enhanceItem(itemId: "%d") { success } }
+                                mutation { enhanceItem(inventoryItemId: "%d") { success } }
                                 """.formatted(sword.getId());
 
             for (int i = 0; i < EnhancementPolicy.MAX_ENHANCE_LEVEL; i++) {
@@ -218,7 +245,7 @@ class InventoryDataFetcherTest {
             List<String> activeSets = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
                     """
                     mutation {
-                        equipItem(itemId: "%d") { activeSets }
+                        equipItem(inventoryItemId: "%d") { activeSets }
                     }
                     """.formatted(armor.getId()),
                     "data.equipItem.activeSets",
@@ -238,7 +265,7 @@ class InventoryDataFetcherTest {
             List<String> activeSets = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
                     """
                     mutation {
-                        equipItem(itemId: "%d") { activeSets }
+                        equipItem(inventoryItemId: "%d") { activeSets }
                     }
                     """.formatted(sword.getId()),
                     "data.equipItem.activeSets",
@@ -264,7 +291,7 @@ class InventoryDataFetcherTest {
             Integer healed = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
                     """
                             mutation {
-                                useItem(itemId: "%d") { healedAmount }
+                                useItem(inventoryItemId: "%d") { healedAmount }
                             }
                             """.formatted(potion.getId()),
                     "data.useItem.healedAmount",
@@ -283,7 +310,7 @@ class InventoryDataFetcherTest {
 
             ExecutionResult result = dgsQueryExecutor.execute(
                     """
-                            mutation { useItem(itemId: "%d") { healedAmount } }
+                            mutation { useItem(inventoryItemId: "%d") { healedAmount } }
                             """.formatted(potion.getId()),
                     Collections.emptyMap(),
                     null,
@@ -308,7 +335,7 @@ class InventoryDataFetcherTest {
             List<Integer> quantities = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
                     """
                             mutation {
-                                useItem(itemId: "%d") { inventory { items { quantity } } }
+                                useItem(inventoryItemId: "%d") { inventory { items { quantity } } }
                             }
                             """.formatted(potion.getId()),
                     "data.useItem.inventory.items[*].quantity",

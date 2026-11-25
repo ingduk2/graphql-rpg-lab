@@ -32,4 +32,6 @@ public interface InventoryRepository extends Repository<Inventory, Long> {
     Optional<Inventory> findById(Long id);
 
     void delete(Inventory inventory);
+
+    void flush();
 }

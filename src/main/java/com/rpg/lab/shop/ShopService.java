@@ -41,7 +41,7 @@ public class ShopService {
         inventory.addItem(shopItem.getItem());
         
         playerManager.save(player);
-        inventoryRepository.save(inventory);
+        inventoryRepository.flush();
         
         return InventoryResponse.from(inventory);
     }

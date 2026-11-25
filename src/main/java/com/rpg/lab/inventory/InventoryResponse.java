@@ -16,6 +16,7 @@ public record InventoryResponse(
         List<ItemResponse> items = inventory.getInventoryItems().stream()
                 .map(it -> ItemResponse.from(
                         it.getItem(),
+                        it.getId(),
                         it.getEnhancedAttackBonus(),
                         it.getEnhancedDefenseBonus(),
                         it.isEquipped(),

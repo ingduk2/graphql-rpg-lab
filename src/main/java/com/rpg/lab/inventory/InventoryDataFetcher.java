@@ -16,46 +16,46 @@ public class InventoryDataFetcher {
 
     @DgsMutation
     public InventoryResponse equipItem(
-            @InputArgument Long itemId,
+            @InputArgument Long inventoryItemId,
             DgsDataFetchingEnvironment dfe
     ) {
         PlayerContext context = DgsContext.getCustomContext(dfe);
-        return inventoryService.equipItem(context.playerId(), itemId);
+        return inventoryService.equipItem(context.playerId(), inventoryItemId);
     }
 
     @DgsMutation
     public InventoryResponse unequipItem(
-            @InputArgument Long itemId,
+            @InputArgument Long inventoryItemId,
             DgsDataFetchingEnvironment dfe
     ) {
         PlayerContext context = DgsContext.getCustomContext(dfe);
-        return inventoryService.unequipItem(context.playerId(), itemId);
+        return inventoryService.unequipItem(context.playerId(), inventoryItemId);
     }
 
     @DgsMutation
     public InventoryResponse sellItem(
-            @InputArgument Long itemId,
+            @InputArgument Long inventoryItemId,
             DgsDataFetchingEnvironment dfe
     ) {
         PlayerContext context = DgsContext.getCustomContext(dfe);
-        return inventoryService.sellItem(context.playerId(), itemId);
+        return inventoryService.sellItem(context.playerId(), inventoryItemId);
     }
 
     @DgsMutation
     public EnhanceItemResponse enhanceItem(
-            @InputArgument Long itemId,
+            @InputArgument Long inventoryItemId,
             DgsDataFetchingEnvironment dfe
     ) {
         PlayerContext context = DgsContext.getCustomContext(dfe);
-        return inventoryService.enhanceItem(context.playerId(), itemId);
+        return inventoryService.enhanceItem(context.playerId(), inventoryItemId);
     }
 
     @DgsMutation
     public UseItemResponse useItem(
-            @InputArgument Long itemId,
+            @InputArgument Long inventoryItemId,
             DgsDataFetchingEnvironment dfe
     ) {
         PlayerContext context = DgsContext.getCustomContext(dfe);
-        return inventoryService.useItem(context.playerId(), itemId);
+        return inventoryService.useItem(context.playerId(), inventoryItemId);
     }
 }

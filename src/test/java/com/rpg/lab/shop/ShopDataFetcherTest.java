@@ -122,19 +122,19 @@ class ShopDataFetcherTest {
             ShopItem shopItem = shopItemRepository.save(ShopItem.create(item, 50));
 
             String mutation = """
-                mutation { buyItem(shopItemId: "%d") { items { id } } }
+                mutation { buyItem(shopItemId: "%d") { items { id inventoryItemId } } }
             """.formatted(shopItem.getId());
             dgsQueryExecutor.execute(mutation, Collections.emptyMap(), null, headers);
 
-            List<Long> itemIds = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
+            List<Long> inventoryItemIds = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
                     mutation,
-                    "data.buyItem.items[*].id",
+                    "data.buyItem.items[*].inventoryItemId",
                     Collections.emptyMap(),
                     new TypeRef<>() {},
                     headers
             );
 
-            assertThat(itemIds).hasSize(2);
+            assertThat(inventoryItemIds).hasSize(2).doesNotHaveDuplicates();
         }
     }
 
