@@ -503,7 +503,7 @@
 
     </div>
 
-    <div class="footer-note">localhost:8080/graphql — Step 22 Consumable Quantity</div>
+    <div class="footer-note">localhost:8080/graphql — Step 23 Individual Equipment</div>
 </div>
 
 <script>
@@ -632,9 +632,9 @@
                         <span>${item.name}${enhanceBadge}${setBadge}</span>${bonusText}${equippedBadge}
                     </div>
                     <div class="inventory-item-actions">
-                        <button class="sm-btn ${item.equipped ? 'amber' : 'green'}" onclick="${toggleFn}(${item.id})">${toggleLabel}</button>
-                        <button class="sm-btn amber" onclick="sellItem(${item.id}, '${item.name}')">SELL</button>
-                        <button class="sm-btn green" onclick="enhanceItem(${item.id}, '${item.name}')">ENHANCE</button>
+                        <button class="sm-btn ${item.equipped ? 'amber' : 'green'}" onclick="${toggleFn}(${item.inventoryItemId})">${toggleLabel}</button>
+                        <button class="sm-btn amber" onclick="sellItem(${item.inventoryItemId}, '${item.name}')">SELL</button>
+                        <button class="sm-btn green" onclick="enhanceItem(${item.inventoryItemId}, '${item.name}')">ENHANCE</button>
                     </div>
                 </div>
             `;
@@ -650,16 +650,16 @@
                 <span class="equipped-badge">×${item.quantity}</span>
             </div>
             <div class="inventory-item-actions">
-                <button class="sm-btn green" onclick="useItem(${item.id}, '${item.name}')">USE</button>
-                <button class="sm-btn amber" onclick="sellItem(${item.id}, '${item.name}')">SELL</button>
+                <button class="sm-btn green" onclick="useItem(${item.inventoryItemId}, '${item.name}')">USE</button>
+                <button class="sm-btn amber" onclick="sellItem(${item.inventoryItemId}, '${item.name}')">SELL</button>
             </div>
         </div>
     `).join('');
     }
 
-    async function useItem(itemId, itemName) {
+    async function useItem(inventoryItemId, itemName) {
         try {
-            const data = await graphql(`mutation { useItem(itemId: ${itemId}) { healedAmount } }`);
+            const data = await graphql(`mutation { useItem(inventoryItemId: ${inventoryItemId}) { healedAmount } }`);
             log(`🧪 ${itemName} 사용! HP +${data.useItem.healedAmount} 회복`, 'levelup');
             await loadPlayer();
         } catch (e) {}
@@ -752,8 +752,8 @@
         }).join('');
     }
 
-    async function sellItem(itemId, itemName) {
-        await graphql(`mutation { sellItem(itemId: ${itemId}) { id } }`);
+    async function sellItem(inventoryItemId, itemName) {
+        await graphql(`mutation { sellItem(inventoryItemId: ${inventoryItemId}) { id } }`);
         log(`💰 ${itemName} 판매 완료!`, 'quest-log');
         await loadPlayer();
     }
@@ -841,7 +841,7 @@
             player(id: ${playerId}) {
                     id name level hp maxHp exp gold expToNextLevel
                     stats { attack defense speed }
-                    inventory { attackBonus defenseBonus activeSets items { id name type attackBonus defenseBonus equipped enhanceLevel setType healAmount quantity } }
+                    inventory { attackBonus defenseBonus activeSets items { id inventoryItemId name type attackBonus defenseBonus equipped enhanceLevel setType healAmount quantity } }
                 }
             }`);
             updatePlayerDisplay(data.player);
@@ -950,13 +950,13 @@
         setButtonsDisabled(false);
     }
 
-    async function equipItem(itemId) {
-        await graphql(`mutation { equipItem(itemId: ${itemId}) { id } }`);
+    async function equipItem(inventoryItemId) {
+        await graphql(`mutation { equipItem(inventoryItemId: ${inventoryItemId}) { id } }`);
         await loadPlayer();
     }
 
-    async function unequipItem(itemId) {
-        await graphql(`mutation { unequipItem(itemId: ${itemId}) { id } }`);
+    async function unequipItem(inventoryItemId) {
+        await graphql(`mutation { unequipItem(inventoryItemId: ${inventoryItemId}) { id } }`);
         await loadPlayer();
     }
 
@@ -1076,9 +1076,9 @@
         }).join('');
     }
 
-    async function enhanceItem(itemId, itemName) {
+    async function enhanceItem(inventoryItemId, itemName) {
         try {
-            const data = await graphql(`mutation { enhanceItem(itemId: ${itemId}) { success newEnhanceLevel } }`);
+            const data = await graphql(`mutation { enhanceItem(inventoryItemId: ${inventoryItemId}) { success newEnhanceLevel } }`);
             const r = data.enhanceItem;
             if (r.success) {
                 log(`⚒ ${itemName} 강화 성공! +${r.newEnhanceLevel}`, 'levelup');
