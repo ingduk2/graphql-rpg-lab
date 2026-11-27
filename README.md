@@ -741,25 +741,31 @@
 > 같은 장비를 여러 개 가져도 각각 따로 장착, 강화, 판매할 수 있게 한다.
 
 - **23-1.** 도메인
-  - Inventory의 장착/해제/강화/판매/사용을 itemId가 아닌 inventoryItemId 기준으로 변경
-  - 장비 중복 보유 허용 (드랍/보상/구매 시 이미 있어도 새 행 추가)
-  - 같은 장비 두 개 중 하나만 강화/장착되는지 도메인 테스트
+  - Inventory의 장착/해제/판매/강화/사용을 itemId가 아닌 inventoryItemId 기준으로 변경
+  - 내 inventoryItems 안에서만 찾도록 해서 다른 플레이어 행 조작 차단 (소유권 검증)
+  - addItem이 생성(또는 수량 증가)된 행을 반환, 단위 테스트는 InventoryFixture.assignIds로 행 ID 부여
 
 - **23-2.** 서비스
-  - 서비스 메서드 파라미터를 inventoryItemId로 변경
-  - 상점 ItemAlreadyOwnedException 정리
-  - 소유권 검증: 다른 플레이어의 inventoryItemId로 조작할 수 없어야 함
+  - 서비스 파라미터를 inventoryItemId로 정리
+  - 장비 중복 보유 허용: 상점 보유 체크 제거, 드랍/보상 addItemIfNotOwned → addItem
+  - 사용처가 없어진 ItemAlreadyOwnedException 정리
 
 - **23-3.** GraphQL
-  - Item 타입에 inventoryItemId 노출, mutation 인자 변경
+  - Item 타입에 inventoryItemId 추가 (id는 아이템 종류 ID로 유지해 의미가 조용히 바뀌지 않게)
+  - mutation 인자 itemId → inventoryItemId
+  - buyItem: save(merge) 대신 flush로 새 행 ID 보장 (merge는 새 자식을 복사본으로 저장해 원본 객체에 ID가 안 채워짐)
 
 - **23-4.** HTML
-  - 버튼이 inventoryItemId를 보내도록 변경
+  - 버튼과 mutation이 inventoryItemId를 사용
 
 - **23-5.** 마무리
+  - 확인: 같은 장비 여러 개를 각각 장착/강화/판매, 드랍·구매로 중복 획득, 소모품 수량 방식 유지
+  - 23-1~23-3 사이에는 테스트는 통과하지만 게임 조작이 동작하지 않는 구간이 있었음 (계약 변경을 계층별로 나눠 커밋한 결과)
 
 **학습 포인트**
 - 행 단위 식별이 필요하면 아이템 ID가 아니라 행 ID로 지정해야 한다
+- 같은 타입(Long) ID가 여러 종류면 테스트가 우연히 통과할 수 있다. 비교하는 양쪽이 같은 종류의 ID인지 확인
+- 전역 PK를 클라이언트가 보내게 되면 소유권 검증이 필요하다 (IDOR). 내 컬렉션 안에서 찾는 방식으로 자연스럽게 막을 수 있다
 ---
 
 ### Step 24. GraphQL다운 사용
